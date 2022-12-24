@@ -1,0 +1,103 @@
+.nav-item .nav-link {
+  padding-top: 0.3rem !important;
+  padding-bottom: 0.3rem !important;
+}
+
+@media (min-width: 992px) {
+  .navbar-nav .navbar-div {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    padding-right: 50px;
+    padding-left: 15px;
+  }
+}
+
+@media (min-width: 992px) {
+  .nav-link.active .navbar-div {
+    background: #f9da68;
+    border-style: none;
+    border-radius: 15px;
+  }
+}
+
+.plan-controlbar .btn {
+  margin-left: 13px;
+  padding-top: 5.8px;
+  padding-bottom: 5.8px;
+}
+
+.row-plan-job {
+  padding-top: 11px;
+  padding-bottom: 11px;
+  background: #f4f1b6;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.row-plan-no-assignment {
+  background: rgb(255, 207, 204);
+}
+
+.smj-table-header {
+  background: rgb(247, 225, 34);
+}
+
+.smj-table {
+  box-shadow: 1px 1px 6px;
+  padding-bottom: 20px;
+  background: rgb(247, 247, 247);
+  border-radius: 11px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.smj-table > .row {
+  padding-right: 0px;
+  padding-top: 9px;
+  padding-left: 0px;
+  padding-bottom: 9px;
+  margin-left: 0px;
+  margin-right: 0px;
+}
+
+.smj-search-stack {
+  margin: 18px;
+  padding-left: 22px;
+  padding-right: 22px;
+  background: #f5f5f5;
+  padding-top: 23px;
+  padding-bottom: 23px;
+  border-radius: 15px;
+  box-shadow: 1px 1px 6px;
+  margin-right: 0px;
+  margin-top: 0px;
+  margin-left: 0px;
+}
+
+.smj-search-stack input {
+  padding: 6px;
+}
+
+.plan-controlbar i.far,
+.plan-controlbar i.fas {
+  margin-right: 10px;
+}
+
+img.smj-nav-logo {
+  max-width: 60px;
+}
+
+.navbar-div span {
+  margin-left: 9px;
+}
+
+#btn-nav-logout {
+  border-style: none;
+  box-shadow: 0px 0px;
+  padding-bottom: 6px;
+  padding-top: 6px;
+}
+
+.smj-navbar {
+  background: #f5f5f5;
+}
