@@ -22,7 +22,11 @@ export function Navbar() {
       <nav className="navbar navbar-light navbar-expand-md smj-navbar pt-2 pb-2 mb-0">
         <div className="container-fluid">
           <a className="navbar-brand d-flex align-items-center" href="#">
-            <img src="/logo-smj-yellow.png" className="smj-nav-logo" />
+            <img
+              src="/logo-smj-yellow.png"
+              className="smj-nav-logo"
+              alt="SummerJob logo"
+            />
           </a>
           <button
             data-bs-toggle="collapse"

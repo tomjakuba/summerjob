@@ -1,8 +1,13 @@
-import { SimpleRow } from "lib/components/table/SimpleRow";
-import { getWorkers } from "../../../lib/data/workers";
+"use client";
+import { LoadingRow } from "lib/components/table/LoadingRow";
+import { VariableWidthRow } from "lib/components/table/VariableWidthRow";
+import useData from "lib/fetcher/fetcher";
+import type { Worker } from "../../../lib/prisma/client";
 
-export default async function WorkersPage() {
-  const workers = await getWorkers();
+export default function WorkersPage() {
+  const { data, error, isLoading } = useData("/api/users");
+  const workers = data as Worker[];
+  const rowWidths = [2, 2, 2, 2, 2, 2];
   return (
     <>
       <section className="mb-3 mt-3">
@@ -55,14 +60,17 @@ export default async function WorkersPage() {
                     <span>Akce</span>
                   </div>
                 </div>
-                {workers.map((worker) => (
-                  <SimpleRow
-                    key={worker.id}
-                    {...{
-                      data: Object.values(worker).slice(1),
-                    }}
-                  />
-                ))}
+                {isLoading && <LoadingRow />}
+                {!isLoading &&
+                  workers.map((worker) => (
+                    <VariableWidthRow
+                      key={worker.id}
+                      {...{
+                        data: Object.values(worker).slice(1),
+                        widths: rowWidths,
+                      }}
+                    />
+                  ))}
               </div>
             </div>
             <div className="col-sm-12 col-lg-3 offset-xl-0">

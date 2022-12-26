@@ -1,14 +1,15 @@
 interface RowProps {
   data: any[];
+  widths: number[];
 }
 
-export function SimpleRow({ data }: RowProps) {
+export function VariableWidthRow({ data, widths }: RowProps) {
   return (
     <div className="row">
       {data.map((field, index) => {
         return (
           <div
-            className="col-2 align-items-xl-center text-truncate"
+            className={`col-${widths[index]} align-items-xl-center text-truncate`}
             key={index}
             title={field}
           >
