@@ -1,13 +1,28 @@
 "use client";
 import { LoadingRow } from "lib/components/table/LoadingRow";
-import { VariableWidthRow } from "lib/components/table/VariableWidthRow";
+import { SimpleRow } from "lib/components/table/SimpleRow";
 import useData from "lib/fetcher/fetcher";
+import Link from "next/link";
 import type { Worker } from "../../../lib/prisma/client";
+import ErrorPage from "./error";
+
+const _columns = [
+  "Jméno",
+  "Příjmení",
+  "Telefonní číslo",
+  "E-mail",
+  "Alergie",
+  "Schopnosti",
+  "Akce",
+];
 
 export default function WorkersPage() {
-  const { data, error, isLoading } = useData("/api/users");
+  const { data, error, isLoading } = useData<Worker[], Error>("/api/users");
+  console.log("Fetching data");
+  if (error) {
+    return <ErrorPage error={error} />;
+  }
   const workers = data as Worker[];
-  const rowWidths = [2, 2, 2, 2, 2, 2];
   return (
     <>
       <section className="mb-3 mt-3">
@@ -39,42 +54,39 @@ export default function WorkersPage() {
         <div className="container-fluid">
           <div className="row gx-3">
             <div className="col-sm-12 col-lg-9">
-              <div className="smj-table">
-                <div className="row fw-bold smj-table-header">
-                  <div className="col-2">
-                    <span>Jméno</span>
-                  </div>
-                  <div className="col-2">
-                    <span>Příjmení</span>
-                  </div>
-                  <div className="col-2">
-                    <span>Telefonní číslo</span>
-                  </div>
-                  <div className="col-2">
-                    <span>E-mail</span>
-                  </div>
-                  <div className="col-2">
-                    <span>Schopnosti</span>
-                  </div>
-                  <div className="col">
-                    <span>Akce</span>
-                  </div>
-                </div>
-                {isLoading && <LoadingRow />}
-                {!isLoading &&
-                  workers.map((worker) => (
-                    <VariableWidthRow
-                      key={worker.id}
-                      {...{
-                        data: Object.values(worker).slice(1),
-                        widths: rowWidths,
-                      }}
-                    />
-                  ))}
+              <div className="table-responsive text-nowrap mb-2 smj-shadow rounded-3">
+                <table className="table table-hover mb-0">
+                  <thead className="smj-table-header">
+                    <tr>
+                      {_columns.map((column) => (
+                        <th key={column}>{column}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="smj-table-body mb-0">
+                    {isLoading && <LoadingRow colspan={_columns.length} />}
+                    {!isLoading &&
+                      workers.map((worker) => (
+                        <SimpleRow
+                          key={worker.id}
+                          {...{
+                            data: [
+                              ...Object.values(worker).slice(1),
+                              "-", // Alergie
+                              "-", // Schopnosti
+                              <Link href={`/workers/${worker.id}`}>
+                                Upravit
+                              </Link>,
+                            ],
+                          }}
+                        />
+                      ))}
+                  </tbody>
+                </table>
               </div>
             </div>
             <div className="col-sm-12 col-lg-3 offset-xl-0">
-              <div className="vstack smj-search-stack">
+              <div className="vstack smj-search-stack smj-shadow rounded-3">
                 <h5>Filtrovat</h5>
                 <hr />
                 <label className="form-label" htmlFor="worker-name">

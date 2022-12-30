@@ -1,9 +1,13 @@
-export function LoadingRow() {
+interface RowProps {
+  colspan: number;
+}
+
+export function LoadingRow({ colspan }: RowProps) {
   return (
-    <div className="row">
-      <div className="col-12 align-items-center text-truncate text-center">
+    <tr>
+      <td colSpan={colspan} className="text-truncate text-center">
         Načítání...
-      </div>
-    </div>
+      </td>
+    </tr>
   );
 }
