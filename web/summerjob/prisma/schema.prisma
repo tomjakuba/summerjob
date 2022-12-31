@@ -9,12 +9,13 @@ datasource db {
 }
 
 model Worker {
-  id        String @id @default(uuid())
-  firstName String @db.VarChar(32)
-  lastName  String @db.VarChar(32)
-  phone     String @db.VarChar(13)
+  id        String    @id @default(uuid())
+  firstName String    @db.VarChar(32)
+  lastName  String    @db.VarChar(32)
+  phone     String    @db.VarChar(16)
   email     String
   car       Car?
+  allergies Allergy[]
 }
 
 model Car {
@@ -23,4 +24,10 @@ model Car {
   description String? @db.VarChar(255)
   owner       Worker  @relation(fields: [ownerId], references: [id])
   ownerId     String  @unique
+}
+
+model Allergy {
+  id                 String   @id @default(uuid())
+  code               String   @db.VarChar(32)
+  workersWithAllergy Worker[]
 }

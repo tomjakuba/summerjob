@@ -5,6 +5,15 @@ const nextConfig = {
     appDir: true,
   },
   distDir: "build",
+  async redirects() {
+    return [
+      {
+        source: "/",
+        destination: "/plan",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;

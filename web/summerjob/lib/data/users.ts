@@ -14,4 +14,17 @@ export async function getUsers() {
   return users;
 }
 
+export async function getUserById(id: string) {
+  const user = await prisma.worker.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      car: true,
+      allergies: true,
+    },
+  });
+  return user;
+}
+
 export async function getWorkersWithAbilities() {}

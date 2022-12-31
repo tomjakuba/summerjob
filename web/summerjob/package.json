@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node --skip-project prisma/seed.ts"
   },
   "dependencies": {
     "@next/font": "13.0.7",
