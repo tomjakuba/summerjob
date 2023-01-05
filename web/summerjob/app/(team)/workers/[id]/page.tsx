@@ -1,8 +1,8 @@
 "use client";
 import EditBox from "lib/components/forms/EditBox";
 import EditWorker from "lib/components/forms/EditWorker";
-import useData from "lib/fetcher/fetcher";
-import type { Worker } from "../../../../lib/prisma/client";
+import { useData } from "lib/fetcher/fetcher";
+import { WorkerComplete } from "lib/types/worker";
 
 type Params = {
   params: {
@@ -11,7 +11,7 @@ type Params = {
 };
 
 export default function EditWorkerPage({ params }: Params) {
-  const { data, error, isLoading } = useData<Worker, Error>(
+  const { data, error, isLoading } = useData<WorkerComplete, Error>(
     `/api/users/${params.id}`
   );
 

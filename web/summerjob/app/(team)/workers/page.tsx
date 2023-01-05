@@ -1,7 +1,7 @@
 "use client";
 import { LoadingRow } from "lib/components/table/LoadingRow";
 import { SimpleRow } from "lib/components/table/SimpleRow";
-import useData from "lib/fetcher/fetcher";
+import { useData } from "lib/fetcher/fetcher";
 import Link from "next/link";
 import type { Worker } from "../../../lib/prisma/client";
 import ErrorPage from "./error";
@@ -18,7 +18,6 @@ const _columns = [
 
 export default function WorkersPage() {
   const { data, error, isLoading } = useData<Worker[], Error>("/api/users");
-  console.log("Fetching data");
   if (error) {
     return <ErrorPage error={error} />;
   }

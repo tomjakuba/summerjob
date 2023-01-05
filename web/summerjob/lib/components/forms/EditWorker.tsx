@@ -1,10 +1,91 @@
 "use client";
-import type { Worker } from "../../../lib/prisma/client";
+import { useForm, UseFormRegister } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { WorkerComplete } from "lib/types/worker";
+import { useData, useDataPartialUpdate } from "lib/fetcher/fetcher";
+import { Allergy } from "lib/prisma/client";
+import { default as t } from "lib/localization/cs-cz";
+import { useState } from "react";
 
-export default function EditWorker({ worker }: { worker: Worker }) {
+const schema = z.object({
+  id: z.string(),
+  firstName: z.string(),
+  lastName: z.string(),
+  email: z.string().email(),
+  phone: z.string().min(9),
+  allergyIds: z.array(z.string()),
+});
+type WorkerForm = z.infer<typeof schema>;
+
+function AllergyPill({
+  allergy,
+  register,
+}: {
+  allergy: Allergy;
+  register: UseFormRegister<WorkerForm>;
+}) {
+  return (
+    <div className="d-inline-block me-3">
+      <input
+        id={allergy.id}
+        className="btn-check"
+        type="checkbox"
+        value={allergy.id}
+        {...register("allergyIds")}
+      />
+      <label className="form-label btn-light btn p-2" htmlFor={allergy.id}>
+        {allergy.code}
+      </label>
+    </div>
+  );
+}
+
+const parseAllergies = (allergies: Allergy[]) => {
+  if (!allergies) return [];
+  let result = allergies.map((allergy) => {
+    return { ...allergy, code: t(allergy.code) };
+  });
+  result.sort((a, b) => a.code.localeCompare(b.code));
+  return result;
+};
+
+export default function EditWorker({ worker }: { worker: WorkerComplete }) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<WorkerForm>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      id: worker.id,
+      firstName: worker.firstName,
+      lastName: worker.lastName,
+      email: worker.email,
+      phone: worker.phone,
+      allergyIds: worker.allergies.map((allergy) => allergy.id),
+    },
+  });
+  const [saved, setSaved] = useState(false);
+  const { trigger, isMutating } = useDataPartialUpdate(
+    "/api/users/" + worker.id,
+    {
+      onSuccess: () => {
+        setSaved(true);
+      },
+    }
+  );
+  const onSubmit = (data: WorkerForm) => {
+    trigger(data);
+  };
+
+  const { data, error, isLoading } = useData<Allergy[], Error>(
+    "/api/allergies"
+  );
+  let allergies = parseAllergies(data || []);
   return (
     <>
-      <div className="row mb-3">
+      <div className="row">
         <div className="col">
           <h2>
             {worker.firstName} {worker.lastName}
@@ -13,88 +94,92 @@ export default function EditWorker({ worker }: { worker: Worker }) {
       </div>
       <div className="row">
         <div className="col">
-          <form>
-            <label className="form-label fw-bold" htmlFor="name">
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <input type="hidden" {...register("id")} />
+            <label className="form-label fw-bold mt-4" htmlFor="name">
               Jméno
             </label>
             <input
               id="name"
-              className="form-control p-0 mb-4 fs-5"
+              className="form-control p-0 fs-5"
               type="text"
-              defaultValue={worker.firstName}
               placeholder="Jméno"
+              {...register("firstName")}
             />
-            <label className="form-label fw-bold" htmlFor="surname">
+            {errors.firstName?.message && (
+              <p>{errors.firstName.message as string}</p>
+            )}
+            <label className="form-label fw-bold mt-4" htmlFor="surname">
               Příjmení
             </label>
             <input
               id="surname"
-              className="form-control p-0 mb-4 fs-5"
+              className="form-control p-0 fs-5"
               type="text"
-              defaultValue={worker.lastName}
               placeholder="Příjmení"
+              {...register("lastName")}
             />
-            <label className="form-label fw-bold" htmlFor="email">
+            <label className="form-label fw-bold mt-4" htmlFor="phone">
+              Telefonní číslo
+            </label>
+            <input
+              id="phone"
+              className="form-control p-0 fs-5"
+              type="text"
+              {...register("phone")}
+            />
+            <label className="form-label fw-bold mt-4" htmlFor="email">
               E-mail
             </label>
             <input
               id="email"
-              className="form-control p-0 mb-4 fs-5"
+              className="form-control p-0 fs-5"
               type="email"
-              defaultValue={worker.email}
+              {...register("email")}
             />
-            <label className="form-label d-block fw-bold" htmlFor="email">
+            <label className="form-label d-block fw-bold mt-4" htmlFor="email">
               Alergie
             </label>
-            <div className="form-check-inline mb-2">
-              <div className="d-inline-block me-3">
-                <input id="alergie_pyl" className="btn-check" type="checkbox" />
-                <label
-                  className="form-label btn-light btn p-2"
-                  htmlFor="alergie_pyl"
-                >
-                  Pyl
-                </label>
-              </div>
-              <div className="d-inline-block me-3">
-                <input
-                  id="alergie_prach"
-                  className="btn-check"
-                  type="checkbox"
-                />
-                <label
-                  className="form-label btn-light btn p-2"
-                  htmlFor="alergie_prach"
-                >
-                  Prach
-                </label>
-              </div>
-              <div className="d-inline-block me-3">
-                <input
-                  id="alergie_zvirata"
-                  className="btn-check"
-                  type="checkbox"
-                />
-                <label
-                  className="form-label btn-light btn p-2"
-                  htmlFor="alergie_zvirata"
-                >
-                  Zvířata
-                </label>
-              </div>
+            <div className="form-check-inline">
+              {isLoading && <p>Načítání alergií...</p>}
+              {data &&
+                allergies.map((allergy) => (
+                  <AllergyPill
+                    key={allergy.id}
+                    allergy={allergy}
+                    register={register}
+                  />
+                ))}
             </div>
-            <label className="form-label d-block fw-bold" htmlFor="email">
+            <label className="form-label d-block fw-bold mt-4" htmlFor="car">
               Auto
             </label>
-            <select className="form-select p-1">
-              <option value="none" selected>
-                Žádné
-              </option>
-              <optgroup label="Auta bez majitele">
-                <option value="rapid">Škoda Rapid (2A7 7885)</option>
-                <option value="mondeo">Ford Mondeo (9B7 7110)</option>
-              </optgroup>
-            </select>
+            <input
+              type="text"
+              className="form-control p-0 fs-5"
+              disabled={true}
+              value={worker.car?.name || "Žádné"}
+            />
+            <input
+              className="btn btn-warning m-3 ms-0 p-3"
+              type="submit"
+              value={isMutating ? "Ukládání..." : "Uložit"}
+              disabled={isMutating}
+            />
+            {saved && (
+              <div
+                className="alert alert-success alert-dismissible d-inline-block mt-3 p-3 pe-5"
+                role="alert"
+              >
+                Změny byly úspěšně uloženy.
+                <button
+                  type="button"
+                  className="btn-close"
+                  aria-label="Close"
+                  onClick={() => setSaved(false)}
+                ></button>
+              </div>
+            )}
           </form>
         </div>
         <div className="w-100 d-lg-none mt-3"></div>
