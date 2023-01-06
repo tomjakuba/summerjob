@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "seed": "ts-node --skip-project prisma/seed.ts"
+    "seed": "ts-node --skip-project prisma/seed.ts",
+    "delete-db": "ts-node --skip-project prisma/drop-tables.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^2.9.10",

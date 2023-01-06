@@ -9,19 +9,21 @@ datasource db {
 }
 
 model Worker {
-  id        String    @id @default(uuid())
-  firstName String    @db.VarChar(32)
-  lastName  String    @db.VarChar(32)
-  phone     String    @db.VarChar(16)
-  email     String
+  id        String      @id @default(uuid())
+  firstName String      @db.VarChar(32)
+  lastName  String      @db.VarChar(32)
+  phone     String      @db.VarChar(16)
+  email     String      @db.VarChar(64)
   car       Car?
+  isStrong  Boolean     @default(false)
   allergies Allergy[]
+  jobs      ActiveJob[]
 }
 
 model Car {
   id          String  @id @default(uuid())
   name        String  @db.VarChar(64)
-  description String? @db.VarChar(255)
+  description String?
   owner       Worker  @relation(fields: [ownerId], references: [id])
   ownerId     String  @unique
 }
@@ -30,4 +32,55 @@ model Allergy {
   id                 String   @id @default(uuid())
   code               String   @db.VarChar(32)
   workersWithAllergy Worker[]
+}
+
+model ProposedJob {
+  id            String      @id @default(uuid())
+  name          String      @db.VarChar(64)
+  description   String?
+  requiredDays  Int
+  completed     Boolean     @default(false)
+  minWorkers    Int
+  maxWorkers    Int
+  strongWorkers Int
+  area          Area        @relation(fields: [areaId], references: [id])
+  areaId        String
+  ActiveJob     ActiveJob[]
+}
+
+model ActiveJob {
+  id                 String      @id @default(uuid())
+  privateDescription String?
+  publicDescription  String?
+  job                ProposedJob @relation(fields: [jobId], references: [id])
+  jobId              String
+  workers            Worker[]
+  plan               Plan        @relation(fields: [planId], references: [id])
+  planId             String
+}
+
+model Plan {
+  id               String         @id @default(uuid())
+  day              DateTime
+  jobs             ActiveJob[]
+  summerJobEvent   SummerJobEvent @relation(fields: [summerJobEventId], references: [id])
+  summerJobEventId String
+}
+
+model Area {
+  id               String         @id @default(uuid())
+  name             String         @db.VarChar(64)
+  description      String?
+  jobs             ProposedJob[]
+  SummerJobEvent   SummerJobEvent @relation(fields: [summerJobEventId], references: [id])
+  summerJobEventId String
+}
+
+model SummerJobEvent {
+  id        String   @id @default(uuid())
+  name      String   @db.VarChar(64)
+  startDate DateTime
+  endDate   DateTime
+  areas     Area[]
+  plans     Plan[]
 }
