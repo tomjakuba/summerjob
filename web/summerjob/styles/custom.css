@@ -119,3 +119,26 @@ img.smj-nav-logo {
 .smj-shadow {
   box-shadow: 1px 1px 6px;
 }
+
+.smj-expandable-row {
+  background-color: #f4f1b6;
+  cursor: pointer;
+}
+
+.smj-expandable-row > td:first-child > i {
+  margin-right: 10px;
+}
+
+.smj-details-row > td:first-child {
+  padding: 0px;
+  border: 0px;
+}
+
+.smj-details-row {
+  white-space: normal;
+}
+
+.smj-row-collapsible {
+  overflow: hidden;
+  transition: all 0.2s ease-out;
+}

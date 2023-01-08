@@ -18,7 +18,10 @@ export default function EditWorkerPage({ params }: Params) {
   return (
     <>
       <section className="mb-3 mt-3">
-        <EditBox>{data && <EditWorker worker={data} />}</EditBox>
+        <EditBox>
+          {isLoading && <h2>Načítám...</h2>}
+          {data && <EditWorker worker={data} />}
+        </EditBox>
       </section>
     </>
   );

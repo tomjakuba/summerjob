@@ -1,5 +1,5 @@
 import { ApiErrorType } from "lib/data/apiError";
-import { getUsers } from "lib/data/users";
+import { getPlans } from "lib/data/plans";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
@@ -11,8 +11,8 @@ export default async function handler(
     return;
   }
   try {
-    const users = await getUsers();
-    res.status(200).json(users);
+    const plans = await getPlans();
+    res.status(200).json(plans);
   } catch (error) {
     res.status(500).json({
       error: {

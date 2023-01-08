@@ -3,6 +3,10 @@ import { WorkerSerializable } from "lib/types/worker";
 
 export async function getUsers() {
   const users = await prisma.worker.findMany({
+    include: {
+      allergies: true,
+      car: true,
+    },
     orderBy: [
       {
         firstName: "asc",

@@ -1,9 +1,10 @@
 "use client";
+import PageHeader from "lib/components/page-header/PageHeader";
 import { LoadingRow } from "lib/components/table/LoadingRow";
 import { SimpleRow } from "lib/components/table/SimpleRow";
 import { useData } from "lib/fetcher/fetcher";
+import { WorkerComplete } from "lib/types/worker";
 import Link from "next/link";
-import type { Worker } from "../../../lib/prisma/client";
 import ErrorPage from "./error";
 
 const _columns = [
@@ -11,44 +12,33 @@ const _columns = [
   "Příjmení",
   "Telefonní číslo",
   "E-mail",
-  "Alergie",
-  "Schopnosti",
+  "Silák",
+  "Má auto",
   "Akce",
 ];
 
 export default function WorkersPage() {
-  const { data, error, isLoading } = useData<Worker[], Error>("/api/users");
+  const { data, error, isLoading } = useData<WorkerComplete[], Error>(
+    "/api/users"
+  );
+
   if (error) {
     return <ErrorPage error={error} />;
   }
-  const workers = data as Worker[];
+
   return (
     <>
-      <section className="mb-3 mt-3">
-        <div className="container-fluid">
-          <div className="row">
-            <div className="col">
-              <h2>Pracanti</h2>
-            </div>
-            <div className="col-auto d-xl-flex justify-content-xl-end align-items-xl-center plan-controlbar">
-              <button
-                className="btn btn-warning d-xl-flex align-items-xl-center"
-                type="button"
-              >
-                <i className="far fa-user"></i>
-                <span>Přidat pracanta</span>
-              </button>
-              <button
-                className="btn btn-primary d-xl-flex align-items-xl-center"
-                type="button"
-              >
-                <i className="fas fa-print"></i>
-                <span>Tisknout</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
+      <PageHeader title="Pracanti">
+        <button className="btn btn-warning" type="button">
+          <i className="far fa-user"></i>
+          <span>Přidat pracanta</span>
+        </button>
+        <button className="btn btn-primary" type="button">
+          <i className="fas fa-print"></i>
+          <span>Tisknout</span>
+        </button>
+      </PageHeader>
+
       <section>
         <div className="container-fluid">
           <div className="row gx-3">
@@ -65,14 +55,18 @@ export default function WorkersPage() {
                   <tbody className="smj-table-body mb-0">
                     {isLoading && <LoadingRow colspan={_columns.length} />}
                     {!isLoading &&
-                      workers.map((worker) => (
+                      data !== undefined &&
+                      data.map((worker) => (
                         <SimpleRow
                           key={worker.id}
                           {...{
                             data: [
-                              ...Object.values(worker).slice(1),
-                              "-", // Alergie
-                              "-", // Schopnosti
+                              worker.firstName,
+                              worker.lastName,
+                              worker.phone,
+                              worker.email,
+                              worker.isStrong ? "Ano" : "Ne",
+                              worker.car ? "Ano" : "Ne",
                               <Link href={`/workers/${worker.id}`}>
                                 Upravit
                               </Link>,
@@ -84,7 +78,7 @@ export default function WorkersPage() {
                 </table>
               </div>
             </div>
-            <div className="col-sm-12 col-lg-3 offset-xl-0">
+            <div className="col-sm-12 col-lg-3">
               <div className="vstack smj-search-stack smj-shadow rounded-3">
                 <h5>Filtrovat</h5>
                 <hr />
@@ -93,7 +87,7 @@ export default function WorkersPage() {
                 </label>
                 <input
                   type="text"
-                  placeholder="Jméno a příjmení"
+                  placeholder="Jméno, příjmení"
                   name="worker-name"
                 />
               </div>

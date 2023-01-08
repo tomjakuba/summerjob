@@ -111,6 +111,7 @@ async function createAreas(eventId: string) {
       name: faker.address.city(),
       description: faker.lorem.paragraph(),
       summerJobEventId: eventId,
+      requiresCar: Math.random() > 0.5,
     };
   };
   await prisma.area.createMany({
@@ -136,6 +137,7 @@ async function createProposedJobs(areaIds: string[]) {
       minWorkers: between(2, 3),
       maxWorkers: between(4, 6),
       strongWorkers: between(0, 1),
+      address: faker.address.streetAddress(),
     };
   };
   await prisma.proposedJob.createMany({
@@ -173,7 +175,7 @@ async function populatePlan(
       privateDescription: "Popis úkolu, který vidí jen organizátor",
       publicDescription: "Popis úkolu, který vidí všichni",
       planId: plan.id,
-      jobId: job.id,
+      proposedJobId: job.id,
       workers: {
         connect: workersIds.map((id) => ({ id })),
       },
