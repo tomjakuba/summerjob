@@ -4,8 +4,9 @@ import PageHeader from "lib/components/page-header/PageHeader";
 import { ExpandableRow } from "lib/components/table/ExpandableRow";
 import { LoadingRow } from "lib/components/table/LoadingRow";
 import { SimpleRow } from "lib/components/table/SimpleRow";
-import { useData } from "lib/fetcher/fetcher";
-import { PlanComplete } from "lib/types/plan";
+import { useAPIPlan } from "lib/fetcher/fetcher";
+import type { Worker } from "lib/prisma/client";
+import { ActiveJobNoPlan } from "lib/types/active-job";
 import Link from "next/link";
 
 const _columns = [
@@ -25,13 +26,33 @@ type Params = {
 };
 
 export default function PlanPage({ params }: Params) {
-  const { data, error, isLoading } = useData<PlanComplete, Error>(
-    `/api/plans/${params.id}`
-  );
+  const { data, error, isLoading } = useAPIPlan(params.id);
 
   if (error) {
     return <ErrorPage error={error} />;
   }
+
+  const formatWorkerData = (worker: Worker, job: ActiveJobNoPlan) => {
+    let name = `${worker.firstName} ${worker.lastName}`;
+    const abilities = [];
+    if (worker.id === job.ride?.driverId) {
+      name = `${name} <i className="fas fa-car ms-2"></i>`;
+      abilities.push("Řidič");
+    }
+    if (worker.isStrong) abilities.push("Silák");
+
+    return [
+      name,
+      worker.phone,
+      abilities.join(", "),
+      <>
+        <a className="me-3" href="#">
+          Odstranit
+        </a>
+        <a href="#">Přesunout</a>
+      </>,
+    ];
+  };
 
   return (
     <>
@@ -55,7 +76,7 @@ export default function PlanPage({ params }: Params) {
           <div className="row gx-3">
             <div className="col-sm-12 col-lg-9">
               <div className="table-responsive text-nowrap mb-2 smj-shadow rounded-3">
-                <table className="table table-hover mb-0">
+                <table className="table mb-0">
                   <thead className="smj-table-header">
                     <tr>
                       {_columns.map((column) => (
@@ -92,42 +113,12 @@ export default function PlanPage({ params }: Params) {
                             <div className="table-responsive text-nowrap">
                               <table className="table table-hover">
                                 <tbody>
-                                  <tr>
-                                    <td>
-                                      Klára Rychlá
-                                      <i className="fas fa-car ms-2"></i>
-                                    </td>
-                                    <td>775 884 784</td>
-                                    <td>Řidič, Silák</td>
-                                    <td>
-                                      <a className="me-3" href="#">
-                                        Odstranit
-                                      </a>
-                                      <a href="#">Přesunout</a>
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td>Marie Kubinčáková</td>
-                                    <td>775 884 784</td>
-                                    <td></td>
-                                    <td>
-                                      <a className="me-3" href="#">
-                                        Odstranit
-                                      </a>
-                                      <a href="#">Přesunout</a>
-                                    </td>
-                                  </tr>
-                                  <tr>
-                                    <td>Marek Hrozný</td>
-                                    <td>775 884 784</td>
-                                    <td>Silák</td>
-                                    <td>
-                                      <a className="me-3" href="#">
-                                        Odstranit
-                                      </a>
-                                      <a href="#">Přesunout</a>
-                                    </td>
-                                  </tr>
+                                  {job.workers.map((worker) => (
+                                    <SimpleRow
+                                      data={formatWorkerData(worker, job)}
+                                      key={worker.id}
+                                    />
+                                  ))}
                                 </tbody>
                               </table>
                             </div>

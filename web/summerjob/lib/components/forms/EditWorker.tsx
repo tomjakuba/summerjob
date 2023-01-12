@@ -3,7 +3,7 @@ import { useForm, UseFormRegister } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { WorkerComplete } from "lib/types/worker";
-import { useData, useDataPartialUpdate } from "lib/fetcher/fetcher";
+import { useAPIAllergies, useAPIWorkerUpdate } from "lib/fetcher/fetcher";
 import { Allergy } from "lib/prisma/client";
 import { default as t } from "lib/localization/cs-cz";
 import { useState } from "react";
@@ -67,21 +67,16 @@ export default function EditWorker({ worker }: { worker: WorkerComplete }) {
     },
   });
   const [saved, setSaved] = useState(false);
-  const { trigger, isMutating } = useDataPartialUpdate(
-    "/api/users/" + worker.id,
-    {
-      onSuccess: () => {
-        setSaved(true);
-      },
-    }
-  );
+  const { trigger, isMutating } = useAPIWorkerUpdate(worker.id, {
+    onSuccess: () => {
+      setSaved(true);
+    },
+  });
   const onSubmit = (data: WorkerForm) => {
     trigger(data);
   };
 
-  const { data, error, isLoading } = useData<Allergy[], Error>(
-    "/api/allergies"
-  );
+  const { data, error, isLoading } = useAPIAllergies();
   let allergies = parseAllergies(data || []);
   return (
     <>

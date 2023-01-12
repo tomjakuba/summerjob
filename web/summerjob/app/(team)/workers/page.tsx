@@ -2,8 +2,7 @@
 import PageHeader from "lib/components/page-header/PageHeader";
 import { LoadingRow } from "lib/components/table/LoadingRow";
 import { SimpleRow } from "lib/components/table/SimpleRow";
-import { useData } from "lib/fetcher/fetcher";
-import { WorkerComplete } from "lib/types/worker";
+import { useAPIWorkers } from "lib/fetcher/fetcher";
 import Link from "next/link";
 import ErrorPage from "./error";
 
@@ -18,9 +17,7 @@ const _columns = [
 ];
 
 export default function WorkersPage() {
-  const { data, error, isLoading } = useData<WorkerComplete[], Error>(
-    "/api/users"
-  );
+  const { data, error, isLoading } = useAPIWorkers();
 
   if (error) {
     return <ErrorPage error={error} />;

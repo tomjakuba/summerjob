@@ -1,8 +1,7 @@
 "use client";
 import EditBox from "lib/components/forms/EditBox";
 import EditWorker from "lib/components/forms/EditWorker";
-import { useData } from "lib/fetcher/fetcher";
-import { WorkerComplete } from "lib/types/worker";
+import { useAPIWorker } from "lib/fetcher/fetcher";
 
 type Params = {
   params: {
@@ -11,9 +10,7 @@ type Params = {
 };
 
 export default function EditWorkerPage({ params }: Params) {
-  const { data, error, isLoading } = useData<WorkerComplete, Error>(
-    `/api/users/${params.id}`
-  );
+  const { data, error, isLoading } = useAPIWorker(params.id);
 
   return (
     <>

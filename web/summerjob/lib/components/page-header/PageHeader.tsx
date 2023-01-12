@@ -1,13 +1,16 @@
 export default function PageHeader({
   children,
   title,
+  isFluid = true,
 }: {
   children: React.ReactNode;
   title: string;
+  isFluid?: boolean;
 }) {
+  const containerClass = isFluid ? "container-fluid" : "container";
   return (
     <section className="mb-3 mt-3">
-      <div className="container-fluid">
+      <div className={containerClass}>
         <div className="row">
           <div className="col">
             <h2>{title}</h2>
