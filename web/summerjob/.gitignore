@@ -39,6 +39,6 @@ next-env.d.ts
 .vscode
 
 # prisma generated files
-lib/prisma
+lib/prisma/client
 
 # other files
