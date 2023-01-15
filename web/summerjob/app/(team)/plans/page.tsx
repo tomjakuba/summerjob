@@ -2,6 +2,7 @@
 import ErrorPage from "lib/components/error-page/error";
 import PageHeader from "lib/components/page-header/PageHeader";
 import { useAPIPlans } from "lib/fetcher/fetcher";
+import { formatDateLong } from "lib/helpers/helpers";
 import Link from "next/link";
 
 const _columns = [
@@ -20,21 +21,6 @@ export default function PlanPage() {
   if (error) {
     return <ErrorPage error={error} />;
   }
-
-  const capitalizeFirstLetter = (text: string) => {
-    return text.charAt(0).toUpperCase() + text.slice(1);
-  };
-
-  const formatDate = (date: Date) => {
-    const options: Intl.DateTimeFormatOptions = {
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-    };
-    return capitalizeFirstLetter(
-      new Intl.DateTimeFormat("cs-CZ", options).format(date)
-    );
-  };
 
   return (
     <>
@@ -57,7 +43,7 @@ export default function PlanPage() {
               >
                 <div className="row">
                   <div className="col">
-                    <h5>{formatDate(plan.day)}</h5>
+                    <h5>{formatDateLong(plan.day)}</h5>
                     <p>{plan.jobs.length} jobů</p>
                     <small className="text-muted">
                       Poslední úprava dnes 8:11

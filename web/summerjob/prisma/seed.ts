@@ -1,5 +1,6 @@
 import {
   Allergy,
+  Car,
   Plan,
   PrismaClient,
   ProposedJob,
@@ -35,7 +36,7 @@ async function createAllergies() {
   return await prisma.allergy.findMany();
 }
 
-async function createWorkers(allergies?: Allergy[]) {
+async function createWorkers(allergies: Allergy[], eventId: string) {
   const createWorker = () => {
     const sex = Math.random() > 0.5 ? "male" : "female";
     const firstName = faker.name.firstName(sex);
@@ -46,6 +47,7 @@ async function createWorkers(allergies?: Allergy[]) {
       phone: faker.phone.number("### ### ###"),
       email: faker.internet.email(firstName, lastName),
       isStrong: Math.random() > 0.75,
+      registeredIn: { connect: { id: eventId } },
     };
   };
   const withCar = (worker: any) => {
@@ -55,6 +57,7 @@ async function createWorkers(allergies?: Allergy[]) {
         create: {
           name: faker.vehicle.vehicle(),
           description: faker.vehicle.color(),
+          seats: between(1, 3) * 2,
         },
       },
     };
@@ -74,7 +77,7 @@ async function createWorkers(allergies?: Allergy[]) {
       data: worker,
     });
   }
-  if (allergies) {
+  if (allergies.length > 0) {
     const allergyWorkers = await prisma.worker.findMany({
       take: 5,
     });
@@ -100,6 +103,7 @@ async function createYearlyEvent() {
       name: "Krkonoše 2023",
       startDate: new Date("2023-07-03"),
       endDate: new Date("2023-07-07"),
+      isActive: true,
     },
   });
   return event;
@@ -164,12 +168,42 @@ async function populatePlan(
   const job = choose(proposedJobs, 1)[0];
   const workersCount = between(job.minWorkers, job.maxWorkers);
   const workersIds = choose(workers, workersCount).map((worker) => worker.id);
+  // Have strong worker if required
   if (job.strongWorkers > 0) {
     const strongWorker = workers.find((w) => w.isStrong) || workers[0];
     if (!workersIds.includes(strongWorker.id)) {
       workersIds[0] = strongWorker.id;
     }
   }
+  // Have driver
+  type WorkerWithCar = Worker & { car: Car };
+  const drivers = (await prisma.worker.findMany({
+    where: {
+      car: {
+        id: {},
+      },
+    },
+    include: {
+      car: true,
+    },
+  })) as WorkerWithCar[];
+  const assignedWorkersWithCar = drivers.filter((driver) =>
+    workersIds.includes(driver.id)
+  );
+  let driver: WorkerWithCar;
+  if (assignedWorkersWithCar.length === 0) {
+    driver = drivers[0];
+    workersIds[1] = driver.id;
+  } else {
+    driver = assignedWorkersWithCar[0];
+  }
+  const ride = await prisma.ride.create({
+    data: {
+      driverId: driver.id,
+      carId: driver.car.id,
+    },
+  });
+
   await prisma.activeJob.create({
     data: {
       privateDescription: "Popis úkolu, který vidí jen organizátor",
@@ -179,16 +213,17 @@ async function populatePlan(
       workers: {
         connect: workersIds.map((id) => ({ id })),
       },
+      rideId: ride.id,
     },
   });
 }
 
 async function main() {
-  const allergies = await createAllergies();
-  console.log("Creating workers, cars...");
-  const workers = await createWorkers(allergies);
   console.log("Creating yearly event...");
   const yearlyEvent = await createYearlyEvent();
+  const allergies = await createAllergies();
+  console.log("Creating workers, cars...");
+  const workers = await createWorkers(allergies, yearlyEvent.id);
   console.log("Creating areas...");
   const areas = await createAreas(yearlyEvent.id);
   console.log("Creating proposed jobs...");

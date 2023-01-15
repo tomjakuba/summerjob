@@ -9,32 +9,35 @@ datasource db {
 }
 
 model Worker {
-  id          String      @id @default(uuid())
-  firstName   String      @db.VarChar(32)
-  lastName    String      @db.VarChar(32)
-  phone       String      @db.VarChar(16)
-  email       String      @db.VarChar(64)
-  car         Car?
-  isStrong    Boolean     @default(false)
-  allergies   Allergy[]
-  jobs        ActiveJob[]
-  driving     Ride[]      @relation("Driver")
-  passengerIn Ride[]
+  id           String           @id @default(uuid())
+  firstName    String           @db.VarChar(32)
+  lastName     String           @db.VarChar(32)
+  phone        String           @db.VarChar(16)
+  email        String           @db.VarChar(64)
+  car          Car?
+  isStrong     Boolean          @default(false)
+  allergies    Allergy[]
+  jobs         ActiveJob[]
+  driving      Ride[]           @relation("Driver")
+  passengerIn  Ride[]
+  registeredIn SummerJobEvent[]
 }
 
 model Car {
   id          String  @id @default(uuid())
   name        String  @db.VarChar(64)
   description String?
+  seats       Int
   owner       Worker  @relation(fields: [ownerId], references: [id])
   ownerId     String  @unique
   rides       Ride[]
 }
 
 model Allergy {
-  id                 String   @id @default(uuid())
-  code               String   @db.VarChar(32)
+  id                 String        @id @default(uuid())
+  code               String        @db.VarChar(32)
   workersWithAllergy Worker[]
+  jobsWithAllergens  ProposedJob[]
 }
 
 model ProposedJob {
@@ -50,6 +53,7 @@ model ProposedJob {
   area          Area        @relation(fields: [areaId], references: [id])
   areaId        String
   activeJobs    ActiveJob[]
+  allergens     Allergy[]
 }
 
 model ActiveJob {
@@ -99,6 +103,8 @@ model SummerJobEvent {
   name      String   @db.VarChar(64)
   startDate DateTime
   endDate   DateTime
+  isActive  Boolean  @default(false)
   areas     Area[]
   plans     Plan[]
+  workers   Worker[]
 }

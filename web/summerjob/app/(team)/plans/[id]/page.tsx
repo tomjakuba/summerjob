@@ -5,6 +5,7 @@ import { ExpandableRow } from "lib/components/table/ExpandableRow";
 import { LoadingRow } from "lib/components/table/LoadingRow";
 import { SimpleRow } from "lib/components/table/SimpleRow";
 import { useAPIPlan } from "lib/fetcher/fetcher";
+import { formatDateLong } from "lib/helpers/helpers";
 import type { Worker } from "lib/prisma/client";
 import { ActiveJobNoPlan } from "lib/types/active-job";
 import Link from "next/link";
@@ -35,14 +36,21 @@ export default function PlanPage({ params }: Params) {
   const formatWorkerData = (worker: Worker, job: ActiveJobNoPlan) => {
     let name = `${worker.firstName} ${worker.lastName}`;
     const abilities = [];
+    let isDriver = false;
     if (worker.id === job.ride?.driverId) {
-      name = `${name} <i className="fas fa-car ms-2"></i>`;
+      isDriver = true;
       abilities.push("Řidič");
     }
     if (worker.isStrong) abilities.push("Silák");
 
     return [
-      name,
+      isDriver ? (
+        <>
+          {name} <i className="fas fa-car ms-2"></i>
+        </>
+      ) : (
+        name
+      ),
       worker.phone,
       abilities.join(", "),
       <>
@@ -54,9 +62,35 @@ export default function PlanPage({ params }: Params) {
     ];
   };
 
+  const formatRideData = (job: ActiveJobNoPlan) => {
+    if (!job.ride) return <>Ne</>;
+    let result = `${job.ride.car.name} - ${job.ride.driver.firstName} ${job.ride.driver.lastName}`;
+    let otherJobNames = "";
+
+    if (!job.workers.find((w) => w.id === job.ride.driverId)) {
+      result += ` (sdílená jízda)`;
+    } else if (job.ride.forJobs.length > 1) {
+      const otherJobs = job.ride.forJobs.filter((j) => j.id !== job.id);
+      otherJobNames = `Také odváží: ${otherJobs
+        .map((j) => j.proposedJob.name)
+        .join(", ")}}`;
+    }
+    return (
+      <>
+        {result}
+        {otherJobNames.length > 0 && (
+          <>
+            <br />
+            {otherJobNames}
+          </>
+        )}
+      </>
+    );
+  };
+
   return (
     <>
-      <PageHeader title="Pondělí, 19. července">
+      <PageHeader title={data ? formatDateLong(data?.day) : "Načítání..."}>
         <button className="btn btn-warning" type="button">
           <i className="fas fa-briefcase"></i>
           <span>Přidat job</span>
@@ -98,16 +132,20 @@ export default function PlanPage({ params }: Params) {
                             job.proposedJob.area.name,
                             job.proposedJob.address,
                             "Zajištění",
-                            <Link href={`/active-job/${job.id}`}>Upravit</Link>,
+                            <Link href={`/active-jobs/${job.id}`}>
+                              Upravit
+                            </Link>,
                           ]}
                         >
                           <>
                             <div className="ms-2">
+                              <h6>Poznámka pro organizátory</h6>
                               <p>{job.privateDescription}</p>
+                              <h6>Popis</h6>
                               <p>{job.publicDescription}</p>
                               <p>
-                                <strong>Doprava:</strong>{" "}
-                                {job.ride ? "Ano" : "Ne"}
+                                <strong>Doprava: </strong>
+                                {formatRideData(job)}
                               </p>
                             </div>
                             <div className="table-responsive text-nowrap">

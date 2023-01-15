@@ -33,7 +33,18 @@ export async function getPlanById(id: string) {
               area: true,
             },
           },
-          ride: true,
+          ride: {
+            include: {
+              driver: true,
+              car: true,
+              forJobs: {
+                include: {
+                  proposedJob: true,
+                },
+              },
+              passengers: true,
+            },
+          },
         },
       },
     },
