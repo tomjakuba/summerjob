@@ -4,7 +4,7 @@ import PageHeader from "lib/components/page-header/PageHeader";
 import { ExpandableRow } from "lib/components/table/ExpandableRow";
 import { LoadingRow } from "lib/components/table/LoadingRow";
 import { SimpleRow } from "lib/components/table/SimpleRow";
-import { useAPIPlan } from "lib/fetcher/fetcher";
+import { useAPIPlan, useAPIWorkersWithoutJob } from "lib/fetcher/fetcher";
 import { formatDateLong } from "lib/helpers/helpers";
 import type { Worker } from "lib/prisma/client";
 import { ActiveJobNoPlan } from "lib/types/active-job";
@@ -28,16 +28,18 @@ type Params = {
 
 export default function PlanPage({ params }: Params) {
   const { data, error, isLoading } = useAPIPlan(params.id);
+  const { data: workersWithoutJob, isLoading: isLoadingWorkersWithoutJob } =
+    useAPIWorkersWithoutJob(params.id);
 
   if (error) {
     return <ErrorPage error={error} />;
   }
 
-  const formatWorkerData = (worker: Worker, job: ActiveJobNoPlan) => {
+  const formatWorkerData = (worker: Worker, job?: ActiveJobNoPlan) => {
     let name = `${worker.firstName} ${worker.lastName}`;
     const abilities = [];
     let isDriver = false;
-    if (worker.id === job.ride?.driverId) {
+    if (worker.id === job?.ride?.driverId) {
       isDriver = true;
       abilities.push("Řidič");
     }
@@ -163,13 +165,43 @@ export default function PlanPage({ params }: Params) {
                           </>
                         </ExpandableRow>
                       ))}
+                    {!isLoadingWorkersWithoutJob &&
+                      workersWithoutJob !== undefined && (
+                        <ExpandableRow
+                          data={[`Bez práce (${workersWithoutJob.length})`]}
+                          colspan={_columns.length}
+                          className={
+                            workersWithoutJob.length > 0
+                              ? "smj-background-error"
+                              : ""
+                          }
+                        >
+                          <div className="ms-2">
+                            <h6>
+                              Následující pracovníci nemají přiřazenou práci:
+                            </h6>
+                          </div>
+                          <div className="table-responsive text-nowrap">
+                            <table className="table table-hover">
+                              <tbody>
+                                {workersWithoutJob.map((worker) => (
+                                  <SimpleRow
+                                    data={formatWorkerData(worker)}
+                                    key={worker.id}
+                                  />
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </ExpandableRow>
+                      )}
                   </tbody>
                 </table>
               </div>
             </div>
             <div className="col-sm-12 col-lg-3">
               <div className="vstack smj-search-stack smj-shadow rounded-3">
-                <h5>Filtrovat Joby</h5>
+                <h5>Filtrovat</h5>
                 <hr />
                 <label className="form-label" htmlFor="job-filter">
                   Job:

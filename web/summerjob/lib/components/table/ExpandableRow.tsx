@@ -3,6 +3,8 @@ import { useRef, useState } from "react";
 interface RowProps {
   data: any[];
   children: React.ReactNode;
+  colspan?: number;
+  className?: string;
 }
 
 const Arrow = () => (
@@ -12,15 +14,28 @@ const ExpandedArrow = () => (
   <i className="fas fa-angle-down" style={{ width: "0.5rem" }}></i>
 );
 
-function Cell({ contents, tooltip }: { contents: any; tooltip?: string }) {
+function Cell({
+  contents,
+  tooltip,
+  colspan,
+}: {
+  contents: any;
+  tooltip?: string;
+  colspan?: number;
+}) {
   return (
-    <td className="text-truncate" title={tooltip}>
+    <td className="text-truncate" title={tooltip} colSpan={colspan}>
       {contents}
     </td>
   );
 }
 
-export function ExpandableRow({ data, children }: RowProps) {
+export function ExpandableRow({
+  data,
+  children,
+  colspan,
+  className,
+}: RowProps) {
   const [expanded, setExpanded] = useState(false);
   const toggleExpanded = () => {
     setExpanded(!expanded);
@@ -35,7 +50,10 @@ export function ExpandableRow({ data, children }: RowProps) {
 
   return (
     <>
-      <tr className="smj-expandable-row" onClick={toggleExpanded}>
+      <tr
+        className={`smj-expandable-row ${className}`}
+        onClick={toggleExpanded}
+      >
         {data.slice(0, 1).map((field, index) => (
           <Cell
             key={index}
@@ -46,6 +64,7 @@ export function ExpandableRow({ data, children }: RowProps) {
                 {field}
               </>
             }
+            colspan={colspan}
           />
         ))}
         {data.slice(1).map((field, index) => (
@@ -58,7 +77,7 @@ export function ExpandableRow({ data, children }: RowProps) {
       </tr>
 
       <tr className="smj-details-row">
-        <td colSpan={data.length}>
+        <td colSpan={colspan ?? data.length}>
           <div
             className="smj-row-collapsible"
             ref={collapsibleContentRef}

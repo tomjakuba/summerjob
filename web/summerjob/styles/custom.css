@@ -142,3 +142,7 @@ img.smj-nav-logo {
   overflow: hidden;
   transition: all 0.2s ease-out;
 }
+
+.smj-background-error {
+  background-color: #ffd9d9;
+}

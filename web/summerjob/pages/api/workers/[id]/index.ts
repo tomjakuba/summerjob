@@ -1,13 +1,13 @@
 import { ApiErrorType } from "lib/data/apiError";
-import { getUserById, modifyUser } from "lib/data/users";
+import { getWorkerById, modifyUser } from "lib/data/workers";
 import { WorkerSerializable, WorkerSerializableSchema } from "lib/types/worker";
 import { NextApiRequest, NextApiResponse } from "next";
 
 async function get(id: string, req: NextApiRequest, res: NextApiResponse) {
   try {
-    const user = await getUserById(id);
+    const user = await getWorkerById(id);
     if (!user) {
-      res.status(404);
+      res.status(404).end();
       return;
     }
     res.status(200).json(user);

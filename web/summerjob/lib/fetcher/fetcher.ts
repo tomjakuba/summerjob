@@ -1,6 +1,7 @@
 import { ApiError } from "lib/data/apiError";
 import { Allergy } from "lib/prisma/client";
 import { PlanComplete, PlanWithJobs } from "lib/types/plan";
+import { ProposedJobComplete } from "lib/types/proposed-job";
 import { WorkerComplete } from "lib/types/worker";
 import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
@@ -41,8 +42,8 @@ const patch = async (url: string, { arg }: { arg: any }) => {
   return res.json();
 };
 
-function useData<T, E>(url: string) {
-  return useSWR<T, E>(url, get);
+function useData<T>(url: string) {
+  return useSWR<T, Error>(url, get);
 }
 
 function useDataPartialUpdate(url: string, options?: any) {
@@ -50,19 +51,25 @@ function useDataPartialUpdate(url: string, options?: any) {
 }
 
 export function useAPIWorkerUpdate(workerId: string, options?: any) {
-  return useDataPartialUpdate(`/api/users/${workerId}`, options);
+  return useDataPartialUpdate(`/api/workers/${workerId}`, options);
 }
 
 export function useAPIWorkers() {
-  return useData<WorkerComplete[], Error>("/api/users");
+  return useData<WorkerComplete[]>("/api/workers");
+}
+
+export function useAPIWorkersWithoutJob(planId: string) {
+  return useData<WorkerComplete[]>(
+    `/api/workers?withoutJob=true&planId=${planId}`
+  );
 }
 
 export function useAPIWorker(id: string) {
-  return useData<WorkerComplete, Error>(`/api/users/${id}`);
+  return useData<WorkerComplete>(`/api/workers/${id}`);
 }
 
 export function useAPIPlans() {
-  const properties = useData<PlanWithJobs[], Error>("/api/plans");
+  const properties = useData<PlanWithJobs[]>("/api/plans");
   if (properties.data) {
     for (const plan of properties.data) {
       plan.day = new Date(plan.day);
@@ -72,7 +79,7 @@ export function useAPIPlans() {
 }
 
 export function useAPIPlan(id: string) {
-  const properties = useData<PlanComplete, Error>(`/api/plans/${id}`);
+  const properties = useData<PlanComplete>(`/api/plans/${id}`);
   if (properties.data) {
     properties.data.day = new Date(properties.data.day);
   }
@@ -80,5 +87,9 @@ export function useAPIPlan(id: string) {
 }
 
 export function useAPIAllergies() {
-  return useData<Allergy[], Error>("/api/allergies");
+  return useData<Allergy[]>("/api/allergies");
+}
+
+export function useAPIProposedJobs() {
+  return useData<ProposedJobComplete[]>("/api/proposed-jobs");
 }

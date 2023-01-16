@@ -46,6 +46,7 @@ model ProposedJob {
   description   String?
   requiredDays  Int
   completed     Boolean     @default(false)
+  pinned        Boolean     @default(false)
   minWorkers    Int
   maxWorkers    Int
   strongWorkers Int
