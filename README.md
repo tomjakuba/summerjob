@@ -92,6 +92,8 @@ Pro spuštění a zastavování aplikace je možné použít příkazy docker-co
 [web]$ docker compose down
 ```
 
+Aplikace běží na adrese `http://localhost:3000`.
+
 ## Procházení databáze
 
 Pro inspekci databáze je možné použít například aplikaci pgAdmin. Pokud chceme pouze zobrazit a upravit data v tabulkách summerjobu, je možné použít nástroj [Prisma Studio](https://www.prisma.io/studio). Pro jeho spuštění je potřeba vytvořit kontejner pomocí image `summerjob/scripts` a použít příkaz na spuštění Prisma Studio:
@@ -102,3 +104,21 @@ root@<container-id>:/app# npx prisma studio
 ```
 
 Prisma Studio je nyní dostupné na adrese `http://localhost:5555`.
+
+## Spuštění pro vývoj
+
+Potřebné nástroje navíc:
+
+- [Node.js](https://nodejs.org/en/)
+- Databáze (může být v Dockeru)
+
+Stejným způsobem jako výše nastavíme connection string pro připojení k databázi.
+
+Následně nainstalujeme závislosti pomocí `npm` a spustíme aplikaci:
+
+```console
+[web/summerjob]$ npm install
+[web/summerjob]$ npm run dev
+```
+
+Tento příkaz spustí aplikaci v režimu vývoje, který automaticky restartuje aplikaci po každé změně v kódu. Aplikace je dostupná na adrese `http://localhost:3000`.
