@@ -1,0 +1,31 @@
+version: "3"
+
+services:
+  summerjob-web:
+    container_name: summerjob-web
+    hostname: summerjob-web
+    image: summerjob/web
+    networks:
+      - summerjob-network
+    ports:
+      - 3000:3000
+
+  summerjob-db:
+    container_name: summerjob-db
+    hostname: summerjob-db
+    image: postgres:15
+    environment:
+      POSTGRES_USER: username
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: summerjob
+    networks:
+      - summerjob-network
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+networks:
+  summerjob-network:
+    external: true
+
+volumes:
+  postgres:
