@@ -2,9 +2,9 @@
 
 Webová aplikace pro organizaci SummerJob, vyvíjená jako diplomová práce na FIT ČVUT v Praze.
 
-## Instalace (dev)
+## Instalace a první spuštění
 
-Tato aplikace je stále ve fázi vývoje a proces instanace se může změnit.
+Tato aplikace je stále ve fázi vývoje a proces instalace se může změnit.
 
 Potřebné nástroje:
 
@@ -64,7 +64,7 @@ networks:
 Nyní je možné spustit kontejnery pomocí docker-compose:
 
 ```console
-[web]$ docker-compose up -d
+[web]$ docker compose up -d
 ```
 
 Do databáze je nutné propsat schéma. Vytvoříme si kontejner pomocí image `summerjob/scripts` a spustíme příkaz na vytvoření schématu. Volitelně je možné vložit do databáze i testovací data:
@@ -79,6 +79,18 @@ root@<container-id>:/app# exit
 Databáze si pamatuje data i po restartu kontejneru, takže krok výše je potřeba provést pouze jednou.
 
 Aplikace je nyní dostupná na adrese `http://localhost:3000`.
+
+## Spouštění a zastavování
+
+Pro spuštění a zastavování aplikace je možné použít příkazy docker-compose:
+
+```console
+[web]$ docker compose up -d
+```
+
+```console
+[web]$ docker compose down
+```
 
 ## Procházení databáze
 
