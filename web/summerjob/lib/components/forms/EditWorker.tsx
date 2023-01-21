@@ -18,38 +18,6 @@ const schema = z.object({
 });
 type WorkerForm = z.infer<typeof schema>;
 
-function AllergyPill({
-  allergy,
-  register,
-}: {
-  allergy: Allergy;
-  register: UseFormRegister<WorkerForm>;
-}) {
-  return (
-    <div className="d-inline-block me-3">
-      <input
-        id={allergy.id}
-        className="btn-check"
-        type="checkbox"
-        value={allergy.id}
-        {...register("allergyIds")}
-      />
-      <label className="form-label btn-light btn p-2" htmlFor={allergy.id}>
-        {allergy.code}
-      </label>
-    </div>
-  );
-}
-
-const parseAllergies = (allergies: Allergy[]) => {
-  if (!allergies) return [];
-  let result = allergies.map((allergy) => {
-    return { ...allergy, code: t(allergy.code) };
-  });
-  result.sort((a, b) => a.code.localeCompare(b.code));
-  return result;
-};
-
 export default function EditWorker({ worker }: { worker: WorkerComplete }) {
   const {
     register,
@@ -188,3 +156,35 @@ export default function EditWorker({ worker }: { worker: WorkerComplete }) {
     </>
   );
 }
+
+function AllergyPill({
+  allergy,
+  register,
+}: {
+  allergy: Allergy;
+  register: UseFormRegister<WorkerForm>;
+}) {
+  return (
+    <div className="d-inline-block me-3">
+      <input
+        id={allergy.id}
+        className="btn-check"
+        type="checkbox"
+        value={allergy.id}
+        {...register("allergyIds")}
+      />
+      <label className="form-label btn-light btn p-2" htmlFor={allergy.id}>
+        {allergy.code}
+      </label>
+    </div>
+  );
+}
+
+const parseAllergies = (allergies: Allergy[]) => {
+  if (!allergies) return [];
+  let result = allergies.map((allergy) => {
+    return { ...allergy, code: t(allergy.code) };
+  });
+  result.sort((a, b) => a.code.localeCompare(b.code));
+  return result;
+};

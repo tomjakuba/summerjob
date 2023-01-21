@@ -21,15 +21,9 @@ async function get(id: string, req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-async function put(
-  id: string,
-  body: object,
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  let workerData: WorkerSerializable;
+async function put(id: string, req: NextApiRequest, res: NextApiResponse) {
   try {
-    workerData = WorkerSerializableSchema.parse(body);
+    const workerData = WorkerSerializableSchema.parse(req.body);
     await modifyUser(id, workerData);
   } catch (error) {
     res.status(400).json({
@@ -51,7 +45,7 @@ export default async function handler(
   if (req.method === "GET") {
     await get(id as string, req, res);
   } else if (req.method === "PUT") {
-    await put(id as string, req.body, req, res);
+    await put(id as string, req, res);
   } else {
     res.status(405).end();
   }

@@ -20,27 +20,32 @@ const get = async (url: string) => {
   return res.json();
 };
 
-const patch = async (url: string, { arg }: { arg: any }) => {
-  const res = await fetch(url, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(arg),
-  });
+const sendData =
+  (method: string) =>
+  async (url: string, { arg }: { arg: any }) => {
+    const res = await fetch(url, {
+      method: method,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(arg),
+    });
 
-  if (!res.ok) {
-    const data = await res.json();
-    if (data.error && data.error.type && data.error.message) {
-      throw new ApiError(data.error.message, data.error.type);
+    if (!res.ok) {
+      const data = await res.json();
+      if (data.error && data.error.type && data.error.message) {
+        throw new ApiError(data.error.message, data.error.type);
+      }
+      throw new Error("An error occurred while submitting the data.");
     }
-    throw new Error("An error occurred while submitting the data.");
-  }
-  if (res.status === 204) {
-    return;
-  }
-  return res.json();
-};
+    if (res.status === 204) {
+      return;
+    }
+    return res.json();
+  };
+
+const post = sendData("POST");
+const patch = sendData("PATCH");
 
 function useData<T>(url: string) {
   return useSWR<T, Error>(url, get);
@@ -48,6 +53,10 @@ function useData<T>(url: string) {
 
 function useDataPartialUpdate(url: string, options?: any) {
   return useSWRMutation(url, patch, options);
+}
+
+function useDataCreate(url: string, options?: any) {
+  return useSWRMutation(url, post, options);
 }
 
 export function useAPIWorkerUpdate(workerId: string, options?: any) {
@@ -92,4 +101,14 @@ export function useAPIAllergies() {
 
 export function useAPIProposedJobs() {
   return useData<ProposedJobComplete[]>("/api/proposed-jobs");
+}
+
+export function useAPIProposedJobsNotInPlan(planId: string) {
+  return useData<ProposedJobComplete[]>(
+    `/api/proposed-jobs?notInPlan=${planId}`
+  );
+}
+
+export function useAPIActiveJobCreate(options?: any) {
+  return useDataCreate("/api/active-jobs", options);
 }

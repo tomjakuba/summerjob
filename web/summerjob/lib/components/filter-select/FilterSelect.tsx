@@ -66,7 +66,7 @@ export function FilterSelect({ items, onSelected }: FilterSelectProps) {
         <input
           className="p-2 form-control"
           type="text"
-          placeholder={selected?.name}
+          placeholder={"Vyberte možnost"}
           style={{ border: "0px", outline: "0px" }}
           onFocus={() => setOpen(true)}
           onClick={() => setOpen(true)}

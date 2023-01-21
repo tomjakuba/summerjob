@@ -1,5 +1,8 @@
 import { ApiErrorType } from "lib/data/apiError";
-import { getProposedJobs } from "lib/data/proposed-jobs";
+import {
+  getProposedJobs,
+  getUnplannedProposedJobs,
+} from "lib/data/proposed-jobs";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
@@ -10,8 +13,14 @@ export default async function handler(
     res.status(405).end();
     return;
   }
+  const { notInPlan } = req.query;
   try {
-    const jobs = await getProposedJobs();
+    let jobs;
+    if (notInPlan && typeof notInPlan === "string") {
+      jobs = await getUnplannedProposedJobs(notInPlan);
+    } else {
+      jobs = await getProposedJobs();
+    }
     res.status(200).json(jobs);
   } catch (error) {
     res.status(500).json({

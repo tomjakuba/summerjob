@@ -30,13 +30,16 @@ type Params = {
 };
 
 export default function PlanPage({ params }: Params) {
-  const { data, error, isLoading } = useAPIPlan(params.id);
+  const { data, error, isLoading, mutate } = useAPIPlan(params.id);
   const { data: workersWithoutJob, isLoading: isLoadingWorkersWithoutJob } =
     useAPIWorkersWithoutJob(params.id);
 
   const [isJobModalOpen, setIsJobModalOpen] = useState(false);
   const openModal = () => setIsJobModalOpen(true);
-  const closeModal = () => setIsJobModalOpen(false);
+  const closeModal = () => {
+    mutate();
+    setIsJobModalOpen(false);
+  };
 
   if (error) {
     return <ErrorPage error={error} />;
@@ -180,7 +183,7 @@ export default function PlanPage({ params }: Params) {
           title={"Přidat job do plánu"}
           onClose={closeModal}
         >
-          <AddJobToPlanForm />
+          <AddJobToPlanForm planId={params.id} onComplete={closeModal} />
         </Modal>
       </section>
     </>
