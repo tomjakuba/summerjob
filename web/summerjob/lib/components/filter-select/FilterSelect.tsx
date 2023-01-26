@@ -10,6 +10,7 @@ export interface FilterSelectItem {
 
 interface FilterSelectProps {
   items: FilterSelectItem[];
+  placeholder: string;
   onSelected: (item: FilterSelectItem) => void;
 }
 
@@ -20,7 +21,11 @@ const DEFAULT: FilterSelectItem = {
   item: <></>,
 };
 
-export function FilterSelect({ items, onSelected }: FilterSelectProps) {
+export function FilterSelect({
+  items,
+  placeholder,
+  onSelected,
+}: FilterSelectProps) {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(DEFAULT);
   const [open, setOpen] = useState(false);
@@ -64,9 +69,9 @@ export function FilterSelect({ items, onSelected }: FilterSelectProps) {
     <div className="dropdown" onBlur={onBlur}>
       <div className="p-0" aria-expanded="false">
         <input
-          className="p-2 form-control"
+          className="p-2"
           type="text"
-          placeholder={"Vyberte možnost"}
+          placeholder={placeholder}
           style={{ border: "0px", outline: "0px" }}
           onFocus={() => setOpen(true)}
           onClick={() => setOpen(true)}
@@ -76,10 +81,7 @@ export function FilterSelect({ items, onSelected }: FilterSelectProps) {
         ></input>
       </div>
 
-      <ul
-        className="dropdown-menu smj-dropdown-menu w-100"
-        style={dropdownStyle}
-      >
+      <ul className="dropdown-menu smj-dropdown-menu" style={dropdownStyle}>
         {items.map((item) => {
           return (
             shouldShowItem(item) && (
