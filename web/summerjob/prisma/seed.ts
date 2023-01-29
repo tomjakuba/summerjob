@@ -142,6 +142,7 @@ async function createProposedJobs(areaIds: string[]) {
       maxWorkers: between(4, 6),
       strongWorkers: between(0, 1),
       address: faker.address.streetAddress(),
+      contact: faker.name.fullName() + ", " + faker.phone.number("### ### ###"),
     };
   };
   await prisma.proposedJob.createMany({
@@ -214,6 +215,7 @@ async function populatePlan(
         connect: workersIds.map((id) => ({ id })),
       },
       rideId: ride.id,
+      responsibleWorkerId: driver.id,
     },
   });
 }

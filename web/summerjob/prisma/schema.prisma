@@ -9,18 +9,19 @@ datasource db {
 }
 
 model Worker {
-  id           String           @id @default(uuid())
-  firstName    String           @db.VarChar(32)
-  lastName     String           @db.VarChar(32)
-  phone        String           @db.VarChar(16)
-  email        String           @db.VarChar(64)
-  car          Car?
-  isStrong     Boolean          @default(false)
-  allergies    Allergy[]
-  jobs         ActiveJob[]
-  driving      Ride[]           @relation("Driver")
-  passengerIn  Ride[]
-  registeredIn SummerJobEvent[]
+  id             String           @id @default(uuid())
+  firstName      String           @db.VarChar(32)
+  lastName       String           @db.VarChar(32)
+  phone          String           @db.VarChar(16)
+  email          String           @db.VarChar(64)
+  car            Car?
+  isStrong       Boolean          @default(false)
+  allergies      Allergy[]
+  jobs           ActiveJob[]
+  driving        Ride[]           @relation("Driver")
+  passengerIn    Ride[]
+  registeredIn   SummerJobEvent[]
+  responsibleFor ActiveJob[]      @relation("ResponsibleWorker")
 }
 
 model Car {
@@ -51,6 +52,7 @@ model ProposedJob {
   maxWorkers    Int
   strongWorkers Int
   address       String
+  contact       String
   area          Area        @relation(fields: [areaId], references: [id])
   areaId        String
   activeJobs    ActiveJob[]
@@ -58,16 +60,18 @@ model ProposedJob {
 }
 
 model ActiveJob {
-  id                 String      @id @default(uuid())
-  privateDescription String?
-  publicDescription  String?
-  proposedJob        ProposedJob @relation(fields: [proposedJobId], references: [id])
-  proposedJobId      String
-  workers            Worker[]
-  plan               Plan        @relation(fields: [planId], references: [id])
-  planId             String
-  ride               Ride?       @relation(fields: [rideId], references: [id])
-  rideId             String?
+  id                  String      @id @default(uuid())
+  privateDescription  String?
+  publicDescription   String?
+  proposedJob         ProposedJob @relation(fields: [proposedJobId], references: [id])
+  proposedJobId       String
+  workers             Worker[]
+  plan                Plan        @relation(fields: [planId], references: [id])
+  planId              String
+  ride                Ride?       @relation(fields: [rideId], references: [id])
+  rideId              String?
+  responsibleWorker   Worker?     @relation("ResponsibleWorker", fields: [responsibleWorkerId], references: [id])
+  responsibleWorkerId String?
 }
 
 model Ride {

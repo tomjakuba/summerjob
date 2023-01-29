@@ -3,6 +3,7 @@ import ErrorPage from "lib/components/error-page/error";
 import AddJobToPlanForm from "lib/components/forms/AddJobToPlanForm";
 import { Modal } from "lib/components/modal/Modal";
 import PageHeader from "lib/components/page-header/PageHeader";
+import { PlanFilters } from "lib/components/plan/PlanFilters";
 import { ExpandableRow } from "lib/components/table/ExpandableRow";
 import { LoadingRow } from "lib/components/table/LoadingRow";
 import { SimpleRow } from "lib/components/table/SimpleRow";
@@ -10,8 +11,9 @@ import { useAPIPlan, useAPIWorkersWithoutJob } from "lib/fetcher/fetcher";
 import { formatDateLong } from "lib/helpers/helpers";
 import type { Worker } from "lib/prisma/client";
 import { ActiveJobNoPlan } from "lib/types/active-job";
+import { PlanComplete } from "lib/types/plan";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 const _columns = [
   "Práce",
@@ -45,6 +47,45 @@ export default function PlanPage({ params }: Params) {
     return <ErrorPage error={error} />;
   }
 
+  const searchableJobs = useMemo(() => {
+    const map = new Map<string, string>();
+    data?.jobs.forEach((job) => {
+      const workerNames = job.workers
+        .map((w) => `${w.firstName} ${w.lastName}`)
+        .join(" ");
+      map.set(
+        job.id,
+        (
+          job.proposedJob.name +
+          job.proposedJob.area.name +
+          job.proposedJob.address +
+          workerNames
+        ).toLocaleLowerCase()
+      );
+    });
+    return map;
+  }, [data?.jobs]);
+
+  const areas = getAvailableAreas(data);
+  const [selectedArea, setSelectedArea] = useState(areas[0]);
+
+  const onAreaSelected = (id: string) => {
+    setSelectedArea(areas.find((a) => a.id === id) || areas[0]);
+  };
+
+  const [filter, setFilter] = useState("");
+
+  function shouldShowJob(job: ActiveJobNoPlan) {
+    const isInArea =
+      selectedArea.id === areas[0].id ||
+      job.proposedJob.area.id === selectedArea.id;
+    const text = searchableJobs.get(job.id);
+    if (text) {
+      return isInArea && text.includes(filter.toLowerCase());
+    }
+    return isInArea;
+  }
+
   return (
     <>
       <PageHeader title={data ? formatDateLong(data?.day) : "Načítání..."}>
@@ -65,7 +106,18 @@ export default function PlanPage({ params }: Params) {
       <section>
         <div className="container-fluid">
           <div className="row gx-3">
-            <div className="col-sm-12 col-lg-9">
+            <div className="col">
+              <PlanFilters
+                search={filter}
+                onSearchChanged={setFilter}
+                areas={areas}
+                selectedArea={selectedArea}
+                onAreaSelected={onAreaSelected}
+              />
+            </div>
+          </div>
+          <div className="row gx-3">
+            <div className="col-sm-12 col-lg-10">
               <div className="table-responsive text-nowrap mb-2 smj-shadow rounded-3">
                 <table className="table mb-0">
                   <thead className="smj-table-header">
@@ -79,47 +131,50 @@ export default function PlanPage({ params }: Params) {
                     {isLoading && <LoadingRow colspan={_columns.length} />}
                     {!isLoading &&
                       data !== undefined &&
-                      data.jobs.map((job) => (
-                        <ExpandableRow
-                          key={job.id}
-                          data={[
-                            job.proposedJob.name,
-                            `${job.workers.length}/${job.proposedJob.maxWorkers}`,
-                            "?",
-                            job.proposedJob.area.name,
-                            job.proposedJob.address,
-                            "Zajištění",
-                            <Link href={`/active-jobs/${job.id}`}>
-                              Upravit
-                            </Link>,
-                          ]}
-                        >
-                          <>
-                            <div className="ms-2">
-                              <h6>Poznámka pro organizátory</h6>
-                              <p>{job.privateDescription}</p>
-                              <h6>Popis</h6>
-                              <p>{job.publicDescription}</p>
-                              <p>
-                                <strong>Doprava: </strong>
-                                {formatRideData(job)}
-                              </p>
-                            </div>
-                            <div className="table-responsive text-nowrap">
-                              <table className="table table-hover">
-                                <tbody>
-                                  {job.workers.map((worker) => (
-                                    <SimpleRow
-                                      data={formatWorkerData(worker, job)}
-                                      key={worker.id}
-                                    />
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </>
-                        </ExpandableRow>
-                      ))}
+                      data.jobs.map(
+                        (job) =>
+                          shouldShowJob(job) && (
+                            <ExpandableRow
+                              key={job.id}
+                              data={[
+                                job.proposedJob.name,
+                                `${job.workers.length}/${job.proposedJob.maxWorkers}`,
+                                job.proposedJob.contact,
+                                job.proposedJob.area.name,
+                                job.proposedJob.address,
+                                "Zajištění",
+                                <Link href={`/active-jobs/${job.id}`}>
+                                  Upravit
+                                </Link>,
+                              ]}
+                            >
+                              <>
+                                <div className="ms-2">
+                                  <h6>Poznámka pro organizátory</h6>
+                                  <p>{job.privateDescription}</p>
+                                  <h6>Popis</h6>
+                                  <p>{job.publicDescription}</p>
+                                  <p>
+                                    <strong>Doprava: </strong>
+                                    {formatRideData(job)}
+                                  </p>
+                                </div>
+                                <div className="table-responsive text-nowrap">
+                                  <table className="table table-hover">
+                                    <tbody>
+                                      {job.workers.map((worker) => (
+                                        <SimpleRow
+                                          data={formatWorkerData(worker, job)}
+                                          key={worker.id}
+                                        />
+                                      ))}
+                                    </tbody>
+                                  </table>
+                                </div>
+                              </>
+                            </ExpandableRow>
+                          )
+                      )}
                     {!isLoadingWorkersWithoutJob &&
                       workersWithoutJob !== undefined && (
                         <ExpandableRow
@@ -154,26 +209,16 @@ export default function PlanPage({ params }: Params) {
                 </table>
               </div>
             </div>
-            <div className="col-sm-12 col-lg-3">
+            <div className="col-sm-12 col-lg-2">
               <div className="vstack smj-search-stack smj-shadow rounded-3">
-                <h5>Filtrovat</h5>
+                <h5>Statistiky</h5>
                 <hr />
-                <label className="form-label" htmlFor="job-filter">
-                  Job:
-                </label>
-                <input
-                  type="text"
-                  placeholder="Název, adresa ..."
-                  name="job-filter"
-                />
-                <label className="form-label mt-4" htmlFor="worker-filter">
-                  Pracant:
-                </label>
-                <input
-                  type="text"
-                  placeholder="Jméno, příjmení"
-                  name="worker-filter"
-                />
+                Nasazených pracovníků:{" "}
+                {data?.jobs.flatMap((x) => x.workers).length}
+                <br />
+                Bez práce: {workersWithoutJob && workersWithoutJob.length}
+                <br />
+                Naplánované joby: {data && data.jobs.length}
               </div>
             </div>
           </div>
@@ -243,4 +288,19 @@ function formatRideData(job: ActiveJobNoPlan) {
       )}
     </>
   );
+}
+
+function getAvailableAreas(plan?: PlanComplete) {
+  const ALL_AREAS = { id: "all", name: "Vyberte oblast" };
+  const jobs = plan?.jobs.flatMap((j) => j.proposedJob);
+  const areas = filterUniqueById(
+    jobs?.map((job) => ({ id: job.area.id, name: job.area.name })) || []
+  );
+  areas.sort((a, b) => a.name.localeCompare(b.name));
+  areas.unshift(ALL_AREAS);
+  return areas;
+}
+
+function filterUniqueById<T extends { id: string }>(elements: T[]): T[] {
+  return Array.from(new Map(elements.map((item) => [item.id, item])).values());
 }
