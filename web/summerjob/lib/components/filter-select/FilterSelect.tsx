@@ -69,7 +69,7 @@ export function FilterSelect({
     <div className="dropdown" onBlur={onBlur}>
       <div className="p-0" aria-expanded="false">
         <input
-          className="p-2"
+          className="p-2 w-100"
           type="text"
           placeholder={placeholder}
           style={{ border: "0px", outline: "0px" }}
@@ -81,7 +81,10 @@ export function FilterSelect({
         ></input>
       </div>
 
-      <ul className="dropdown-menu smj-dropdown-menu" style={dropdownStyle}>
+      <ul
+        className="dropdown-menu smj-dropdown-menu w-100"
+        style={dropdownStyle}
+      >
         {items.map((item) => {
           return (
             shouldShowItem(item) && (

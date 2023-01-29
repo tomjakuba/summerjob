@@ -158,10 +158,21 @@ export default function PlanPage({ params }: Params) {
                                     <strong>Doprava: </strong>
                                     {formatRideData(job)}
                                   </p>
+                                  <p>
+                                    <strong>Zodpovědná osoba: </strong>
+                                    {responsibleWorkerName(job)}
+                                  </p>
                                 </div>
                                 <div className="table-responsive text-nowrap">
                                   <table className="table table-hover">
                                     <tbody>
+                                      {job.workers.length === 0 && (
+                                        <tr>
+                                          <td colSpan={3}>
+                                            <i>Žádní pracovníci</i>
+                                          </td>
+                                        </tr>
+                                      )}
                                       {job.workers.map((worker) => (
                                         <SimpleRow
                                           data={formatWorkerData(worker, job)}
@@ -223,13 +234,11 @@ export default function PlanPage({ params }: Params) {
             </div>
           </div>
         </div>
-        <Modal
-          visible={isJobModalOpen}
-          title={"Přidat job do plánu"}
-          onClose={closeModal}
-        >
-          <AddJobToPlanForm planId={params.id} onComplete={closeModal} />
-        </Modal>
+        {isJobModalOpen && (
+          <Modal title={"Přidat job do plánu"} onClose={closeModal}>
+            <AddJobToPlanForm planId={params.id} onComplete={closeModal} />
+          </Modal>
+        )}
       </section>
     </>
   );
@@ -288,6 +297,11 @@ function formatRideData(job: ActiveJobNoPlan) {
       )}
     </>
   );
+}
+
+function responsibleWorkerName(job: ActiveJobNoPlan) {
+  if (!job.responsibleWorker) return "Není";
+  return `${job.responsibleWorker?.firstName} ${job.responsibleWorker?.lastName}`;
 }
 
 function getAvailableAreas(plan?: PlanComplete) {

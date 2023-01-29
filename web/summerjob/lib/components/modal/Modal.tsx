@@ -1,19 +1,16 @@
 interface ModalProps {
   children: React.ReactNode;
   title: string;
-  visible: boolean;
   onClose: () => void;
 }
 
-export function Modal({ children, title, visible, onClose }: ModalProps) {
-  const showClass = `${visible ? "show" : ""}`;
-  const style = visible ? { display: "block" } : {};
+export function Modal({ children, title, onClose }: ModalProps) {
   return (
     <>
-      {visible && <div className="modal-backdrop fade show"></div>}
+      <div className="modal-backdrop fade show"></div>
       <div
-        className={`modal modal-lg fade ${showClass}`}
-        style={style}
+        className={`modal modal-lg fade show`}
+        style={{ display: "block" }}
         tabIndex={-1}
         onAnimationEnd={() => {}}
       >

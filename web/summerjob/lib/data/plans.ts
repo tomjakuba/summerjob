@@ -45,6 +45,7 @@ export async function getPlanById(id: string) {
               passengers: true,
             },
           },
+          responsibleWorker: true,
         },
       },
     },

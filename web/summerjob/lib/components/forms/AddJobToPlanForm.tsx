@@ -4,8 +4,6 @@ import {
   useAPIActiveJobCreate,
   useAPIProposedJobsNotInPlan,
 } from "lib/fetcher/fetcher";
-import { ProposedJobComplete } from "lib/types/proposed-job";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import ErrorPage from "../error-page/error";
@@ -29,7 +27,6 @@ export default function AddJobToPlanForm({
   onComplete,
 }: AddJobToPlanFormProps) {
   const { data, error, isLoading } = useAPIProposedJobsNotInPlan(planId);
-  const [selectedJob, setSelectedJob] = useState<ProposedJobComplete>();
 
   const {
     register,
@@ -75,7 +72,6 @@ export default function AddJobToPlanForm({
     if (!job) {
       return;
     }
-    setSelectedJob(job);
     setValue("proposedJobId", job.id);
     if (job.description) {
       setValue("publicDescription", job.description);
@@ -88,7 +84,11 @@ export default function AddJobToPlanForm({
         <label className="form-label fw-bold" htmlFor="job-filter">
           Job:
         </label>
-        <FilterSelect items={items} onSelected={onJobSelected}></FilterSelect>
+        <FilterSelect
+          items={items}
+          onSelected={onJobSelected}
+          placeholder={"Vyberte job..."}
+        ></FilterSelect>
         <input type="hidden" {...register("proposedJobId")} />
         <input type="hidden" {...register("planId")} />
 
@@ -113,7 +113,11 @@ export default function AddJobToPlanForm({
           rows={3}
           {...register("privateDescription")}
         ></textarea>
-        <button className="btn btn-warning mt-4 float-end" type="submit">
+        <button
+          className="btn btn-warning mt-4 float-end"
+          type="submit"
+          disabled={isMutating}
+        >
           Přidat
         </button>
       </form>

@@ -8,6 +8,7 @@ export type ActiveJobNoPlan = ActiveJob & {
   workers: Worker[];
   proposedJob: ProposedJobWithArea;
   ride: RideComplete;
+  responsibleWorker?: Worker;
 };
 
 export type ActiveJobWithProposed = ActiveJob & {
