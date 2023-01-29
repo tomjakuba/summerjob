@@ -4,26 +4,12 @@ import AddJobToPlanForm from "lib/components/forms/AddJobToPlanForm";
 import { Modal } from "lib/components/modal/Modal";
 import PageHeader from "lib/components/page-header/PageHeader";
 import { PlanFilters } from "lib/components/plan/PlanFilters";
-import { ExpandableRow } from "lib/components/table/ExpandableRow";
-import { LoadingRow } from "lib/components/table/LoadingRow";
-import { SimpleRow } from "lib/components/table/SimpleRow";
+import { PlanTable } from "lib/components/plan/PlanTable";
 import { useAPIPlan, useAPIWorkersWithoutJob } from "lib/fetcher/fetcher";
 import { formatDateLong } from "lib/helpers/helpers";
-import type { Worker } from "lib/prisma/client";
 import { ActiveJobNoPlan } from "lib/types/active-job";
 import { PlanComplete } from "lib/types/plan";
-import Link from "next/link";
-import { useMemo, useState } from "react";
-
-const _columns = [
-  "Práce",
-  "Pracovníci",
-  "Kontaktní osoba",
-  "Oblast",
-  "Adresa",
-  "Zajištění",
-  "Akce",
-];
+import React, { useMemo, useState } from "react";
 
 type Params = {
   params: {
@@ -118,107 +104,13 @@ export default function PlanPage({ params }: Params) {
           </div>
           <div className="row gx-3">
             <div className="col-sm-12 col-lg-10">
-              <div className="table-responsive text-nowrap mb-2 smj-shadow rounded-3">
-                <table className="table mb-0">
-                  <thead className="smj-table-header">
-                    <tr>
-                      {_columns.map((column) => (
-                        <th key={column}>{column}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody className="smj-table-body mb-0">
-                    {isLoading && <LoadingRow colspan={_columns.length} />}
-                    {!isLoading &&
-                      data !== undefined &&
-                      data.jobs.map(
-                        (job) =>
-                          shouldShowJob(job) && (
-                            <ExpandableRow
-                              key={job.id}
-                              data={[
-                                job.proposedJob.name,
-                                `${job.workers.length}/${job.proposedJob.maxWorkers}`,
-                                job.proposedJob.contact,
-                                job.proposedJob.area.name,
-                                job.proposedJob.address,
-                                "Zajištění",
-                                <Link href={`/active-jobs/${job.id}`}>
-                                  Upravit
-                                </Link>,
-                              ]}
-                            >
-                              <>
-                                <div className="ms-2">
-                                  <h6>Poznámka pro organizátory</h6>
-                                  <p>{job.privateDescription}</p>
-                                  <h6>Popis</h6>
-                                  <p>{job.publicDescription}</p>
-                                  <p>
-                                    <strong>Doprava: </strong>
-                                    {formatRideData(job)}
-                                  </p>
-                                  <p>
-                                    <strong>Zodpovědná osoba: </strong>
-                                    {responsibleWorkerName(job)}
-                                  </p>
-                                </div>
-                                <div className="table-responsive text-nowrap">
-                                  <table className="table table-hover">
-                                    <tbody>
-                                      {job.workers.length === 0 && (
-                                        <tr>
-                                          <td colSpan={3}>
-                                            <i>Žádní pracovníci</i>
-                                          </td>
-                                        </tr>
-                                      )}
-                                      {job.workers.map((worker) => (
-                                        <SimpleRow
-                                          data={formatWorkerData(worker, job)}
-                                          key={worker.id}
-                                        />
-                                      ))}
-                                    </tbody>
-                                  </table>
-                                </div>
-                              </>
-                            </ExpandableRow>
-                          )
-                      )}
-                    {!isLoadingWorkersWithoutJob &&
-                      workersWithoutJob !== undefined && (
-                        <ExpandableRow
-                          data={[`Bez práce (${workersWithoutJob.length})`]}
-                          colspan={_columns.length}
-                          className={
-                            workersWithoutJob.length > 0
-                              ? "smj-background-error"
-                              : ""
-                          }
-                        >
-                          <div className="ms-2">
-                            <h6>
-                              Následující pracovníci nemají přiřazenou práci:
-                            </h6>
-                          </div>
-                          <div className="table-responsive text-nowrap">
-                            <table className="table table-hover">
-                              <tbody>
-                                {workersWithoutJob.map((worker) => (
-                                  <SimpleRow
-                                    data={formatWorkerData(worker)}
-                                    key={worker.id}
-                                  />
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        </ExpandableRow>
-                      )}
-                  </tbody>
-                </table>
-              </div>
+              <PlanTable
+                plan={data}
+                isLoadingPlan={isLoading}
+                shouldShowJob={shouldShowJob}
+                joblessWorkers={workersWithoutJob || []}
+                isLoadingJoblessWorkers={isLoadingWorkersWithoutJob}
+              />
             </div>
             <div className="col-sm-12 col-lg-2">
               <div className="vstack smj-search-stack smj-shadow rounded-3">
@@ -242,66 +134,6 @@ export default function PlanPage({ params }: Params) {
       </section>
     </>
   );
-}
-
-function formatWorkerData(worker: Worker, job?: ActiveJobNoPlan) {
-  let name = `${worker.firstName} ${worker.lastName}`;
-  const abilities = [];
-  let isDriver = false;
-  if (worker.id === job?.ride?.driverId) {
-    isDriver = true;
-    abilities.push("Řidič");
-  }
-  if (worker.isStrong) abilities.push("Silák");
-
-  return [
-    isDriver ? (
-      <>
-        {name} <i className="fas fa-car ms-2"></i>
-      </>
-    ) : (
-      name
-    ),
-    worker.phone,
-    abilities.join(", "),
-    <>
-      <a className="me-3" href="#">
-        Odstranit
-      </a>
-      <a href="#">Přesunout</a>
-    </>,
-  ];
-}
-
-function formatRideData(job: ActiveJobNoPlan) {
-  if (!job.ride) return <>Ne</>;
-  let result = `${job.ride.car.name} - ${job.ride.driver.firstName} ${job.ride.driver.lastName}`;
-  let otherJobNames = "";
-
-  if (!job.workers.find((w) => w.id === job.ride.driverId)) {
-    result += ` (sdílená jízda)`;
-  } else if (job.ride.forJobs.length > 1) {
-    const otherJobs = job.ride.forJobs.filter((j) => j.id !== job.id);
-    otherJobNames = `Také odváží: ${otherJobs
-      .map((j) => j.proposedJob.name)
-      .join(", ")}}`;
-  }
-  return (
-    <>
-      {result}
-      {otherJobNames.length > 0 && (
-        <>
-          <br />
-          {otherJobNames}
-        </>
-      )}
-    </>
-  );
-}
-
-function responsibleWorkerName(job: ActiveJobNoPlan) {
-  if (!job.responsibleWorker) return "Není";
-  return `${job.responsibleWorker?.firstName} ${job.responsibleWorker?.lastName}`;
 }
 
 function getAvailableAreas(plan?: PlanComplete) {

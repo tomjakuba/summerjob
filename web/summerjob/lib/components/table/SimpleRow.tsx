@@ -1,10 +1,13 @@
 interface RowProps {
   data: any[];
+  draggable?: boolean;
+  onDragStart?: (e: React.DragEvent<HTMLTableRowElement>) => void;
 }
 
-export function SimpleRow({ data }: RowProps) {
+export function SimpleRow({ data, draggable = false, onDragStart }: RowProps) {
+  const style = draggable ? { cursor: "grab" } : {};
   return (
-    <tr>
+    <tr draggable={draggable} style={style} onDragStart={onDragStart}>
       {data.map((field, index) => {
         return (
           <td

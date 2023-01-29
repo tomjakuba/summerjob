@@ -5,6 +5,7 @@ interface RowProps {
   children: React.ReactNode;
   colspan?: number;
   className?: string;
+  onDrop?: (e: React.DragEvent<HTMLTableRowElement>) => void;
 }
 
 const Arrow = () => (
@@ -35,6 +36,7 @@ export function ExpandableRow({
   children,
   colspan,
   className,
+  onDrop,
 }: RowProps) {
   const [expanded, setExpanded] = useState(false);
   const toggleExpanded = () => {
@@ -48,11 +50,19 @@ export function ExpandableRow({
     return 0;
   };
 
+  const onDragOver = (e: React.DragEvent<HTMLTableRowElement>) => {
+    if (onDrop) {
+      e.preventDefault();
+    }
+  };
+
   return (
     <>
       <tr
         className={`smj-expandable-row ${className}`}
         onClick={toggleExpanded}
+        onDrop={onDrop}
+        onDragOver={onDragOver}
       >
         {data.slice(0, 1).map((field, index) => (
           <Cell
@@ -76,7 +86,7 @@ export function ExpandableRow({
         ))}
       </tr>
 
-      <tr className="smj-details-row">
+      <tr className="smj-details-row" onDrop={onDrop} onDragOver={onDragOver}>
         <td colSpan={colspan ?? data.length}>
           <div
             className="smj-row-collapsible"
