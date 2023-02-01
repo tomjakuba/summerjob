@@ -2,7 +2,7 @@ import { ActiveJobNoPlan } from "lib/types/active-job";
 import { LoadingRow } from "../table/LoadingRow";
 import type { Worker } from "lib/prisma/client";
 import { ExpandableRow } from "../table/ExpandableRow";
-import { PlanComplete } from "lib/types/plan";
+import { PlanComplete, PlanUpdateMoveWorker } from "lib/types/plan";
 import Link from "next/link";
 import { SimpleRow } from "../table/SimpleRow";
 import {
@@ -48,15 +48,29 @@ export function PlanTable({
     return plan ? sortJobsInPlan(plan, sortOrder) : [];
   }, [sortOrder, plan?.jobs]);
 
-  const onWorkerDragStart = (worker: Worker) => {
+  const onWorkerDragStart = (worker: Worker, sourceId: string) => {
     return (e: React.DragEvent<HTMLTableRowElement>) => {
-      e.dataTransfer.setData("text/plain", worker.id);
+      e.dataTransfer.setData("worker-id", worker.id);
+      e.dataTransfer.setData("source-id", sourceId);
     };
   };
 
   const onWorkerDropped =
     (job: ActiveJobNoPlan) => (e: React.DragEvent<HTMLTableRowElement>) => {
-      console.log(e.dataTransfer.getData("text/plain"), job.proposedJob.name);
+      const workerId = e.dataTransfer.getData("worker-id");
+      const fromJobId = e.dataTransfer.getData("source-id");
+      const toJobId = job.id;
+      const fromRideId =
+        sortedJobs.find((j) => j.id === fromJobId)?.rideId || undefined;
+      const toRideId = job.rideId || undefined;
+      const updateObject: PlanUpdateMoveWorker = {
+        workerId,
+        fromJobId,
+        toJobId,
+        fromRideId,
+        toRideId,
+      };
+      console.log(updateObject);
     };
 
   return (
@@ -113,7 +127,7 @@ export function PlanTable({
                             data={formatWorkerData(worker, job)}
                             key={worker.id}
                             draggable={true}
-                            onDragStart={onWorkerDragStart(worker)}
+                            onDragStart={onWorkerDragStart(worker, job.id)}
                           />
                         ))}
                       </tbody>
@@ -140,7 +154,7 @@ export function PlanTable({
                     data={formatWorkerData(worker)}
                     key={worker.id}
                     draggable={true}
-                    onDragStart={onWorkerDragStart(worker)}
+                    onDragStart={onWorkerDragStart(worker, "jobless")}
                   />
                 ))}
               </tbody>
@@ -154,7 +168,9 @@ export function PlanTable({
 
 function formatRideData(job: ActiveJobNoPlan) {
   if (!job.ride) return <>Není</>;
-  let result = `${job.ride.car.name} - ${job.ride.driver.firstName} ${job.ride.driver.lastName}`;
+  let result = `${job.ride.car.name} - ${job.ride.driver.firstName} ${
+    job.ride.driver.lastName
+  } (obsazenost: ${job.ride.passengers.length + 1}/${job.ride.car.seats})`;
   let otherJobNames = "";
 
   if (!job.workers.find((w) => w.id === job.ride.driverId)) {

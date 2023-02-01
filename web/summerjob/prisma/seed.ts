@@ -202,6 +202,11 @@ async function populatePlan(
     data: {
       driverId: driver.id,
       carId: driver.car.id,
+      passengers: {
+        connect: workersIds
+          .filter((id) => id !== driver.id)
+          .map((id) => ({ id })),
+      },
     },
   });
 
