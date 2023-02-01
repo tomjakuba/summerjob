@@ -5,15 +5,21 @@ import { ExpandableRow } from "../table/ExpandableRow";
 import { PlanComplete } from "lib/types/plan";
 import Link from "next/link";
 import { SimpleRow } from "../table/SimpleRow";
+import {
+  SortableColumn,
+  SortableTable,
+  SortOrder,
+} from "../table/SortableTable";
+import { useMemo, useState } from "react";
 
-const _columns = [
-  "Práce",
-  "Pracovníci",
-  "Kontaktní osoba",
-  "Oblast",
-  "Adresa",
-  "Zajištění",
-  "Akce",
+const _columns: SortableColumn[] = [
+  { id: "name", name: "Práce", sortable: true },
+  { id: "workers", name: "Pracovníci", sortable: true },
+  { id: "contact", name: "Kontaktní osoba", sortable: true },
+  { id: "area", name: "Oblast", sortable: true },
+  { id: "address", name: "Adresa", sortable: true },
+  { id: "amenities", name: "Zajištění", sortable: false },
+  { id: "actions", name: "Akce", sortable: false },
 ];
 
 interface PlanTableProps {
@@ -31,6 +37,17 @@ export function PlanTable({
   joblessWorkers,
   isLoadingJoblessWorkers,
 }: PlanTableProps) {
+  const [sortOrder, setSortOrder] = useState<SortOrder>({
+    columnId: undefined,
+    direction: "desc",
+  });
+  const onSortRequested = (direction: SortOrder) => {
+    setSortOrder(direction);
+  };
+  const sortedJobs = useMemo(() => {
+    return plan ? sortJobsInPlan(plan, sortOrder) : [];
+  }, [sortOrder, plan?.jobs]);
+
   const onWorkerDragStart = (worker: Worker) => {
     return (e: React.DragEvent<HTMLTableRowElement>) => {
       e.dataTransfer.setData("text/plain", worker.id);
@@ -43,104 +60,95 @@ export function PlanTable({
     };
 
   return (
-    <div className="table-responsive text-nowrap mb-2 smj-shadow rounded-3">
-      <table className="table mb-0">
-        <thead className="smj-table-header">
-          <tr>
-            {_columns.map((column) => (
-              <th key={column}>{column}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="smj-table-body mb-0">
-          {isLoadingPlan && <LoadingRow colspan={_columns.length} />}
-          {!isLoadingPlan &&
-            plan?.jobs.map(
-              (job) =>
-                shouldShowJob(job) && (
-                  <ExpandableRow
-                    key={job.id}
-                    data={[
-                      job.proposedJob.name,
-                      `${job.workers.length}/${job.proposedJob.maxWorkers}`,
-                      job.proposedJob.contact,
-                      job.proposedJob.area.name,
-                      job.proposedJob.address,
-                      "Zajištění",
-                      <Link href={`/active-jobs/${job.id}`}>Upravit</Link>,
-                    ]}
-                    onDrop={onWorkerDropped(job)}
-                  >
-                    <>
-                      <div className="ms-2">
-                        <h6>Poznámka pro organizátory</h6>
-                        <p>{job.privateDescription}</p>
-                        <h6>Popis</h6>
-                        <p>{job.publicDescription}</p>
-                        <p>
-                          <strong>Doprava: </strong>
-                          {formatRideData(job)}
-                        </p>
-                        <p>
-                          <strong>Zodpovědná osoba: </strong>
-                          {responsibleWorkerName(job)}
-                        </p>
-                      </div>
-                      <div className="table-responsive text-nowrap">
-                        <table className="table table-hover">
-                          <tbody>
-                            {job.workers.length === 0 && (
-                              <tr>
-                                <td colSpan={3}>
-                                  <i>Žádní pracovníci</i>
-                                </td>
-                              </tr>
-                            )}
-                            {job.workers.map((worker) => (
-                              <SimpleRow
-                                data={formatWorkerData(worker, job)}
-                                key={worker.id}
-                                draggable={true}
-                                onDragStart={onWorkerDragStart(worker)}
-                              />
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </>
-                  </ExpandableRow>
-                )
-            )}
-          {!isLoadingJoblessWorkers && (
-            <ExpandableRow
-              data={[`Bez práce (${joblessWorkers.length})`]}
-              colspan={_columns.length}
-              className={
-                joblessWorkers.length > 0 ? "smj-background-error" : ""
-              }
-            >
-              <div className="ms-2">
-                <h6>Následující pracovníci nemají přiřazenou práci:</h6>
-              </div>
-              <div className="table-responsive text-nowrap">
-                <table className="table table-hover">
-                  <tbody>
-                    {joblessWorkers.map((worker) => (
-                      <SimpleRow
-                        data={formatWorkerData(worker)}
-                        key={worker.id}
-                        draggable={true}
-                        onDragStart={onWorkerDragStart(worker)}
-                      />
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </ExpandableRow>
-          )}
-        </tbody>
-      </table>
-    </div>
+    <SortableTable
+      columns={_columns}
+      currentSort={sortOrder}
+      onRequestedSort={onSortRequested}
+    >
+      {isLoadingPlan && <LoadingRow colspan={_columns.length} />}
+      {!isLoadingPlan &&
+        sortedJobs.map(
+          (job) =>
+            shouldShowJob(job) && (
+              <ExpandableRow
+                key={job.id}
+                data={[
+                  job.proposedJob.name,
+                  `${job.workers.length}/${job.proposedJob.maxWorkers}`,
+                  job.proposedJob.contact,
+                  job.proposedJob.area.name,
+                  job.proposedJob.address,
+                  "Zajištění",
+                  <Link href={`/active-jobs/${job.id}`}>Upravit</Link>,
+                ]}
+                onDrop={onWorkerDropped(job)}
+              >
+                <>
+                  <div className="ms-2">
+                    <h6>Poznámka pro organizátory</h6>
+                    <p>{job.privateDescription}</p>
+                    <h6>Popis</h6>
+                    <p>{job.publicDescription}</p>
+                    <p>
+                      <strong>Doprava: </strong>
+                      {formatRideData(job)}
+                    </p>
+                    <p>
+                      <strong>Zodpovědná osoba: </strong>
+                      {responsibleWorkerName(job)}
+                    </p>
+                  </div>
+                  <div className="table-responsive text-nowrap">
+                    <table className="table table-hover">
+                      <tbody>
+                        {job.workers.length === 0 && (
+                          <tr>
+                            <td colSpan={3}>
+                              <i>Žádní pracovníci</i>
+                            </td>
+                          </tr>
+                        )}
+                        {job.workers.map((worker) => (
+                          <SimpleRow
+                            data={formatWorkerData(worker, job)}
+                            key={worker.id}
+                            draggable={true}
+                            onDragStart={onWorkerDragStart(worker)}
+                          />
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              </ExpandableRow>
+            )
+        )}
+      {!isLoadingJoblessWorkers && (
+        <ExpandableRow
+          data={[`Bez práce (${joblessWorkers.length})`]}
+          colspan={_columns.length}
+          className={joblessWorkers.length > 0 ? "smj-background-error" : ""}
+        >
+          <div className="ms-2">
+            <h6>Následující pracovníci nemají přiřazenou práci:</h6>
+          </div>
+          <div className="table-responsive text-nowrap">
+            <table className="table table-hover">
+              <tbody>
+                {joblessWorkers.map((worker) => (
+                  <SimpleRow
+                    data={formatWorkerData(worker)}
+                    key={worker.id}
+                    draggable={true}
+                    onDragStart={onWorkerDragStart(worker)}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </ExpandableRow>
+      )}
+    </SortableTable>
   );
 }
 
@@ -202,4 +210,37 @@ function formatWorkerData(worker: Worker, job?: ActiveJobNoPlan) {
 function responsibleWorkerName(job: ActiveJobNoPlan) {
   if (!job.responsibleWorker) return "Není";
   return `${job.responsibleWorker?.firstName} ${job.responsibleWorker?.lastName}`;
+}
+
+function sortJobsInPlan(data: PlanComplete, sortOrder: SortOrder) {
+  if (sortOrder.columnId === undefined) {
+    return data.jobs;
+  }
+  const jobs = [...data.jobs];
+
+  const getSortable: {
+    [b: string]: (job: ActiveJobNoPlan) => string | number;
+  } = {
+    name: (job) => job.proposedJob.name,
+    area: (job) => job.proposedJob.area.name,
+    address: (job) => job.proposedJob.address,
+    days: (job) => job.proposedJob.requiredDays,
+    contact: (job) => job.proposedJob.contact,
+    workers: (job) =>
+      `${job.proposedJob.minWorkers}/${job.proposedJob.maxWorkers}`,
+  };
+
+  if (sortOrder.columnId in getSortable) {
+    const sortKey = getSortable[sortOrder.columnId];
+    return jobs.sort((a, b) => {
+      if (sortKey(a) < sortKey(b)) {
+        return sortOrder.direction === "desc" ? 1 : -1;
+      }
+      if (sortKey(a) > sortKey(b)) {
+        return sortOrder.direction === "desc" ? -1 : 1;
+      }
+      return 0;
+    });
+  }
+  return jobs;
 }

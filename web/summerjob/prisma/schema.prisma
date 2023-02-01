@@ -53,6 +53,8 @@ model ProposedJob {
   strongWorkers Int
   address       String
   contact       String
+  hasFood       Boolean     @default(false)
+  hasShower     Boolean     @default(false)
   area          Area        @relation(fields: [areaId], references: [id])
   areaId        String
   activeJobs    ActiveJob[]
