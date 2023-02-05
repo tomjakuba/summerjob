@@ -1,19 +1,9 @@
 "use client";
 import ErrorPage from "lib/components/error-page/error";
 import PageHeader from "lib/components/page-header/PageHeader";
-import { useAPIPlans } from "lib/fetcher/fetcher";
+import { useAPIPlans } from "lib/fetcher/plan";
 import { formatDateLong } from "lib/helpers/helpers";
 import Link from "next/link";
-
-const _columns = [
-  "Práce",
-  "Pracovníci",
-  "Kontaktní osoba",
-  "Oblast",
-  "Adresa",
-  "Zajištění",
-  "Akce",
-];
 
 export default function PlanPage() {
   const { data, error, isLoading } = useAPIPlans();

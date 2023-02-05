@@ -25,13 +25,24 @@ model Worker {
 }
 
 model Car {
-  id          String  @id @default(uuid())
-  name        String  @db.VarChar(64)
+  id          String        @id @default(uuid())
+  name        String        @db.VarChar(64)
   description String?
   seats       Int
-  owner       Worker  @relation(fields: [ownerId], references: [id])
-  ownerId     String  @unique
+  owner       Worker        @relation(fields: [ownerId], references: [id])
+  ownerId     String        @unique
   rides       Ride[]
+  odometers   CarOdometer[]
+}
+
+model CarOdometer {
+  id      String         @id @default(uuid())
+  car     Car            @relation(fields: [carId], references: [id])
+  carId   String
+  start   Int
+  end     Int
+  event   SummerJobEvent @relation(fields: [eventId], references: [id])
+  eventId String
 }
 
 model Allergy {
@@ -106,12 +117,13 @@ model Area {
 }
 
 model SummerJobEvent {
-  id        String   @id @default(uuid())
-  name      String   @db.VarChar(64)
-  startDate DateTime
-  endDate   DateTime
-  isActive  Boolean  @default(false)
-  areas     Area[]
-  plans     Plan[]
-  workers   Worker[]
+  id           String        @id @default(uuid())
+  name         String        @db.VarChar(64)
+  startDate    DateTime
+  endDate      DateTime
+  isActive     Boolean       @default(false)
+  areas        Area[]
+  plans        Plan[]
+  workers      Worker[]
+  carOdometers CarOdometer[]
 }

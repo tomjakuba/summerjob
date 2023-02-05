@@ -47,68 +47,18 @@ const sendData =
 const post = sendData("POST");
 const patch = sendData("PATCH");
 
-function useData<T>(url: string) {
+export function useData<T>(url: string) {
   return useSWR<T, Error>(url, get);
 }
 
-function useDataPartialUpdate(url: string, options?: any) {
+export function useDataPartialUpdate(url: string, options?: any) {
   return useSWRMutation(url, patch, options);
 }
 
-function useDataCreate(url: string, options?: any) {
+export function useDataCreate(url: string, options?: any) {
   return useSWRMutation(url, post, options);
-}
-
-export function useAPIWorkerUpdate(workerId: string, options?: any) {
-  return useDataPartialUpdate(`/api/workers/${workerId}`, options);
-}
-
-export function useAPIWorkers() {
-  return useData<WorkerComplete[]>("/api/workers");
-}
-
-export function useAPIWorkersWithoutJob(planId: string) {
-  return useData<WorkerComplete[]>(
-    `/api/workers?withoutJob=true&planId=${planId}`
-  );
-}
-
-export function useAPIWorker(id: string) {
-  return useData<WorkerComplete>(`/api/workers/${id}`);
-}
-
-export function useAPIPlans() {
-  const properties = useData<PlanWithJobs[]>("/api/plans");
-  if (properties.data) {
-    for (const plan of properties.data) {
-      plan.day = new Date(plan.day);
-    }
-  }
-  return properties;
-}
-
-export function useAPIPlan(id: string) {
-  const properties = useData<PlanComplete>(`/api/plans/${id}`);
-  if (properties.data) {
-    properties.data.day = new Date(properties.data.day);
-  }
-  return properties;
 }
 
 export function useAPIAllergies() {
   return useData<Allergy[]>("/api/allergies");
-}
-
-export function useAPIProposedJobs() {
-  return useData<ProposedJobComplete[]>("/api/proposed-jobs");
-}
-
-export function useAPIProposedJobsNotInPlan(planId: string) {
-  return useData<ProposedJobComplete[]>(
-    `/api/proposed-jobs?notInPlan=${planId}`
-  );
-}
-
-export function useAPIActiveJobCreate(options?: any) {
-  return useDataCreate("/api/active-jobs", options);
 }

@@ -3,9 +3,10 @@ import { ProposedJobWithArea } from "./proposed-job";
 import type { Worker } from "lib/prisma/client";
 import { RideComplete } from "./ride";
 import { z } from "zod";
+import { WorkerWithAllergies } from "./worker";
 
 export type ActiveJobNoPlan = ActiveJob & {
-  workers: Worker[];
+  workers: WorkerWithAllergies[];
   proposedJob: ProposedJobWithArea;
   ride: RideComplete;
   responsibleWorker?: Worker;

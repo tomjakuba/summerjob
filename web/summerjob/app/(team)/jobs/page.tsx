@@ -2,10 +2,10 @@
 import ErrorPage from "lib/components/error-page/error";
 import PageHeader from "lib/components/page-header/PageHeader";
 import { JobsTable } from "lib/components/jobs/JobsTable";
-import { useAPIProposedJobs } from "lib/fetcher/fetcher";
 import { ProposedJobComplete } from "lib/types/proposed-job";
 import { useState } from "react";
 import { JobsFilters } from "lib/components/jobs/JobsFilters";
+import { useAPIProposedJobs } from "lib/fetcher/proposed-job";
 
 export default function ProposedJobsPage() {
   const { data, error, isLoading } = useAPIProposedJobs();

@@ -27,7 +27,11 @@ export async function getPlanById(id: string) {
     include: {
       jobs: {
         include: {
-          workers: true,
+          workers: {
+            include: {
+              allergies: true,
+            },
+          },
           proposedJob: {
             include: {
               area: true,

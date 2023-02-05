@@ -2,7 +2,7 @@ import { ActiveJobNoPlan } from "lib/types/active-job";
 import { LoadingRow } from "../table/LoadingRow";
 import type { Worker } from "lib/prisma/client";
 import { ExpandableRow } from "../table/ExpandableRow";
-import { PlanComplete, PlanUpdateMoveWorker } from "lib/types/plan";
+import { PlanComplete } from "lib/types/plan";
 import Link from "next/link";
 import { SimpleRow } from "../table/SimpleRow";
 import {
@@ -11,6 +11,8 @@ import {
   SortOrder,
 } from "../table/SortableTable";
 import { useMemo, useState } from "react";
+import { useAPIPlanMoveWorker } from "lib/fetcher/plan";
+import { WorkerComplete, WorkerWithAllergies } from "lib/types/worker";
 
 const _columns: SortableColumn[] = [
   { id: "name", name: "Práce", sortable: true },
@@ -26,7 +28,8 @@ interface PlanTableProps {
   plan?: PlanComplete;
   isLoadingPlan: boolean;
   shouldShowJob: (job: ActiveJobNoPlan) => boolean;
-  joblessWorkers: Worker[];
+  joblessWorkers: WorkerComplete[];
+  reloadJoblessWorkers: (expectedResult: WorkerComplete[]) => void;
   isLoadingJoblessWorkers: boolean;
 }
 
@@ -35,6 +38,7 @@ export function PlanTable({
   isLoadingPlan,
   shouldShowJob,
   joblessWorkers,
+  reloadJoblessWorkers,
   isLoadingJoblessWorkers,
 }: PlanTableProps) {
   const [sortOrder, setSortOrder] = useState<SortOrder>({
@@ -48,6 +52,11 @@ export function PlanTable({
     return plan ? sortJobsInPlan(plan, sortOrder) : [];
   }, [sortOrder, plan?.jobs]);
 
+  const {
+    trigger: triggerMoveWorker,
+    isMutating,
+    error: moveWorkerError,
+  } = useAPIPlanMoveWorker(plan?.id || "");
   const onWorkerDragStart = (worker: Worker, sourceId: string) => {
     return (e: React.DragEvent<HTMLTableRowElement>) => {
       e.dataTransfer.setData("worker-id", worker.id);
@@ -56,21 +65,21 @@ export function PlanTable({
   };
 
   const onWorkerDropped =
-    (job: ActiveJobNoPlan) => (e: React.DragEvent<HTMLTableRowElement>) => {
+    (toJobId: string) => (e: React.DragEvent<HTMLTableRowElement>) => {
       const workerId = e.dataTransfer.getData("worker-id");
       const fromJobId = e.dataTransfer.getData("source-id");
-      const toJobId = job.id;
-      const fromRideId =
-        sortedJobs.find((j) => j.id === fromJobId)?.rideId || undefined;
-      const toRideId = job.rideId || undefined;
-      const updateObject: PlanUpdateMoveWorker = {
+      if (fromJobId === toJobId) {
+        return;
+      }
+      moveWorkerToJob(
         workerId,
         fromJobId,
         toJobId,
-        fromRideId,
-        toRideId,
-      };
-      console.log(updateObject);
+        plan!,
+        joblessWorkers,
+        triggerMoveWorker,
+        reloadJoblessWorkers
+      );
     };
 
   return (
@@ -95,7 +104,7 @@ export function PlanTable({
                   "Zajištění",
                   <Link href={`/active-jobs/${job.id}`}>Upravit</Link>,
                 ]}
-                onDrop={onWorkerDropped(job)}
+                onDrop={onWorkerDropped(job.id)}
               >
                 <>
                   <div className="ms-2">
@@ -142,6 +151,7 @@ export function PlanTable({
           data={[`Bez práce (${joblessWorkers.length})`]}
           colspan={_columns.length}
           className={joblessWorkers.length > 0 ? "smj-background-error" : ""}
+          onDrop={onWorkerDropped("jobless")}
         >
           <div className="ms-2">
             <h6>Následující pracovníci nemají přiřazenou práci:</h6>
@@ -259,4 +269,46 @@ function sortJobsInPlan(data: PlanComplete, sortOrder: SortOrder) {
     });
   }
   return jobs;
+}
+
+function moveWorkerToJob(
+  workerId: string,
+  fromJobId: string,
+  toJobId: string,
+  plan: PlanComplete,
+  joblessWorkers: WorkerWithAllergies[],
+  triggerMoveWorker: (plan: PlanComplete, options?: any) => void,
+  reloadJoblessWorkers: (workers: WorkerWithAllergies[]) => void
+) {
+  const planCopy = structuredClone(plan!);
+  const isFromJobless = fromJobId === "jobless";
+  const isToJobless = toJobId === "jobless";
+  let worker: WorkerWithAllergies | WorkerComplete;
+
+  let joblessCopy = [...joblessWorkers];
+  if (isFromJobless) {
+    worker = joblessCopy.find((w) => w.id === workerId)!;
+    joblessCopy = joblessCopy.filter((w) => w.id !== workerId);
+  } else {
+    const fromJob = planCopy.jobs.find((j) => j.id === fromJobId)!;
+    worker = fromJob.workers.find((w) => w.id === workerId)!;
+    fromJob.workers = fromJob.workers.filter((w) => w.id !== workerId);
+    const fromRideId = fromJob.rideId;
+    // TODO remove from ride
+  }
+  if (isToJobless) {
+    joblessCopy.push(worker!);
+  } else {
+    const toJob = planCopy.jobs.find((j) => j.id === toJobId)!;
+    toJob.workers.push(worker!);
+    const toRideId = toJob.rideId;
+    // TODO add to ride
+  }
+
+  triggerMoveWorker(planCopy, {
+    optimisticData: (oldPlan: PlanComplete) => {
+      return { ...oldPlan, ...planCopy };
+    },
+  });
+  reloadJoblessWorkers(joblessCopy);
 }

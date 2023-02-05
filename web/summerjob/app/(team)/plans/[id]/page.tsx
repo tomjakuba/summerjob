@@ -5,10 +5,12 @@ import { Modal } from "lib/components/modal/Modal";
 import PageHeader from "lib/components/page-header/PageHeader";
 import { PlanFilters } from "lib/components/plan/PlanFilters";
 import { PlanTable } from "lib/components/plan/PlanTable";
-import { useAPIPlan, useAPIWorkersWithoutJob } from "lib/fetcher/fetcher";
+import { useAPIPlan } from "lib/fetcher/plan";
+import { useAPIWorkersWithoutJob } from "lib/fetcher/worker";
 import { formatDateLong } from "lib/helpers/helpers";
 import { ActiveJobNoPlan } from "lib/types/active-job";
 import { PlanComplete } from "lib/types/plan";
+import { WorkerWithAllergies } from "lib/types/worker";
 import React, { useMemo, useState } from "react";
 
 type Params = {
@@ -19,14 +21,21 @@ type Params = {
 
 export default function PlanPage({ params }: Params) {
   const { data, error, isLoading, mutate } = useAPIPlan(params.id);
-  const { data: workersWithoutJob, isLoading: isLoadingWorkersWithoutJob } =
-    useAPIWorkersWithoutJob(params.id);
+  const {
+    data: workersWithoutJob,
+    isLoading: isLoadingWorkersWithoutJob,
+    mutate: reloadJoblessWorkers,
+  } = useAPIWorkersWithoutJob(params.id);
 
   const [isJobModalOpen, setIsJobModalOpen] = useState(false);
   const openModal = () => setIsJobModalOpen(true);
   const closeModal = () => {
     mutate();
     setIsJobModalOpen(false);
+  };
+
+  const updateJoblessWorkers = (expectedValue: WorkerWithAllergies[]) => {
+    reloadJoblessWorkers([...expectedValue]);
   };
 
   if (error) {
@@ -109,6 +118,7 @@ export default function PlanPage({ params }: Params) {
                 isLoadingPlan={isLoading}
                 shouldShowJob={shouldShowJob}
                 joblessWorkers={workersWithoutJob || []}
+                reloadJoblessWorkers={updateJoblessWorkers}
                 isLoadingJoblessWorkers={isLoadingWorkersWithoutJob}
               />
             </div>

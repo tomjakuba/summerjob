@@ -6,6 +6,10 @@ export type WorkerComplete = Worker & {
   allergies: Allergy[];
 };
 
+export type WorkerWithAllergies = Worker & {
+  allergies: Allergy[];
+};
+
 export const WorkerSerializableSchema = z
   .object({
     id: z.string(),

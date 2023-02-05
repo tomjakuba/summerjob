@@ -1,9 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  useAPIActiveJobCreate,
-  useAPIProposedJobsNotInPlan,
-} from "lib/fetcher/fetcher";
+import { useAPIActiveJobCreate } from "lib/fetcher/active-job";
+import { useAPIProposedJobsNotInPlan } from "lib/fetcher/proposed-job";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import ErrorPage from "../error-page/error";
