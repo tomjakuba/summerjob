@@ -13,6 +13,8 @@ import {
 import { useMemo, useState } from "react";
 import { useAPIPlanMoveWorker } from "lib/fetcher/plan";
 import { WorkerComplete, WorkerWithAllergies } from "lib/types/worker";
+import { filterUniqueById } from "lib/helpers/helpers";
+import { RideComplete } from "lib/types/ride";
 
 const _columns: SortableColumn[] = [
   { id: "name", name: "Práce", sortable: true },
@@ -101,7 +103,7 @@ export function PlanTable({
                   job.proposedJob.contact,
                   job.proposedJob.area.name,
                   job.proposedJob.address,
-                  "Zajištění",
+                  formatAmenities(job),
                   <Link href={`/active-jobs/${job.id}`}>Upravit</Link>,
                 ]}
                 onDrop={onWorkerDropped(job.id)}
@@ -112,10 +114,9 @@ export function PlanTable({
                     <p>{job.privateDescription}</p>
                     <h6>Popis</h6>
                     <p>{job.publicDescription}</p>
-                    <p>
-                      <strong>Doprava: </strong>
-                      {formatRideData(job)}
-                    </p>
+
+                    <h6>Doprava: </h6>
+                    <p>{formatRideData(job)}</p>
                     <p>
                       <strong>Zodpovědná osoba: </strong>
                       {responsibleWorkerName(job)}
@@ -176,30 +177,46 @@ export function PlanTable({
   );
 }
 
-function formatRideData(job: ActiveJobNoPlan) {
-  if (!job.ride) return <>Není</>;
-  let result = `${job.ride.car.name} - ${job.ride.driver.firstName} ${
-    job.ride.driver.lastName
-  } (obsazenost: ${job.ride.passengers.length + 1}/${job.ride.car.seats})`;
-  let otherJobNames = "";
-
-  if (!job.workers.find((w) => w.id === job.ride.driverId)) {
-    result += ` (sdílená jízda)`;
-  } else if (job.ride.forJobs.length > 1) {
-    const otherJobs = job.ride.forJobs.filter((j) => j.id !== job.id);
-    otherJobNames = `Také odváží: ${otherJobs
-      .map((j) => j.proposedJob.name)
-      .join(", ")}}`;
-  }
+function formatAmenities(job: ActiveJobNoPlan) {
   return (
     <>
-      {result}
-      {otherJobNames.length > 0 && (
-        <>
-          <br />
-          {otherJobNames}
-        </>
+      {job.proposedJob.hasFood && (
+        <i className="fas fa-utensils me-2" title="Jídlo na místě"></i>
+      )}{" "}
+      {job.proposedJob.hasShower && (
+        <i className="fas fa-shower" title="Sprcha na místě"></i>
       )}
+    </>
+  );
+}
+
+function formatRideData(job: ActiveJobNoPlan) {
+  if (!job.rides || job.rides.length == 0) return <>Není</>;
+
+  const formatSingleRide = (ride: RideComplete) => {
+    const isDriverFromJob = job.workers.find((w) => w.id === ride.driverId);
+    const otherJobs = ride.jobs.filter((j) => j.id !== job.id);
+
+    return (
+      <>
+        {ride.car.name}: {ride.driver.firstName} {ride.driver.lastName}{" "}
+        (obsazenost: {ride.passengers.length + 1}/{ride.car.seats})
+        {!isDriverFromJob && <i>(řidič z jiného jobu)</i>}
+        <br />
+        {isDriverFromJob && otherJobs.length > 0 && (
+          <>
+            Dále odváží: {otherJobs.map((j) => j.proposedJob.name).join(", ")}
+          </>
+        )}
+      </>
+    );
+  };
+
+  return (
+    <>
+      {job.rides.map((r) => (
+        <span key={r.id}>{formatSingleRide(r)}</span>
+      ))}
     </>
   );
 }
@@ -208,7 +225,7 @@ function formatWorkerData(worker: Worker, job?: ActiveJobNoPlan) {
   let name = `${worker.firstName} ${worker.lastName}`;
   const abilities = [];
   let isDriver = false;
-  if (worker.id === job?.ride?.driverId) {
+  if (job?.rides.map((r) => r.driverId).includes(worker.id)) {
     isDriver = true;
     abilities.push("Řidič");
   }
@@ -293,16 +310,30 @@ function moveWorkerToJob(
     const fromJob = planCopy.jobs.find((j) => j.id === fromJobId)!;
     worker = fromJob.workers.find((w) => w.id === workerId)!;
     fromJob.workers = fromJob.workers.filter((w) => w.id !== workerId);
-    const fromRideId = fromJob.rideId;
+    const fromRide =
+      fromJob.rides.find((r) => r.driverId === workerId) ||
+      fromJob.rides.find((r) => r.passengers.includes(worker));
     // TODO remove from ride
+    if (fromRide) {
+      if (fromRide.driverId === workerId) {
+        fromJob.rides.splice(fromJob.rides.indexOf(fromRide), 1);
+      } else {
+        fromRide.passengers = fromRide.passengers.filter(
+          (p) => p.id !== workerId
+        );
+      }
+    }
   }
   if (isToJobless) {
     joblessCopy.push(worker!);
   } else {
     const toJob = planCopy.jobs.find((j) => j.id === toJobId)!;
     toJob.workers.push(worker!);
-    const toRideId = toJob.rideId;
+    const toRide = toJob.rides[0];
     // TODO add to ride
+    if (toRide) {
+      toRide.passengers.push(worker);
+    }
   }
 
   triggerMoveWorker(planCopy, {

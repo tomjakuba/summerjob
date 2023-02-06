@@ -7,7 +7,7 @@ import { PlanFilters } from "lib/components/plan/PlanFilters";
 import { PlanTable } from "lib/components/plan/PlanTable";
 import { useAPIPlan } from "lib/fetcher/plan";
 import { useAPIWorkersWithoutJob } from "lib/fetcher/worker";
-import { formatDateLong } from "lib/helpers/helpers";
+import { filterUniqueById, formatDateLong } from "lib/helpers/helpers";
 import { ActiveJobNoPlan } from "lib/types/active-job";
 import { PlanComplete } from "lib/types/plan";
 import { WorkerWithAllergies } from "lib/types/worker";
@@ -155,8 +155,4 @@ function getAvailableAreas(plan?: PlanComplete) {
   areas.sort((a, b) => a.name.localeCompare(b.name));
   areas.unshift(ALL_AREAS);
   return areas;
-}
-
-function filterUniqueById<T extends { id: string }>(elements: T[]): T[] {
-  return Array.from(new Map(elements.map((item) => [item.id, item])).values());
 }

@@ -8,7 +8,7 @@ import { WorkerWithAllergies } from "./worker";
 export type ActiveJobNoPlan = ActiveJob & {
   workers: WorkerWithAllergies[];
   proposedJob: ProposedJobWithArea;
-  ride: RideComplete;
+  rides: RideComplete[];
   responsibleWorker?: Worker;
 };
 

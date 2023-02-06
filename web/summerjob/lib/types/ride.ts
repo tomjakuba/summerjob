@@ -9,6 +9,6 @@ export type RideWithDriverCarDetails = Ride & {
 export type RideComplete = Ride & {
   driver: Worker;
   car: Car;
-  forJobs: ActiveJobWithProposed[];
+  jobs: ActiveJobWithProposed[];
   passengers: Worker[];
 };

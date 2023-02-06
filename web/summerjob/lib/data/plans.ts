@@ -37,11 +37,11 @@ export async function getPlanById(id: string) {
               area: true,
             },
           },
-          ride: {
+          rides: {
             include: {
               driver: true,
               car: true,
-              forJobs: {
+              jobs: {
                 include: {
                   proposedJob: true,
                 },

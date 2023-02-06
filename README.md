@@ -42,7 +42,7 @@ version: "3"
 services:
   summerjob-web:
   ...
-  networks:
+    networks:
       - summerjob-network
 
   summerjob-db:
@@ -104,6 +104,12 @@ root@<container-id>:/app# npx prisma studio
 ```
 
 Prisma Studio je nyní dostupné na adrese `http://localhost:5555`.
+
+Pokud běží aplikace na vzdáleném systému, kde není vhodné otevírat porty, je možné využít SSH tunelování. V tomto případě je potřeba vytvořit SSH tunel na port 5555 a poté spustit Prisma Studio, na které se následně půjde připojit lokálně:
+
+```console
+[local]$ ssh -L 5555:<remote-host>:5555 <remote-user>@<remote-host>
+```
 
 ## Spuštění pro vývoj
 

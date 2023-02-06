@@ -6,6 +6,7 @@ import { ProposedJobComplete } from "lib/types/proposed-job";
 import { useState } from "react";
 import { JobsFilters } from "lib/components/jobs/JobsFilters";
 import { useAPIProposedJobs } from "lib/fetcher/proposed-job";
+import { filterUniqueById } from "lib/helpers/helpers";
 
 export default function ProposedJobsPage() {
   const { data, error, isLoading } = useAPIProposedJobs();
@@ -65,10 +66,6 @@ export default function ProposedJobsPage() {
       </section>
     </>
   );
-}
-
-function filterUniqueById<T extends { id: string }>(elements: T[]): T[] {
-  return Array.from(new Map(elements.map((item) => [item.id, item])).values());
 }
 
 function getAvailableAreas(jobs?: ProposedJobComplete[]) {

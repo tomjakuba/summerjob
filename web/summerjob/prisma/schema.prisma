@@ -81,8 +81,7 @@ model ActiveJob {
   workers             Worker[]
   plan                Plan        @relation(fields: [planId], references: [id])
   planId              String
-  ride                Ride?       @relation(fields: [rideId], references: [id])
-  rideId              String?
+  rides               Ride[]
   responsibleWorker   Worker?     @relation("ResponsibleWorker", fields: [responsibleWorkerId], references: [id])
   responsibleWorkerId String?
 }
@@ -95,7 +94,7 @@ model Ride {
   car         Car         @relation(fields: [carId], references: [id])
   carId       String
   passengers  Worker[]
-  forJobs     ActiveJob[]
+  jobs        ActiveJob[]
 }
 
 model Plan {

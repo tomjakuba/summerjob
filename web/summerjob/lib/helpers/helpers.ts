@@ -12,3 +12,7 @@ export const formatDateLong = (date: Date) => {
     new Intl.DateTimeFormat("cs-CZ", options).format(date)
   );
 };
+
+export function filterUniqueById<T extends { id: string }>(elements: T[]): T[] {
+  return Array.from(new Map(elements.map((item) => [item.id, item])).values());
+}
