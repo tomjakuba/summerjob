@@ -42,7 +42,7 @@ export function FilterSelect({
         transform: `translate(0px, ${inputRef.current?.scrollHeight}px)`,
       });
     }
-  }, [open]);
+  }, [open, inputRef]);
 
   const selectItem = (item: FilterSelectItem) => {
     setSelected(item);

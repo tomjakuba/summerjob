@@ -1,7 +1,7 @@
 "use client";
 import EditBox from "lib/components/forms/EditBox";
 import EditWorker from "lib/components/forms/EditWorker";
-import { useAPIWorker } from "lib/fetcher/fetcher";
+import { useAPIWorker } from "lib/fetcher/worker";
 
 type Params = {
   params: {

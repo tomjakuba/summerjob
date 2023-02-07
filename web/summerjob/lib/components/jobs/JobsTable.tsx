@@ -82,7 +82,9 @@ function formatJobRow(job: ProposedJobComplete) {
     job.address,
     job.requiredDays,
     `${job.minWorkers} - ${job.maxWorkers}`,
-    <Link href={`/jobs/${job.id}`}>Upravit</Link>,
+    <Link key={job.id} href={`/jobs/${job.id}`}>
+      Upravit
+    </Link>,
   ];
 }
 

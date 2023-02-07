@@ -25,6 +25,11 @@ export default function AddJobToPlanForm({
   onComplete,
 }: AddJobToPlanFormProps) {
   const { data, error, isLoading } = useAPIProposedJobsNotInPlan(planId);
+  const { trigger, isMutating } = useAPIActiveJobCreate({
+    onSuccess: () => {
+      onComplete();
+    },
+  });
 
   const {
     register,
@@ -56,11 +61,6 @@ export default function AddJobToPlanForm({
       ),
     })) || [];
 
-  const { trigger, isMutating } = useAPIActiveJobCreate({
-    onSuccess: () => {
-      onComplete();
-    },
-  });
   const onSubmit = (data: AddJobToPlanFormData) => {
     trigger(data);
   };

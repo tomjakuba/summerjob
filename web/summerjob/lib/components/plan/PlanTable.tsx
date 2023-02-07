@@ -13,7 +13,6 @@ import {
 import { useMemo, useState } from "react";
 import { useAPIPlanMoveWorker } from "lib/fetcher/plan";
 import { WorkerComplete, WorkerWithAllergies } from "lib/types/worker";
-import { filterUniqueById } from "lib/helpers/helpers";
 import { RideComplete } from "lib/types/ride";
 
 const _columns: SortableColumn[] = [
@@ -52,7 +51,7 @@ export function PlanTable({
   };
   const sortedJobs = useMemo(() => {
     return plan ? sortJobsInPlan(plan, sortOrder) : [];
-  }, [sortOrder, plan?.jobs]);
+  }, [sortOrder, plan]);
 
   const {
     trigger: triggerMoveWorker,
@@ -104,7 +103,9 @@ export function PlanTable({
                   job.proposedJob.area.name,
                   job.proposedJob.address,
                   formatAmenities(job),
-                  <Link href={`/active-jobs/${job.id}`}>Upravit</Link>,
+                  <Link key={job.id} href={`/active-jobs/${job.id}`}>
+                    Upravit
+                  </Link>,
                 ]}
                 onDrop={onWorkerDropped(job.id)}
               >

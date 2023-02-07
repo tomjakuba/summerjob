@@ -3,10 +3,11 @@ import { useForm, UseFormRegister } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { WorkerComplete } from "lib/types/worker";
-import { useAPIAllergies, useAPIWorkerUpdate } from "lib/fetcher/fetcher";
 import { Allergy } from "lib/prisma/client";
 import { default as t } from "lib/localization/cs-cz";
 import { useState } from "react";
+import { useAPIWorkerUpdate } from "lib/fetcher/worker";
+import { useAPIAllergies } from "lib/fetcher/fetcher";
 
 const schema = z.object({
   id: z.string(),

@@ -11,10 +11,6 @@ import { filterUniqueById } from "lib/helpers/helpers";
 export default function ProposedJobsPage() {
   const { data, error, isLoading } = useAPIProposedJobs();
 
-  if (error) {
-    return <ErrorPage error={error} />;
-  }
-
   const areas = getAvailableAreas(data);
   const [selectedArea, setSelectedArea] = useState(areas[0]);
 
@@ -29,6 +25,10 @@ export default function ProposedJobsPage() {
       selectedArea.id === areas[0].id || job.area.id === selectedArea.id;
     const name = job.name.toLowerCase().includes(filter.toLowerCase());
     return area && name;
+  }
+
+  if (error) {
+    return <ErrorPage error={error} />;
   }
 
   return (
