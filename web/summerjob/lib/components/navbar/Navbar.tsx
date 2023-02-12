@@ -22,7 +22,7 @@ export function Navbar() {
   const toggleExpanded = () => setExpanded(!expanded);
   return (
     <>
-      <nav className="navbar navbar-light navbar-expand-md smj-navbar pt-2 pb-2 mb-0">
+      <nav className="navbar navbar-light navbar-expand-md smj-gray pt-2 pb-2 mb-0">
         <div className="container-fluid">
           <a className="navbar-brand d-flex align-items-center" href="#">
             <img

@@ -1,15 +1,9 @@
+import { http_method_handler } from "lib/api/method_handler";
 import { ApiErrorType } from "lib/data/apiError";
 import { getWorkers } from "lib/data/workers";
 import { NextApiRequest, NextApiResponse } from "next";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method !== "GET") {
-    res.status(405).end();
-    return;
-  }
+async function get(req: NextApiRequest, res: NextApiResponse<any>) {
   const { withoutJob, planId } = req.query;
   const hasJob = !Boolean(withoutJob);
   try {
@@ -24,3 +18,5 @@ export default async function handler(
     });
   }
 }
+
+export default http_method_handler({ get: get });

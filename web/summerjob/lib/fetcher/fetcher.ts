@@ -1,8 +1,5 @@
 import { ApiError } from "lib/data/apiError";
 import { Allergy } from "lib/prisma/client";
-import { PlanComplete, PlanWithJobs } from "lib/types/plan";
-import { ProposedJobComplete } from "lib/types/proposed-job";
-import { WorkerComplete } from "lib/types/worker";
 import useSWR from "swr";
 import useSWRMutation from "swr/mutation";
 

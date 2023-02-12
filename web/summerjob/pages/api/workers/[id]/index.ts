@@ -1,9 +1,11 @@
+import { http_method_handler } from "lib/api/method_handler";
 import { ApiErrorType } from "lib/data/apiError";
 import { getWorkerById, modifyUser } from "lib/data/workers";
-import { WorkerSerializable, WorkerSerializableSchema } from "lib/types/worker";
+import { WorkerSerializableSchema } from "lib/types/worker";
 import { NextApiRequest, NextApiResponse } from "next";
 
-async function get(id: string, req: NextApiRequest, res: NextApiResponse) {
+async function get(req: NextApiRequest, res: NextApiResponse) {
+  const id = req.query.id as string;
   try {
     const user = await getWorkerById(id);
     if (!user) {
@@ -21,7 +23,8 @@ async function get(id: string, req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-async function put(id: string, req: NextApiRequest, res: NextApiResponse) {
+async function patch(req: NextApiRequest, res: NextApiResponse) {
+  const id = req.query.id as string;
   try {
     const workerData = WorkerSerializableSchema.parse(req.body);
     await modifyUser(id, workerData);
@@ -37,16 +40,4 @@ async function put(id: string, req: NextApiRequest, res: NextApiResponse) {
   res.status(204).end();
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  const { id } = req.query;
-  if (req.method === "GET") {
-    await get(id as string, req, res);
-  } else if (req.method === "PUT") {
-    await put(id as string, req, res);
-  } else {
-    res.status(405).end();
-  }
-}
+export default http_method_handler({ get: get, patch: patch });

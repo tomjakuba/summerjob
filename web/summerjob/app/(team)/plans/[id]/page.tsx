@@ -126,12 +126,20 @@ export default function PlanPage({ params }: Params) {
               <div className="vstack smj-search-stack smj-shadow rounded-3">
                 <h5>Statistiky</h5>
                 <hr />
-                Nasazených pracovníků:{" "}
-                {data?.jobs.flatMap((x) => x.workers).length}
-                <br />
-                Bez práce: {workersWithoutJob && workersWithoutJob.length}
-                <br />
-                Naplánované joby: {data && data.jobs.length}
+                <ul className="list-group list-group-flush ">
+                  <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
+                    Nasazených pracovníků
+                    <span>{data?.jobs.flatMap((x) => x.workers).length}</span>
+                  </li>
+                  <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
+                    Bez práce
+                    <span>{workersWithoutJob && workersWithoutJob.length}</span>
+                  </li>
+                  <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
+                    Naplánované joby
+                    <span>{data && data.jobs.length}</span>
+                  </li>
+                </ul>
               </div>
             </div>
           </div>

@@ -1,3 +1,4 @@
+import { http_method_handler } from "lib/api/method_handler";
 import { ApiErrorType } from "lib/data/apiError";
 import {
   getProposedJobs,
@@ -5,14 +6,7 @@ import {
 } from "lib/data/proposed-jobs";
 import { NextApiRequest, NextApiResponse } from "next";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  if (req.method !== "GET") {
-    res.status(405).end();
-    return;
-  }
+async function get(req: NextApiRequest, res: NextApiResponse<any>) {
   const { notInPlan } = req.query;
   try {
     let jobs;
@@ -31,3 +25,5 @@ export default async function handler(
     });
   }
 }
+
+export default http_method_handler({ get: get });

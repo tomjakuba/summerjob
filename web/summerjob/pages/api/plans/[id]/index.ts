@@ -1,8 +1,10 @@
+import { http_method_handler } from "lib/api/method_handler";
 import { ApiErrorType } from "lib/data/apiError";
 import { getPlanById } from "lib/data/plans";
 import { NextApiRequest, NextApiResponse } from "next";
 
-async function get(id: string, req: NextApiRequest, res: NextApiResponse) {
+async function get(req: NextApiRequest, res: NextApiResponse) {
+  const id = req.query.id as string;
   try {
     const plan = await getPlanById(id);
     if (!plan) {
@@ -20,7 +22,7 @@ async function get(id: string, req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-async function patch(id: string, req: NextApiRequest, res: NextApiResponse) {
+async function patch(req: NextApiRequest, res: NextApiResponse) {
   try {
     const data = req.body;
     res.status(204).end();
@@ -34,16 +36,4 @@ async function patch(id: string, req: NextApiRequest, res: NextApiResponse) {
   }
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  const { id } = req.query;
-  if (req.method === "GET") {
-    await get(id as string, req, res);
-  } else if (req.method === "PATCH") {
-    await patch(id as string, req, res);
-  } else {
-    res.status(405).end();
-  }
-}
+export default http_method_handler({ get: get, patch: patch });

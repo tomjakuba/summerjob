@@ -108,8 +108,8 @@ img.smj-nav-logo {
   padding-top: 6px;
 }
 
-.smj-navbar {
-  background: #f5f5f5;
+.smj-gray {
+  background-color: #f5f5f5 !important;
 }
 
 .smj-table-body {
