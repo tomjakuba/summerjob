@@ -120,6 +120,7 @@ export default function PlanPage({ params }: Params) {
                 joblessWorkers={workersWithoutJob || []}
                 reloadJoblessWorkers={updateJoblessWorkers}
                 isLoadingJoblessWorkers={isLoadingWorkersWithoutJob}
+                reloadPlan={mutate}
               />
             </div>
             <div className="col-sm-12 col-lg-2">

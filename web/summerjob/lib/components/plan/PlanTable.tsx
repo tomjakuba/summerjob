@@ -1,4 +1,7 @@
-import { ActiveJobNoPlan } from "lib/types/active-job";
+import {
+  ActiveJobNoPlan,
+  UpdateActiveJobSerializable,
+} from "lib/types/active-job";
 import { LoadingRow } from "../table/LoadingRow";
 import type { Worker } from "lib/prisma/client";
 import { ExpandableRow } from "../table/ExpandableRow";
@@ -10,10 +13,14 @@ import {
   SortableTable,
   SortOrder,
 } from "../table/SortableTable";
-import { useMemo, useState } from "react";
+import { DragEvent, useMemo, useState } from "react";
 import { useAPIPlanMoveWorker } from "lib/fetcher/plan";
 import { WorkerComplete, WorkerWithAllergies } from "lib/types/worker";
 import { RideComplete } from "lib/types/ride";
+import { useAPIActiveJobUpdate } from "lib/fetcher/active-job";
+import { SWRMutationResponse } from "swr/mutation";
+import { Key } from "swr";
+import { PlanJobRow } from "./PlanJobRow";
 
 const _columns: SortableColumn[] = [
   { id: "name", name: "Práce", sortable: true },
@@ -32,6 +39,7 @@ interface PlanTableProps {
   joblessWorkers: WorkerComplete[];
   reloadJoblessWorkers: (expectedResult: WorkerComplete[]) => void;
   isLoadingJoblessWorkers: boolean;
+  reloadPlan: () => void;
 }
 
 export function PlanTable({
@@ -41,10 +49,11 @@ export function PlanTable({
   joblessWorkers,
   reloadJoblessWorkers,
   isLoadingJoblessWorkers,
+  reloadPlan,
 }: PlanTableProps) {
   const [sortOrder, setSortOrder] = useState<SortOrder>({
-    columnId: undefined,
-    direction: "desc",
+    columnId: "name",
+    direction: "asc",
   });
   const onSortRequested = (direction: SortOrder) => {
     setSortOrder(direction);
@@ -53,11 +62,6 @@ export function PlanTable({
     return plan ? sortJobsInPlan(plan, sortOrder) : [];
   }, [sortOrder, plan]);
 
-  const {
-    trigger: triggerMoveWorker,
-    isMutating,
-    error: moveWorkerError,
-  } = useAPIPlanMoveWorker(plan?.id || "");
   const onWorkerDragStart = (worker: Worker, sourceId: string) => {
     return (e: React.DragEvent<HTMLTableRowElement>) => {
       e.dataTransfer.setData("worker-id", worker.id);
@@ -65,23 +69,10 @@ export function PlanTable({
     };
   };
 
-  const onWorkerDropped =
-    (toJobId: string) => (e: React.DragEvent<HTMLTableRowElement>) => {
-      const workerId = e.dataTransfer.getData("worker-id");
-      const fromJobId = e.dataTransfer.getData("source-id");
-      if (fromJobId === toJobId) {
-        return;
-      }
-      moveWorkerToJob(
-        workerId,
-        fromJobId,
-        toJobId,
-        plan!,
-        joblessWorkers,
-        triggerMoveWorker,
-        reloadJoblessWorkers
-      );
-    };
+  const reload = () => {
+    reloadPlan();
+    reloadJoblessWorkers(joblessWorkers);
+  };
 
   return (
     <SortableTable
@@ -91,69 +82,22 @@ export function PlanTable({
     >
       {isLoadingPlan && <LoadingRow colspan={_columns.length} />}
       {!isLoadingPlan &&
-        sortedJobs.map(
-          (job) =>
-            shouldShowJob(job) && (
-              <ExpandableRow
-                key={job.id}
-                data={[
-                  job.proposedJob.name,
-                  `${job.workers.length}/${job.proposedJob.maxWorkers}`,
-                  job.proposedJob.contact,
-                  job.proposedJob.area.name,
-                  job.proposedJob.address,
-                  formatAmenities(job),
-                  <Link key={job.id} href={`/active-jobs/${job.id}`}>
-                    Upravit
-                  </Link>,
-                ]}
-                onDrop={onWorkerDropped(job.id)}
-              >
-                <>
-                  <div className="ms-2">
-                    <h6>Poznámka pro organizátory</h6>
-                    <p>{job.privateDescription}</p>
-                    <h6>Popis</h6>
-                    <p>{job.publicDescription}</p>
-
-                    <h6>Doprava: </h6>
-                    <p>{formatRideData(job)}</p>
-                    <p>
-                      <strong>Zodpovědná osoba: </strong>
-                      {responsibleWorkerName(job)}
-                    </p>
-                  </div>
-                  <div className="table-responsive text-nowrap">
-                    <table className="table table-hover">
-                      <tbody>
-                        {job.workers.length === 0 && (
-                          <tr>
-                            <td colSpan={3}>
-                              <i>Žádní pracovníci</i>
-                            </td>
-                          </tr>
-                        )}
-                        {job.workers.map((worker) => (
-                          <SimpleRow
-                            data={formatWorkerData(worker, job)}
-                            key={worker.id}
-                            draggable={true}
-                            onDragStart={onWorkerDragStart(worker, job.id)}
-                          />
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </>
-              </ExpandableRow>
-            )
-        )}
+        sortedJobs.map((job) => (
+          <PlanJobRow
+            key={job.id}
+            isDisplayed={shouldShowJob(job)}
+            job={job}
+            formatWorkerData={formatWorkerData}
+            onWorkerDragStart={onWorkerDragStart}
+            reloadPlan={reload}
+          />
+        ))}
       {!isLoadingJoblessWorkers && (
         <ExpandableRow
           data={[`Bez práce (${joblessWorkers.length})`]}
           colspan={_columns.length}
           className={joblessWorkers.length > 0 ? "smj-background-error" : ""}
-          onDrop={onWorkerDropped("jobless")}
+          // onDrop={onWorkerDropped("jobless")}
         >
           <div className="ms-2">
             <h6>Následující pracovníci nemají přiřazenou práci:</h6>
@@ -175,50 +119,6 @@ export function PlanTable({
         </ExpandableRow>
       )}
     </SortableTable>
-  );
-}
-
-function formatAmenities(job: ActiveJobNoPlan) {
-  return (
-    <>
-      {job.proposedJob.hasFood && (
-        <i className="fas fa-utensils me-2" title="Jídlo na místě"></i>
-      )}{" "}
-      {job.proposedJob.hasShower && (
-        <i className="fas fa-shower" title="Sprcha na místě"></i>
-      )}
-    </>
-  );
-}
-
-function formatRideData(job: ActiveJobNoPlan) {
-  if (!job.rides || job.rides.length == 0) return <>Není</>;
-
-  const formatSingleRide = (ride: RideComplete) => {
-    const isDriverFromJob = job.workers.find((w) => w.id === ride.driverId);
-    const otherJobs = ride.jobs.filter((j) => j.id !== job.id);
-
-    return (
-      <>
-        {ride.car.name}: {ride.driver.firstName} {ride.driver.lastName}{" "}
-        (obsazenost: {ride.passengers.length + 1}/{ride.car.seats})
-        {!isDriverFromJob && <i>(řidič z jiného jobu)</i>}
-        <br />
-        {isDriverFromJob && otherJobs.length > 0 && (
-          <>
-            Dále odváží: {otherJobs.map((j) => j.proposedJob.name).join(", ")}
-          </>
-        )}
-      </>
-    );
-  };
-
-  return (
-    <>
-      {job.rides.map((r) => (
-        <span key={r.id}>{formatSingleRide(r)}</span>
-      ))}
-    </>
   );
 }
 
@@ -251,9 +151,77 @@ function formatWorkerData(worker: Worker, job?: ActiveJobNoPlan) {
   ];
 }
 
-function responsibleWorkerName(job: ActiveJobNoPlan) {
-  if (!job.responsibleWorker) return "Není";
-  return `${job.responsibleWorker?.firstName} ${job.responsibleWorker?.lastName}`;
+function moveWorkerToJob(
+  workerId: string,
+  fromJobId: string,
+  toJobId: string,
+  plan: PlanComplete,
+  joblessWorkers: WorkerWithAllergies[],
+  updateHooks: {
+    id: string;
+    hook: SWRMutationResponse<any, any, UpdateActiveJobSerializable, Key>;
+  }[],
+  reloadJoblessWorkers: (workers: WorkerWithAllergies[]) => void
+) {
+  const planCopy = structuredClone(plan!);
+  const isFromJobless = fromJobId === "jobless";
+  const isToJobless = toJobId === "jobless";
+  let worker: WorkerWithAllergies | WorkerComplete;
+  if (isFromJobless && isToJobless) return;
+
+  let joblessCopy = [...joblessWorkers];
+  let fromJob = planCopy.jobs.find((j) => j.id === fromJobId);
+  let toJob = planCopy.jobs.find((j) => j.id === toJobId);
+
+  if (isFromJobless) {
+    worker = joblessCopy.find((w) => w.id === workerId)!;
+    joblessCopy = joblessCopy.filter((w) => w.id !== workerId);
+  } else {
+    fromJob = fromJob!;
+    worker = fromJob.workers.find((w) => w.id === workerId)!;
+    fromJob.workers = fromJob.workers.filter((w) => w.id !== workerId);
+    const fromRide =
+      fromJob.rides.find((r) => r.driverId === workerId) ||
+      fromJob.rides.find((r) => r.passengers.includes(worker));
+    if (fromRide) {
+      if (fromRide.driverId === workerId) {
+        fromJob.rides.splice(fromJob.rides.indexOf(fromRide), 1);
+      } else {
+        fromRide.passengers = fromRide.passengers.filter(
+          (p) => p.id !== workerId
+        );
+      }
+    }
+  }
+  if (isToJobless) {
+    joblessCopy.push(worker!);
+    const updateData: UpdateActiveJobSerializable = {
+      workerIds: fromJob!.workers.map((w) => w.id),
+    };
+    const trigger = updateHooks.find((h) => h.id === fromJobId)!.hook.trigger;
+    trigger(updateData);
+  } else {
+    toJob = toJob!;
+    toJob.workers.push(worker!);
+    const toRide = toJob.rides[0];
+    if (toRide) {
+      toRide.passengers.push(worker);
+    }
+    const updateData: UpdateActiveJobSerializable = {
+      workerIds: toJob.workers.map((w) => w.id),
+    };
+    const trigger = updateHooks.find((h) => h.id === toJobId)!.hook.trigger;
+    trigger(updateData);
+  }
+
+  // optimisticUpdatePlan({...oldPlan, ...planCopy})
+
+  // triggerMoveWorker(planCopy, {
+  //   optimisticData: (oldPlan: PlanComplete) => {
+  //     return { ...oldPlan, ...planCopy };
+  //   },
+  // });
+  // reloadJoblessWorkers(joblessCopy);
 }
 
 function sortJobsInPlan(data: PlanComplete, sortOrder: SortOrder) {
@@ -287,60 +255,4 @@ function sortJobsInPlan(data: PlanComplete, sortOrder: SortOrder) {
     });
   }
   return jobs;
-}
-
-function moveWorkerToJob(
-  workerId: string,
-  fromJobId: string,
-  toJobId: string,
-  plan: PlanComplete,
-  joblessWorkers: WorkerWithAllergies[],
-  triggerMoveWorker: (plan: PlanComplete, options?: any) => void,
-  reloadJoblessWorkers: (workers: WorkerWithAllergies[]) => void
-) {
-  const planCopy = structuredClone(plan!);
-  const isFromJobless = fromJobId === "jobless";
-  const isToJobless = toJobId === "jobless";
-  let worker: WorkerWithAllergies | WorkerComplete;
-
-  let joblessCopy = [...joblessWorkers];
-  if (isFromJobless) {
-    worker = joblessCopy.find((w) => w.id === workerId)!;
-    joblessCopy = joblessCopy.filter((w) => w.id !== workerId);
-  } else {
-    const fromJob = planCopy.jobs.find((j) => j.id === fromJobId)!;
-    worker = fromJob.workers.find((w) => w.id === workerId)!;
-    fromJob.workers = fromJob.workers.filter((w) => w.id !== workerId);
-    const fromRide =
-      fromJob.rides.find((r) => r.driverId === workerId) ||
-      fromJob.rides.find((r) => r.passengers.includes(worker));
-    // TODO remove from ride
-    if (fromRide) {
-      if (fromRide.driverId === workerId) {
-        fromJob.rides.splice(fromJob.rides.indexOf(fromRide), 1);
-      } else {
-        fromRide.passengers = fromRide.passengers.filter(
-          (p) => p.id !== workerId
-        );
-      }
-    }
-  }
-  if (isToJobless) {
-    joblessCopy.push(worker!);
-  } else {
-    const toJob = planCopy.jobs.find((j) => j.id === toJobId)!;
-    toJob.workers.push(worker!);
-    const toRide = toJob.rides[0];
-    // TODO add to ride
-    if (toRide) {
-      toRide.passengers.push(worker);
-    }
-  }
-
-  triggerMoveWorker(planCopy, {
-    optimisticData: (oldPlan: PlanComplete) => {
-      return { ...oldPlan, ...planCopy };
-    },
-  });
-  reloadJoblessWorkers(joblessCopy);
 }

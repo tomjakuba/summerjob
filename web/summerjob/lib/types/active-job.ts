@@ -12,6 +12,11 @@ export type ActiveJobNoPlan = ActiveJob & {
   responsibleWorker?: Worker;
 };
 
+export type ActiveJobWithWorkersRides = ActiveJob & {
+  workers: Worker[];
+  rides: RideComplete[];
+};
+
 export type ActiveJobWithProposed = ActiveJob & {
   proposedJob: ProposedJob;
 };
@@ -27,4 +32,21 @@ export const CreateActiveJobSerializableSchema = z
 
 export type CreateActiveJobSerializable = z.infer<
   typeof CreateActiveJobSerializableSchema
+>;
+
+export const UpdateActiveJobSerializableSchema = z
+  .object({
+    id: z.string(),
+    privateDescription: z.string(),
+    publicDescription: z.string(),
+    proposedJobId: z.string(),
+    workerIds: z.array(z.string()),
+    responsibleWorkerId: z.string(),
+    rideIds: z.array(z.string()),
+  })
+  .partial()
+  .strict();
+
+export type UpdateActiveJobSerializable = z.infer<
+  typeof UpdateActiveJobSerializableSchema
 >;

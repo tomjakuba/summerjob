@@ -1,8 +1,8 @@
 import { WorkerComplete } from "lib/types/worker";
 import { useData, useDataPartialUpdate } from "./fetcher";
 
-export function useAPIWorkerUpdate(workerId: string, options?: any) {
-  return useDataPartialUpdate(`/api/workers/${workerId}`, options);
+export function useAPIWorkerUpdate<T>(workerId: string, options?: any) {
+  return useDataPartialUpdate<T>(`/api/workers/${workerId}`, options);
 }
 
 export function useAPIWorkers() {

@@ -36,7 +36,7 @@ export default function EditWorker({ worker }: { worker: WorkerComplete }) {
     },
   });
   const [saved, setSaved] = useState(false);
-  const { trigger, isMutating } = useAPIWorkerUpdate(worker.id, {
+  const { trigger, isMutating } = useAPIWorkerUpdate<WorkerForm>(worker.id, {
     onSuccess: () => {
       setSaved(true);
     },

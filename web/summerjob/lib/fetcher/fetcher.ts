@@ -1,6 +1,6 @@
 import { ApiError } from "lib/data/apiError";
 import { Allergy } from "lib/prisma/client";
-import useSWR from "swr";
+import useSWR, { Key } from "swr";
 import useSWRMutation from "swr/mutation";
 
 const get = async (url: string) => {
@@ -48,8 +48,8 @@ export function useData<T>(url: string) {
   return useSWR<T, Error>(url, get);
 }
 
-export function useDataPartialUpdate(url: string, options?: any) {
-  return useSWRMutation(url, patch, options);
+export function useDataPartialUpdate<T>(url: string, options?: any) {
+  return useSWRMutation<any, any, Key, T>(url, patch, options);
 }
 
 export function useDataCreate(url: string, options?: any) {
