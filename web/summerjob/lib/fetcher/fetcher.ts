@@ -52,6 +52,18 @@ export function useDataPartialUpdate<T>(url: string, options?: any) {
   return useSWRMutation<any, any, Key, T>(url, patch, options);
 }
 
+export function useDataPartialUpdateDynamic<T>(
+  func: () => string,
+  getUrlFunc: (value: string) => string,
+  options?: any
+) {
+  return useSWRMutation<any, any, Key, T>(
+    () => getUrlFunc(func()),
+    patch,
+    options
+  );
+}
+
 export function useDataCreate(url: string, options?: any) {
   return useSWRMutation(url, post, options);
 }

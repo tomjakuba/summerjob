@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface RowProps {
   data: any[];
@@ -35,20 +35,19 @@ export function ExpandableRow({
   data,
   children,
   colspan,
-  className,
+  className = "",
   onDrop,
 }: RowProps) {
   const [expanded, setExpanded] = useState(false);
   const toggleExpanded = () => {
     setExpanded(!expanded);
   };
+  const [expandedHeight, setExpandedHeight] = useState(0);
   const collapsibleContentRef = useRef<HTMLDivElement>(null);
-  const computedHeight = () => {
-    if (collapsibleContentRef.current) {
-      return collapsibleContentRef.current.scrollHeight;
-    }
-    return 0;
-  };
+
+  useEffect(() => {
+    setExpandedHeight(collapsibleContentRef.current?.scrollHeight || 0);
+  }, [children, collapsibleContentRef]);
 
   const onDragOver = (e: React.DragEvent<HTMLTableRowElement>) => {
     if (onDrop) {
@@ -91,7 +90,7 @@ export function ExpandableRow({
           <div
             className="smj-row-collapsible"
             ref={collapsibleContentRef}
-            style={{ maxHeight: expanded ? `${computedHeight()}px` : "0px" }}
+            style={{ maxHeight: expanded ? `${expandedHeight}px` : "0px" }}
           >
             <div className="p-2">{children}</div>
           </div>

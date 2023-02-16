@@ -4,23 +4,18 @@ import {
 } from "lib/types/active-job";
 import { LoadingRow } from "../table/LoadingRow";
 import type { Worker } from "lib/prisma/client";
-import { ExpandableRow } from "../table/ExpandableRow";
 import { PlanComplete } from "lib/types/plan";
-import Link from "next/link";
-import { SimpleRow } from "../table/SimpleRow";
 import {
   SortableColumn,
   SortableTable,
   SortOrder,
 } from "../table/SortableTable";
 import { DragEvent, useMemo, useState } from "react";
-import { useAPIPlanMoveWorker } from "lib/fetcher/plan";
 import { WorkerComplete, WorkerWithAllergies } from "lib/types/worker";
-import { RideComplete } from "lib/types/ride";
-import { useAPIActiveJobUpdate } from "lib/fetcher/active-job";
 import { SWRMutationResponse } from "swr/mutation";
 import { Key } from "swr";
 import { PlanJobRow } from "./PlanJobRow";
+import { PlanJoblessRow } from "./PlanJoblessRow";
 
 const _columns: SortableColumn[] = [
   { id: "name", name: "Práce", sortable: true },
@@ -87,36 +82,21 @@ export function PlanTable({
             key={job.id}
             isDisplayed={shouldShowJob(job)}
             job={job}
+            planId={plan!.id}
             formatWorkerData={formatWorkerData}
             onWorkerDragStart={onWorkerDragStart}
             reloadPlan={reload}
           />
         ))}
       {!isLoadingJoblessWorkers && (
-        <ExpandableRow
-          data={[`Bez práce (${joblessWorkers.length})`]}
-          colspan={_columns.length}
-          className={joblessWorkers.length > 0 ? "smj-background-error" : ""}
-          // onDrop={onWorkerDropped("jobless")}
-        >
-          <div className="ms-2">
-            <h6>Následující pracovníci nemají přiřazenou práci:</h6>
-          </div>
-          <div className="table-responsive text-nowrap">
-            <table className="table table-hover">
-              <tbody>
-                {joblessWorkers.map((worker) => (
-                  <SimpleRow
-                    data={formatWorkerData(worker)}
-                    key={worker.id}
-                    draggable={true}
-                    onDragStart={onWorkerDragStart(worker, "jobless")}
-                  />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </ExpandableRow>
+        <PlanJoblessRow
+          jobs={sortedJobs}
+          joblessWorkers={joblessWorkers}
+          numColumns={_columns.length}
+          formatWorkerData={formatWorkerData}
+          onWorkerDragStart={onWorkerDragStart}
+          reloadJoblessWorkers={reload}
+        />
       )}
     </SortableTable>
   );

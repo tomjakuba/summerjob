@@ -1,6 +1,6 @@
 "use client";
 import EditBox from "lib/components/forms/EditBox";
-import EditWorker from "lib/components/forms/EditWorker";
+import EditWorker from "lib/components/worker/EditWorker";
 import { useAPIWorker } from "lib/fetcher/worker";
 
 type Params = {
@@ -14,9 +14,13 @@ export default function EditWorkerPage({ params }: Params) {
 
   return (
     <>
-      <section className="mb-3 mt-3">
+      <section className="mb-3">
         <EditBox>
-          {isLoading && <h2>Načítám...</h2>}
+          {isLoading && (
+            <center>
+              <h3>Načítám...</h3>
+            </center>
+          )}
           {data && <EditWorker worker={data} />}
         </EditBox>
       </section>

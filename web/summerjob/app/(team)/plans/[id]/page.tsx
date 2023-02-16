@@ -1,6 +1,6 @@
 "use client";
 import ErrorPage from "lib/components/error-page/error";
-import AddJobToPlanForm from "lib/components/forms/AddJobToPlanForm";
+import AddJobToPlanForm from "lib/components/plan/AddJobToPlanForm";
 import { Modal } from "lib/components/modal/Modal";
 import PageHeader from "lib/components/page-header/PageHeader";
 import { PlanFilters } from "lib/components/plan/PlanFilters";
@@ -38,10 +38,6 @@ export default function PlanPage({ params }: Params) {
     reloadJoblessWorkers([...expectedValue]);
   };
 
-  if (error) {
-    return <ErrorPage error={error} />;
-  }
-
   const searchableJobs = useMemo(() => {
     const map = new Map<string, string>();
     data?.jobs.forEach((job) => {
@@ -69,6 +65,10 @@ export default function PlanPage({ params }: Params) {
   };
 
   const [filter, setFilter] = useState("");
+
+  if (error) {
+    return <ErrorPage error={error} />;
+  }
 
   function shouldShowJob(job: ActiveJobNoPlan) {
     const isInArea =

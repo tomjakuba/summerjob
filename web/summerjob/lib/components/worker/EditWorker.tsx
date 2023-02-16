@@ -51,9 +51,9 @@ export default function EditWorker({ worker }: { worker: WorkerComplete }) {
     <>
       <div className="row">
         <div className="col">
-          <h2>
+          <h3>
             {worker.firstName} {worker.lastName}
-          </h2>
+          </h3>
         </div>
       </div>
       <div className="row">

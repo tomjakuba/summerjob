@@ -1,9 +1,46 @@
 import { prisma } from "lib/prisma/connection";
 import {
+  ActiveJobNoPlan,
   CreateActiveJobSerializable,
   UpdateActiveJobSerializable,
 } from "lib/types/active-job";
 import type { Worker, Prisma } from "lib/prisma/client";
+
+export async function getActiveJobById(
+  id: string
+): Promise<ActiveJobNoPlan | null> {
+  const job = await prisma.activeJob.findFirst({
+    where: {
+      id,
+    },
+    include: {
+      workers: {
+        include: {
+          allergies: true,
+        },
+      },
+      proposedJob: {
+        include: {
+          area: true,
+        },
+      },
+      responsibleWorker: true,
+      rides: {
+        include: {
+          car: true,
+          driver: true,
+          jobs: {
+            include: {
+              proposedJob: true,
+            },
+          },
+          passengers: true,
+        },
+      },
+    },
+  });
+  return job;
+}
 
 type ActiveJobSimplified = {
   id: string;
@@ -163,9 +200,26 @@ export async function updateActiveJob(job: UpdateActiveJobSerializable) {
           }
         }
       }
+    }
+
+    // Remove old workers from this job if needed
+    let workersToRemove: string[] = [];
+    if (workerIds) {
+      workersToRemove = currentWorkerIds.filter(
+        (id) => !workerIds?.includes(id)
+      );
+      for (const workerId of workersToRemove) {
+        await removeWorkerFromJob(workerId, existingActiveJob, tx);
+      }
+    }
+
+    const addedWorkers = workersToAdd?.length ?? 0 > 0;
+    let removedWorkers = workersToRemove.length > 0;
+    if (workerIds && (addedWorkers || removedWorkers)) {
       workersCommand = {
         workers: {
-          connect: workerIds?.map((id) => ({ id })),
+          connect: workersToAdd?.map((id) => ({ id })) ?? [],
+          disconnect: workersToRemove.map((id) => ({ id })),
         },
       };
     }

@@ -9,6 +9,7 @@ import { useAPIActiveJobUpdate } from "lib/fetcher/active-job";
 
 interface PlanJobRowProps {
   job: ActiveJobNoPlan;
+  planId: string;
   isDisplayed: boolean;
   formatWorkerData: (
     worker: WorkerWithAllergies,
@@ -23,6 +24,7 @@ interface PlanJobRowProps {
 
 export function PlanJobRow({
   job,
+  planId,
   isDisplayed,
   formatWorkerData,
   onWorkerDragStart,
@@ -51,58 +53,64 @@ export function PlanJobRow({
   return (
     <>
       {isDisplayed && (
-        <ExpandableRow
-          key={job.id}
-          data={[
-            job.proposedJob.name,
-            `${job.workers.length}/${job.proposedJob.maxWorkers}`,
-            job.proposedJob.contact,
-            job.proposedJob.area.name,
-            job.proposedJob.address,
-            formatAmenities(job),
-            <Link key={job.id} href={`/active-jobs/${job.id}`}>
-              Upravit
-            </Link>,
-          ]}
-          onDrop={onWorkerDropped(job.id)}
-        >
-          <>
-            <div className="ms-2">
-              <h6>Poznámka pro organizátory</h6>
-              <p>{job.privateDescription}</p>
-              <h6>Popis</h6>
-              <p>{job.publicDescription}</p>
+        <>
+          <ExpandableRow
+            key={job.id}
+            data={[
+              job.proposedJob.name,
+              `${job.workers.length}/${job.proposedJob.maxWorkers}`,
+              job.proposedJob.contact,
+              job.proposedJob.area.name,
+              job.proposedJob.address,
+              formatAmenities(job),
+              <Link
+                key={job.id}
+                href={`/plans/${planId}/${job.id}`}
+                onClick={(e) => e.stopPropagation()}
+              >
+                Upravit
+              </Link>,
+            ]}
+            onDrop={onWorkerDropped(job.id)}
+          >
+            <>
+              <div className="ms-2">
+                <h6>Poznámka pro organizátory</h6>
+                <p>{job.privateDescription}</p>
+                <h6>Popis</h6>
+                <p>{job.publicDescription}</p>
 
-              <h6>Doprava: </h6>
-              <p>{formatRideData(job)}</p>
-              <p>
-                <strong>Zodpovědná osoba: </strong>
-                {responsibleWorkerName(job)}
-              </p>
-            </div>
-            <div className="table-responsive text-nowrap">
-              <table className="table table-hover">
-                <tbody>
-                  {job.workers.length === 0 && (
-                    <tr>
-                      <td colSpan={3}>
-                        <i>Žádní pracovníci</i>
-                      </td>
-                    </tr>
-                  )}
-                  {job.workers.map((worker) => (
-                    <SimpleRow
-                      data={formatWorkerData(worker, job)}
-                      key={worker.id}
-                      draggable={true}
-                      onDragStart={onWorkerDragStart(worker, job.id)}
-                    />
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </>
-        </ExpandableRow>
+                <h6>Doprava: </h6>
+                <p>{formatRideData(job)}</p>
+                <p>
+                  <strong>Zodpovědná osoba: </strong>
+                  {responsibleWorkerName(job)}
+                </p>
+              </div>
+              <div className="table-responsive text-nowrap">
+                <table className="table table-hover">
+                  <tbody>
+                    {job.workers.length === 0 && (
+                      <tr>
+                        <td colSpan={3}>
+                          <i>Žádní pracovníci</i>
+                        </td>
+                      </tr>
+                    )}
+                    {job.workers.map((worker) => (
+                      <SimpleRow
+                        data={formatWorkerData(worker, job)}
+                        key={worker.id}
+                        draggable={true}
+                        onDragStart={onWorkerDragStart(worker, job.id)}
+                      />
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
+          </ExpandableRow>
+        </>
       )}
     </>
   );
