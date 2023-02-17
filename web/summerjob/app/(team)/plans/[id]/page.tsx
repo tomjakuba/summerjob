@@ -50,6 +50,7 @@ export default function PlanPage({ params }: Params) {
           job.proposedJob.name +
           job.proposedJob.area.name +
           job.proposedJob.address +
+          job.proposedJob.contact +
           workerNames
         ).toLocaleLowerCase()
       );
