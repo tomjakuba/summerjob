@@ -130,6 +130,14 @@ export default function EditWorker({ worker }: { worker: WorkerComplete }) {
               value={isMutating ? "Ukládání..." : "Uložit"}
               disabled={isMutating}
             />
+            <button
+              className="btn btn-secondary m-3 ms-0 p-3"
+              type="button"
+              disabled={isMutating}
+              onClick={() => window.history.back()}
+            >
+              Zpět
+            </button>
             {saved && (
               <div
                 className="alert alert-success alert-dismissible d-inline-block mt-3 p-3 pe-5"
