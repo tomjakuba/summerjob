@@ -9,9 +9,11 @@ export function useAPIWorkers() {
   return useData<WorkerComplete[]>("/api/workers");
 }
 
-export function useAPIWorkersWithoutJob(planId: string) {
+export function useAPIWorkersWithoutJob(planId: string, options?: any) {
+  const opts = Object.assign({ refreshInterval: 1000 }, options);
   return useData<WorkerComplete[]>(
-    `/api/workers?withoutJob=true&planId=${planId}`
+    `/api/workers?withoutJob=true&planId=${planId}`,
+    opts
   );
 }
 

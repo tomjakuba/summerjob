@@ -33,7 +33,7 @@ export default function PlanPage() {
               >
                 <div className="row">
                   <div className="col">
-                    <h5>{formatDateLong(plan.day)}</h5>
+                    <h5>{formatDateLong(plan.day, true)}</h5>
                     <p>{plan.jobs.length} jobů</p>
                     <small className="text-muted">
                       Poslední úprava dnes 8:11

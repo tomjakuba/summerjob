@@ -1,5 +1,5 @@
 import {
-  ActiveJobNoPlan,
+  ActiveJobComplete,
   UpdateActiveJobSerializable,
 } from "lib/types/active-job";
 import {
@@ -29,5 +29,9 @@ export function useAPIActiveJobUpdateDynamic(id: () => string, options?: any) {
 }
 
 export function useAPIActiveJob(id: string) {
-  return useData<ActiveJobNoPlan>(`/api/active-jobs/${id}`);
+  const result = useData<ActiveJobComplete>(`/api/active-jobs/${id}`);
+  if (result.data) {
+    result.data.plan.day = new Date(result.data.plan.day);
+  }
+  return result;
 }

@@ -84,7 +84,9 @@ export default function PlanPage({ params }: Params) {
 
   return (
     <>
-      <PageHeader title={data ? formatDateLong(data?.day) : "Načítání..."}>
+      <PageHeader
+        title={data ? formatDateLong(data?.day, true) : "Načítání..."}
+      >
         <button className="btn btn-warning" type="button" onClick={openModal}>
           <i className="fas fa-briefcase"></i>
           <span>Přidat job</span>

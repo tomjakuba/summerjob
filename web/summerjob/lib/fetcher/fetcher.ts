@@ -44,8 +44,8 @@ const sendData =
 const post = sendData("POST");
 const patch = sendData("PATCH");
 
-export function useData<T>(url: string) {
-  return useSWR<T, Error>(url, get);
+export function useData<T>(url: string, options?: any) {
+  return useSWR<T, Error>(url, get, options);
 }
 
 export function useDataPartialUpdate<T>(url: string, options?: any) {

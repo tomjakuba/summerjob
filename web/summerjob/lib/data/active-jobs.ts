@@ -1,5 +1,6 @@
 import { prisma } from "lib/prisma/connection";
 import {
+  ActiveJobComplete,
   ActiveJobNoPlan,
   CreateActiveJobSerializable,
   UpdateActiveJobSerializable,
@@ -8,7 +9,7 @@ import type { Worker, Prisma } from "lib/prisma/client";
 
 export async function getActiveJobById(
   id: string
-): Promise<ActiveJobNoPlan | null> {
+): Promise<ActiveJobComplete | null> {
   const job = await prisma.activeJob.findFirst({
     where: {
       id,
@@ -37,6 +38,7 @@ export async function getActiveJobById(
           passengers: true,
         },
       },
+      plan: true,
     },
   });
   return job;

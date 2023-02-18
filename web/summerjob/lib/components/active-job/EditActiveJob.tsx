@@ -1,12 +1,12 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAPIActiveJob } from "lib/fetcher/active-job";
-import { ActiveJobNoPlan } from "lib/types/active-job";
+import { formatDateLong } from "lib/helpers/helpers";
+import { ActiveJobComplete } from "lib/types/active-job";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 interface EditActiveJobProps {
-  job: ActiveJobNoPlan;
+  job: ActiveJobComplete;
 }
 
 const schema = z.object({
@@ -39,6 +39,9 @@ export default function EditActiveJobForm({ job }: EditActiveJobProps) {
             <div className="row">
               <div className="col">
                 <h3>{job.proposedJob.name}</h3>
+                <small className="text-muted">
+                  {formatDateLong(job.plan.day, true)}
+                </small>
               </div>
             </div>
             <div className="row">

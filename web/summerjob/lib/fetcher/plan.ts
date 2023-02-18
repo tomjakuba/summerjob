@@ -11,8 +11,9 @@ export function useAPIPlans() {
   return properties;
 }
 
-export function useAPIPlan(id: string) {
-  const properties = useData<PlanComplete>(`/api/plans/${id}`);
+export function useAPIPlan(id: string, options?: any) {
+  const opts = Object.assign({ refreshInterval: 1000 }, options);
+  const properties = useData<PlanComplete>(`/api/plans/${id}`, opts);
   if (properties.data) {
     properties.data.day = new Date(properties.data.day);
   }
