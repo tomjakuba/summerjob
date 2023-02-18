@@ -1,10 +1,10 @@
 import { prisma } from "lib/prisma/connection";
-import { WorkerSerializable } from "lib/types/worker";
+import { WorkerComplete, WorkerSerializable } from "lib/types/worker";
 
 export async function getWorkers(
   planId: string | undefined = undefined,
   hasJob: boolean | undefined = undefined
-) {
+): Promise<WorkerComplete[]> {
   let whereClause: any = {};
   if (planId) {
     whereClause = {
@@ -39,7 +39,8 @@ export async function getWorkers(
       },
     ],
   });
-  return users;
+  // TODO: Remove this when the prisma client findMany is fixed
+  return users as WorkerComplete[];
 }
 
 export async function getWorkerById(id: string) {

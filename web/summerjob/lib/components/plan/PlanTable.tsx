@@ -2,7 +2,6 @@ import {
   ActiveJobNoPlan,
   UpdateActiveJobSerializable,
 } from "lib/types/active-job";
-import { LoadingRow } from "../table/LoadingRow";
 import type { Worker } from "lib/prisma/client";
 import { PlanComplete } from "lib/types/plan";
 import {
@@ -10,7 +9,7 @@ import {
   SortableTable,
   SortOrder,
 } from "../table/SortableTable";
-import { DragEvent, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { WorkerComplete, WorkerWithAllergies } from "lib/types/worker";
 import { SWRMutationResponse } from "swr/mutation";
 import { Key } from "swr";
@@ -29,21 +28,17 @@ const _columns: SortableColumn[] = [
 
 interface PlanTableProps {
   plan?: PlanComplete;
-  isLoadingPlan: boolean;
   shouldShowJob: (job: ActiveJobNoPlan) => boolean;
   joblessWorkers: WorkerComplete[];
   reloadJoblessWorkers: (expectedResult: WorkerComplete[]) => void;
-  isLoadingJoblessWorkers: boolean;
   reloadPlan: () => void;
 }
 
 export function PlanTable({
   plan,
-  isLoadingPlan,
   shouldShowJob,
   joblessWorkers,
   reloadJoblessWorkers,
-  isLoadingJoblessWorkers,
   reloadPlan,
 }: PlanTableProps) {
   const [sortOrder, setSortOrder] = useState<SortOrder>({
@@ -75,8 +70,7 @@ export function PlanTable({
       currentSort={sortOrder}
       onRequestedSort={onSortRequested}
     >
-      {isLoadingPlan && <LoadingRow colspan={_columns.length} />}
-      {!isLoadingPlan &&
+      {plan &&
         sortedJobs.map((job) => (
           <PlanJobRow
             key={job.id}
@@ -88,7 +82,7 @@ export function PlanTable({
             reloadPlan={reload}
           />
         ))}
-      {!isLoadingJoblessWorkers && (
+      {joblessWorkers && (
         <PlanJoblessRow
           jobs={sortedJobs}
           joblessWorkers={joblessWorkers}

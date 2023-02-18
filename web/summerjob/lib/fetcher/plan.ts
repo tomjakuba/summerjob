@@ -1,8 +1,8 @@
 import { PlanComplete, PlanWithJobs } from "lib/types/plan";
 import { useData, useDataPartialUpdate } from "./fetcher";
 
-export function useAPIPlans() {
-  const properties = useData<PlanWithJobs[]>("/api/plans");
+export function useAPIPlans(options?: any) {
+  const properties = useData<PlanWithJobs[]>("/api/plans", options);
   if (properties.data) {
     for (const plan of properties.data) {
       plan.day = new Date(plan.day);

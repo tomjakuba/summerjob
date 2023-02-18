@@ -19,3 +19,25 @@ export const PlanUpdateMoveWorkerSchema = z.object({
 });
 
 export type PlanUpdateMoveWorker = z.infer<typeof PlanUpdateMoveWorkerSchema>;
+
+export function serializePlan(plan: PlanComplete) {
+  return JSON.stringify(plan);
+}
+
+export function deserializePlan(plan: string) {
+  const parsed = JSON.parse(plan);
+  parsed.day = new Date(parsed.day);
+  return parsed;
+}
+
+export function serializePlans(plans: PlanWithJobs[]) {
+  return JSON.stringify(plans);
+}
+
+export function deserializePlans(plans: string) {
+  const parsed = JSON.parse(plans);
+  for (const plan of parsed) {
+    plan.day = new Date(plan.day);
+  }
+  return parsed;
+}

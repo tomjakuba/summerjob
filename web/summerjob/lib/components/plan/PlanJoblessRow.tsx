@@ -53,7 +53,7 @@ export function PlanJoblessRow({
       );
       setSourceJobId(null);
     }
-  });
+  }, [sourceJobId, workerIds, trigger, reloadJoblessWorkers]);
 
   const onWorkerDropped = () => (e: React.DragEvent<HTMLTableRowElement>) => {
     const workerId = e.dataTransfer.getData("worker-id");

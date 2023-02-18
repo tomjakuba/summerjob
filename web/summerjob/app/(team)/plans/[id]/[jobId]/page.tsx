@@ -3,14 +3,14 @@ import EditActiveJobForm from "lib/components/active-job/EditActiveJob";
 import EditBox from "lib/components/forms/EditBox";
 import { useAPIActiveJob } from "lib/fetcher/active-job";
 
-type Params = {
+type PathProps = {
   params: {
     id: string;
     jobId: string;
   };
 };
 
-export default function EditActiveJobPage({ params }: Params) {
+export default function EditActiveJobPage({ params }: PathProps) {
   const { data, error, isLoading } = useAPIActiveJob(params.jobId);
   return (
     <section>

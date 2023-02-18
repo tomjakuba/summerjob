@@ -1,4 +1,5 @@
 import { prisma } from "lib/prisma/connection";
+import { PlanComplete } from "lib/types/plan";
 
 export async function getPlans() {
   // TODO replace with the currently active year instead of newest
@@ -21,7 +22,7 @@ export async function getPlans() {
   return events[0].plans;
 }
 
-export async function getPlanById(id: string) {
+export async function getPlanById(id: string): Promise<PlanComplete | null> {
   const plan = await prisma.plan.findUnique({
     where: { id },
     include: {
