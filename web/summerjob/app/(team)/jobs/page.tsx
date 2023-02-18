@@ -3,7 +3,7 @@ import ErrorPage from "lib/components/error-page/error";
 import PageHeader from "lib/components/page-header/PageHeader";
 import { JobsTable } from "lib/components/jobs/JobsTable";
 import { ProposedJobComplete } from "lib/types/proposed-job";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { JobsFilters } from "lib/components/jobs/JobsFilters";
 import { useAPIProposedJobs } from "lib/fetcher/proposed-job";
 import { filterUniqueById } from "lib/helpers/helpers";
@@ -20,11 +20,29 @@ export default function ProposedJobsPage() {
 
   const [filter, setFilter] = useState("");
 
+  const fulltextData = useMemo(() => {
+    const map = new Map<string, string>();
+    data?.forEach((job) => {
+      map.set(
+        job.id,
+        (
+          job.name +
+          job.area.name +
+          job.address +
+          job.contact +
+          job.description
+        ).toLocaleLowerCase()
+      );
+    });
+    return map;
+  }, [data]);
+
   function shouldShowJob(job: ProposedJobComplete) {
     const area =
       selectedArea.id === areas[0].id || job.area.id === selectedArea.id;
-    const name = job.name.toLowerCase().includes(filter.toLowerCase());
-    return area && name;
+    const fulltext =
+      fulltextData.get(job.id)?.includes(filter.toLowerCase()) ?? false;
+    return area && fulltext;
   }
 
   if (error) {

@@ -184,3 +184,15 @@ img.smj-nav-logo {
 .error-code-border {
   border-right: 1px solid rgb(114, 114, 114);
 }
+
+.smj-table-actions-cell > a {
+  color: inherit;
+}
+
+.smj-action-complete {
+  color: #008000;
+}
+
+.smj-action-delete {
+  color: #9c0000;
+}

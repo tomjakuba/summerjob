@@ -12,8 +12,9 @@ import {
 const _columns: SortableColumn[] = [
   { id: "name", name: "Název", sortable: true },
   { id: "area", name: "Lokalita", sortable: true },
-  { id: "address", name: "Adresa", sortable: true },
-  { id: "days", name: "Dny", sortable: true },
+  { id: "contact", name: "Kontaktní osoba", sortable: false },
+  { id: "address", name: "Adresa", sortable: false },
+  { id: "days", name: "Naplánované dny", sortable: true },
   { id: "workers", name: "Počet pracovníků", sortable: true },
   { id: "actions", name: "Akce", sortable: false },
 ];
@@ -79,12 +80,25 @@ function formatJobRow(job: ProposedJobComplete) {
   return [
     job.name,
     job.area.name,
+    job.contact,
     job.address,
-    job.requiredDays,
+    `${job.activeJobs.length} / ${job.requiredDays}`,
     `${job.minWorkers} - ${job.maxWorkers}`,
-    <Link key={job.id} href={`/jobs/${job.id}`}>
-      Upravit
-    </Link>,
+    <span className="d-flex align-items-center gap-3 smj-table-actions-cell">
+      <i
+        className="fas fa-check smj-action-complete"
+        title="Označit jako dokončený"
+      ></i>
+      <i className="fas fa-thumbtack" title="Připnout"></i>
+      <Link
+        key={job.id}
+        href={`/jobs/${job.id}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <i className="fas fa-edit" title="Upravit"></i>
+      </Link>
+      <i className="fas fa-trash-alt smj-action-delete" title="Smazat"></i>
+    </span>,
   ];
 }
 
@@ -100,8 +114,8 @@ function sortJobs(data: ProposedJobComplete[], sortOrder: SortOrder) {
     name: (job) => job.name,
     area: (job) => job.area.name,
     address: (job) => job.address,
-    days: (job) => job.requiredDays,
-    workers: (job) => `${job.minWorkers} - ${job.maxWorkers}`,
+    days: (job) => job.activeJobs.length,
+    workers: (job) => job.minWorkers,
   };
 
   if (sortOrder.columnId in getSortable) {
