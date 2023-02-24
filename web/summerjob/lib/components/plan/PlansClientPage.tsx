@@ -43,9 +43,6 @@ export default function PlansClientPage({ initialData }: PlansClientPageProps) {
                   <div className="col">
                     <h5>{formatDateLong(plan.day, true)}</h5>
                     <p>{plan.jobs.length} jobů</p>
-                    <small className="text-muted">
-                      Poslední úprava dnes 8:11
-                    </small>
                   </div>
                   <div className="col d-flex justify-content-end align-items-center gap-3">
                     <i className="fas fa-chevron-right"></i>

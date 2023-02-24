@@ -1,5 +1,5 @@
 import { getAllergies } from "lib/data/allergies";
-import { ApiErrorType } from "lib/data/apiError";
+import { ApiErrorType } from "lib/data/api-error";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(

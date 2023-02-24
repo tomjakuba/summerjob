@@ -5,6 +5,10 @@ export enum ApiErrorType {
   INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR",
 }
 
+export type WrappedError<T extends Error> = {
+  error: T;
+};
+
 export class ApiError extends Error {
   readonly type: ApiErrorType;
   constructor(message: string, errorType: ApiErrorType) {

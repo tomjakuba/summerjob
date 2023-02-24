@@ -1,6 +1,6 @@
 "use client";
 
-import { ApiError } from "lib/data/apiError";
+import { ApiError } from "lib/data/api-error";
 import { default as t } from "lib/localization/cs-cz";
 
 export default function ErrorPage({ error }: { error: Error }) {

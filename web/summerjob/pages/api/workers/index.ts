@@ -1,5 +1,5 @@
 import { http_method_handler } from "lib/api/method_handler";
-import { ApiErrorType } from "lib/data/apiError";
+import { ApiErrorType } from "lib/data/api-error";
 import { getWorkers } from "lib/data/workers";
 import { NextApiRequest, NextApiResponse } from "next";
 

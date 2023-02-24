@@ -11,7 +11,7 @@ import { filterUniqueById, formatDateLong } from "lib/helpers/helpers";
 import { ActiveJobNoPlan } from "lib/types/active-job";
 import { PlanComplete } from "lib/types/plan";
 import { WorkerComplete, WorkerWithAllergies } from "lib/types/worker";
-import React, { useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 interface PlanClientPageProps {
   id: string;
@@ -27,16 +27,13 @@ export default function PlanClientPage({
   const initialDataPlanParsed = JSON.parse(initialDataPlan);
   initialDataPlanParsed.day = new Date(initialDataPlanParsed.day);
 
-  const { data, error, isLoading, mutate } = useAPIPlan(id, {
+  const { data, error, mutate } = useAPIPlan(id, {
     fallbackData: initialDataPlanParsed as PlanComplete,
   });
-  const {
-    data: workersWithoutJob,
-    isLoading: isLoadingWorkersWithoutJob,
-    mutate: reloadJoblessWorkers,
-  } = useAPIWorkersWithoutJob(id, {
-    fallbackData: initialDataJoblessWorkers,
-  });
+  const { data: workersWithoutJob, mutate: reloadJoblessWorkers } =
+    useAPIWorkersWithoutJob(id, {
+      fallbackData: initialDataJoblessWorkers,
+    });
 
   const [isJobModalOpen, setIsJobModalOpen] = useState(false);
   const openModal = () => setIsJobModalOpen(true);

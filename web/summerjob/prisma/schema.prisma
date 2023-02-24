@@ -36,13 +36,14 @@ model Car {
 }
 
 model CarOdometer {
-  id      String         @id @default(uuid())
-  car     Car            @relation(fields: [carId], references: [id])
-  carId   String
-  start   Int
-  end     Int
-  event   SummerJobEvent @relation(fields: [eventId], references: [id])
-  eventId String
+  id         String         @id @default(uuid())
+  car        Car            @relation(fields: [carId], references: [id])
+  carId      String
+  start      Int
+  end        Int
+  reimbursed Int            @default(0)
+  event      SummerJobEvent @relation(fields: [eventId], references: [id])
+  eventId    String
 }
 
 model Allergy {

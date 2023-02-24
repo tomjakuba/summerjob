@@ -1,4 +1,4 @@
-import { ApiErrorType } from "lib/data/apiError";
+import { ApiErrorType } from "lib/data/api-error";
 import { getPlans } from "lib/data/plans";
 import { NextApiRequest, NextApiResponse } from "next";
 import { http_method_handler } from "lib/api/method_handler";

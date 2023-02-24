@@ -8,6 +8,7 @@ import { default as t } from "lib/localization/cs-cz";
 import { useState } from "react";
 import { useAPIWorkerUpdate } from "lib/fetcher/worker";
 import { useAPIAllergies } from "lib/fetcher/fetcher";
+import Image from "next/image";
 
 const schema = z.object({
   id: z.string(),
@@ -156,7 +157,16 @@ export default function EditWorker({ worker }: { worker: WorkerComplete }) {
         </div>
         <div className="w-100 d-lg-none mt-3"></div>
         <div className="col-sm-auto col-lg-3 d-flex flex-column">
-          <img className="img-fluid" src="/profile.webp" alt="Worker photo" />
+          <div>
+            <Image
+              className="position-relative"
+              src="/profile.webp"
+              alt="Worker photo"
+              fill={true}
+              quality={95}
+            />
+          </div>
+
           <button className="btn btn-warning ms-auto mt-2" type="button">
             Změnit obrázek
           </button>

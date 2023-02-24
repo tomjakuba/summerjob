@@ -1,4 +1,4 @@
-import { ApiError } from "lib/data/apiError";
+import { ApiError } from "lib/data/api-error";
 import { Allergy } from "lib/prisma/client";
 import useSWR, { Key } from "swr";
 import useSWRMutation from "swr/mutation";

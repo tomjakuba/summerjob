@@ -51,6 +51,7 @@ async function createWorkers(allergies: Allergy[], eventId: string) {
     };
   };
   const withCar = (worker: any) => {
+    const odometerValue = between(10000, 100000);
     return {
       ...worker,
       car: {
@@ -58,6 +59,15 @@ async function createWorkers(allergies: Allergy[], eventId: string) {
           name: faker.vehicle.vehicle(),
           description: faker.vehicle.color(),
           seats: between(1, 3) * 2,
+          odometers: {
+            create: [
+              {
+                start: odometerValue,
+                end: odometerValue,
+                event: { connect: { id: eventId } },
+              },
+            ],
+          },
         },
       },
     };

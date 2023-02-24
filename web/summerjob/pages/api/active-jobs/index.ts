@@ -1,5 +1,5 @@
 import { createActiveJob } from "lib/data/active-jobs";
-import { ApiErrorType } from "lib/data/apiError";
+import { ApiErrorType } from "lib/data/api-error";
 import { CreateActiveJobSerializableSchema } from "lib/types/active-job";
 import { NextApiRequest, NextApiResponse } from "next";
 

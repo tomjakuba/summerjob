@@ -1,6 +1,6 @@
 import { http_method_handler } from "lib/api/method_handler";
 import { getActiveJobById, updateActiveJob } from "lib/data/active-jobs";
-import { ApiErrorType } from "lib/data/apiError";
+import { ApiErrorType } from "lib/data/api-error";
 import { UpdateActiveJobSerializableSchema } from "lib/types/active-job";
 import { NextApiRequest, NextApiResponse } from "next";
 

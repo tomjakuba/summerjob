@@ -84,17 +84,16 @@ function formatJobRow(job: ProposedJobComplete) {
     job.address,
     `${job.activeJobs.length} / ${job.requiredDays}`,
     `${job.minWorkers} - ${job.maxWorkers}`,
-    <span className="d-flex align-items-center gap-3 smj-table-actions-cell">
+    <span
+      key={job.id}
+      className="d-flex align-items-center gap-3 smj-table-actions-cell"
+    >
       <i
         className="fas fa-check smj-action-complete"
         title="Označit jako dokončený"
       ></i>
       <i className="fas fa-thumbtack" title="Připnout"></i>
-      <Link
-        key={job.id}
-        href={`/jobs/${job.id}`}
-        onClick={(e) => e.stopPropagation()}
-      >
+      <Link href={`/jobs/${job.id}`} onClick={(e) => e.stopPropagation()}>
         <i className="fas fa-edit" title="Upravit"></i>
       </Link>
       <i className="fas fa-trash-alt smj-action-delete" title="Smazat"></i>
