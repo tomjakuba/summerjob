@@ -1,3 +1,12 @@
+import {
+  PrismaClientInitializationError,
+  PrismaClientKnownRequestError,
+} from "@prisma/client/runtime";
+import {
+  ApiBadRequestError,
+  ApiDbError,
+  ApiInternalServerError,
+} from "lib/data/api-error";
 import { NextApiRequest, NextApiResponse } from "next";
 
 interface MethodHandlerProps {
@@ -17,25 +26,25 @@ export function http_method_handler({
     switch (req.method) {
       case "GET":
         if (get) {
-          await get(req, res);
+          await handle(get, req, res);
           return;
         }
         break;
       case "POST":
         if (post) {
-          await post(req, res);
+          await handle(post, req, res);
           return;
         }
         break;
       case "PATCH":
         if (patch) {
-          await patch(req, res);
+          await handle(patch, req, res);
           return;
         }
         break;
       case "DELETE":
         if (del) {
-          await del(req, res);
+          await handle(del, req, res);
           return;
         }
         break;
@@ -45,4 +54,29 @@ export function http_method_handler({
     }
     res.status(405).end();
   };
+}
+
+async function handle(
+  func: (req: NextApiRequest, res: NextApiResponse) => Promise<void>,
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  try {
+    await func(req, res);
+  } catch (error) {
+    if (error instanceof PrismaClientInitializationError) {
+      res.status(500).json({
+        error: new ApiDbError(),
+      });
+      return;
+    } else if (error instanceof PrismaClientKnownRequestError) {
+      res.status(400).json({
+        error: new ApiBadRequestError(),
+      });
+      return;
+    }
+    res.status(500).json({
+      error: new ApiInternalServerError(),
+    });
+  }
 }

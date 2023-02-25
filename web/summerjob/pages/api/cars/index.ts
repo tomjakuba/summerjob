@@ -8,14 +8,8 @@ async function get(
   req: NextApiRequest,
   res: NextApiResponse<CarsAPIGetResponse | WrappedError<ApiError>>
 ) {
-  try {
-    const cars = await getCars();
-    res.status(200).json(cars);
-  } catch (error) {
-    res.status(500).json({
-      error: new ApiDbError(),
-    });
-  }
+  const cars = await getCars();
+  res.status(200).json(cars);
 }
 
 export default http_method_handler({ get: get });

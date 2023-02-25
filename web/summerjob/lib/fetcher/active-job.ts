@@ -1,13 +1,11 @@
-import {
-  ActiveJobComplete,
-  UpdateActiveJobSerializable,
-} from "lib/types/active-job";
+import { UpdateActiveJobSerializable } from "lib/types/active-job";
 import {
   useData,
   useDataCreate,
   useDataPartialUpdate,
   useDataPartialUpdateDynamic,
 } from "./fetcher";
+import type { ActiveJobAPIGetResponse } from "pages/api/active-jobs/[id]";
 
 export function useAPIActiveJobCreate(options?: any) {
   return useDataCreate("/api/active-jobs", options);
@@ -29,7 +27,7 @@ export function useAPIActiveJobUpdateDynamic(id: () => string, options?: any) {
 }
 
 export function useAPIActiveJob(id: string) {
-  const result = useData<ActiveJobComplete>(`/api/active-jobs/${id}`);
+  const result = useData<ActiveJobAPIGetResponse>(`/api/active-jobs/${id}`);
   if (result.data) {
     result.data.plan.day = new Date(result.data.plan.day);
   }

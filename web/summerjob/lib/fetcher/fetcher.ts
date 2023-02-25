@@ -1,4 +1,4 @@
-import { ApiError } from "lib/data/api-error";
+import { ApiError, ApiErrorSchema } from "lib/data/api-error";
 import { Allergy } from "lib/prisma/client";
 import useSWR, { Key } from "swr";
 import useSWRMutation from "swr/mutation";
@@ -8,8 +8,9 @@ const get = async (url: string) => {
 
   if (!res.ok) {
     const data = await res.json();
-    if (data.error && data.error.type && data.error.message) {
-      throw new ApiError(data.error.message, data.error.type);
+    const parsingResult = ApiErrorSchema.safeParse(data.error);
+    if (parsingResult.success) {
+      throw new ApiError(parsingResult.data.reason, parsingResult.data.type);
     }
     throw new Error("An error occurred while fetching the data.");
   }
@@ -30,8 +31,9 @@ const sendData =
 
     if (!res.ok) {
       const data = await res.json();
-      if (data.error && data.error.type && data.error.message) {
-        throw new ApiError(data.error.message, data.error.type);
+      const parsingResult = ApiErrorSchema.safeParse(data.error);
+      if (parsingResult.success) {
+        throw new ApiError(parsingResult.data.reason, parsingResult.data.type);
       }
       throw new Error("An error occurred while submitting the data.");
     }
