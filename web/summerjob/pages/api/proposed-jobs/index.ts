@@ -1,12 +1,17 @@
 import { http_method_handler } from "lib/api/method_handler";
-import { ApiErrorType } from "lib/data/api-error";
 import {
   getProposedJobs,
   getUnplannedProposedJobs,
 } from "lib/data/proposed-jobs";
 import { NextApiRequest, NextApiResponse } from "next";
 
-async function get(req: NextApiRequest, res: NextApiResponse<any>) {
+export type ProposedJobsAPIGetResponse = Awaited<
+  ReturnType<typeof getProposedJobs>
+>;
+async function get(
+  req: NextApiRequest,
+  res: NextApiResponse<ProposedJobsAPIGetResponse>
+) {
   const { notInPlan } = req.query;
   let jobs;
   if (notInPlan && typeof notInPlan === "string") {

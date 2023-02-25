@@ -1,9 +1,14 @@
 import { http_method_handler } from "lib/api/method_handler";
+import { ApiError, WrappedError } from "lib/data/api-error";
 import { getWorkerById, modifyUser } from "lib/data/workers";
 import { WorkerSerializableSchema } from "lib/types/worker";
 import { NextApiRequest, NextApiResponse } from "next";
 
-async function get(req: NextApiRequest, res: NextApiResponse) {
+export type WorkerAPIGetResponse = Awaited<ReturnType<typeof getWorkerById>>;
+async function get(
+  req: NextApiRequest,
+  res: NextApiResponse<WorkerAPIGetResponse | WrappedError<ApiError>>
+) {
   const id = req.query.id as string;
   const user = await getWorkerById(id);
   if (!user) {

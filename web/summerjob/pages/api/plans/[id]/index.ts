@@ -2,7 +2,11 @@ import { http_method_handler } from "lib/api/method_handler";
 import { getPlanById } from "lib/data/plans";
 import { NextApiRequest, NextApiResponse } from "next";
 
-async function get(req: NextApiRequest, res: NextApiResponse) {
+export type PlanAPIGetResponse = Awaited<ReturnType<typeof getPlanById>>;
+async function get(
+  req: NextApiRequest,
+  res: NextApiResponse<PlanAPIGetResponse>
+) {
   const id = req.query.id as string;
   const plan = await getPlanById(id);
   if (!plan) {

@@ -7,7 +7,7 @@ import { Allergy } from "lib/prisma/client";
 import { default as t } from "lib/localization/cs-cz";
 import { useState } from "react";
 import { useAPIWorkerUpdate } from "lib/fetcher/worker";
-import { useAPIAllergies } from "lib/fetcher/fetcher";
+import { useAPIAllergies } from "lib/fetcher/allergy";
 import Image from "next/image";
 
 const schema = z.object({

@@ -1,6 +1,6 @@
 import { http_method_handler } from "lib/api/method_handler";
 import { getActiveJobById, updateActiveJob } from "lib/data/active-jobs";
-import { ApiBadRequestError, ApiError, WrappedError } from "lib/data/api-error";
+import { ApiBadRequestError } from "lib/data/api-error";
 import { UpdateActiveJobSerializableSchema } from "lib/types/active-job";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -25,7 +25,7 @@ export type ActiveJobAPIGetResponse = Awaited<
 >;
 async function get(
   req: NextApiRequest,
-  res: NextApiResponse<ActiveJobAPIGetResponse | WrappedError<ApiError>>
+  res: NextApiResponse<ActiveJobAPIGetResponse>
 ) {
   const id = req.query.id as string;
   const job = await getActiveJobById(id);

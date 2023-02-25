@@ -1,7 +1,7 @@
 import { prisma } from "lib/prisma/connection";
-import { PlanComplete } from "lib/types/plan";
+import { PlanComplete, PlanWithJobs } from "lib/types/plan";
 
-export async function getPlans() {
+export async function getPlans(): Promise<PlanWithJobs[]> {
   // TODO replace with the currently active year instead of newest
   const events = await prisma.summerJobEvent.findMany({
     orderBy: {

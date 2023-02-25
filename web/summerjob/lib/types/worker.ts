@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { Allergy, Car, Worker } from "../../lib/prisma/client";
 
 export type WorkerComplete = Worker & {
-  car?: Car;
+  car: Car | null;
   allergies: Allergy[];
 };
 

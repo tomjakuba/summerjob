@@ -1,12 +1,12 @@
-import { ProposedJobComplete } from "lib/types/proposed-job";
+import type { ProposedJobsAPIGetResponse } from "pages/api/proposed-jobs";
 import { useData } from "./fetcher";
 
 export function useAPIProposedJobs() {
-  return useData<ProposedJobComplete[]>("/api/proposed-jobs");
+  return useData<ProposedJobsAPIGetResponse>("/api/proposed-jobs");
 }
 
 export function useAPIProposedJobsNotInPlan(planId: string) {
-  return useData<ProposedJobComplete[]>(
+  return useData<ProposedJobsAPIGetResponse>(
     `/api/proposed-jobs?notInPlan=${planId}`
   );
 }

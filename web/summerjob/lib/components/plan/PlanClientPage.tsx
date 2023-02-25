@@ -12,6 +12,7 @@ import { ActiveJobNoPlan } from "lib/types/active-job";
 import { PlanComplete } from "lib/types/plan";
 import { WorkerComplete, WorkerWithAllergies } from "lib/types/worker";
 import { useMemo, useState } from "react";
+import ErrorPage404 from "../404/404";
 
 interface PlanClientPageProps {
   id: string;
@@ -42,7 +43,7 @@ export default function PlanClientPage({
     setIsJobModalOpen(false);
   };
 
-  const updateJoblessWorkers = (expectedValue: WorkerWithAllergies[]) => {
+  const updateJoblessWorkers = (expectedValue: WorkerComplete[]) => {
     reloadJoblessWorkers([...expectedValue]);
   };
 
@@ -66,7 +67,7 @@ export default function PlanClientPage({
     return map;
   }, [data?.jobs]);
 
-  const areas = getAvailableAreas(data);
+  const areas = getAvailableAreas(data ?? undefined);
   const [selectedArea, setSelectedArea] = useState(areas[0]);
 
   const onAreaSelected = (id: string) => {
@@ -92,74 +93,87 @@ export default function PlanClientPage({
 
   return (
     <>
-      <PageHeader
-        title={data ? formatDateLong(data?.day, true) : "Načítání..."}
-      >
-        <button className="btn btn-warning" type="button" onClick={openModal}>
-          <i className="fas fa-briefcase"></i>
-          <span>Přidat job</span>
-        </button>
-        <button className="btn btn-primary" type="button">
-          <i className="fas fa-cog"></i>
-          <span>Vygenerovat plán</span>
-        </button>
-        <button className="btn btn-primary" type="button">
-          <i className="fas fa-print"></i>
-          <span>Tisknout</span>
-        </button>
-      </PageHeader>
+      {data === null && <ErrorPage404 message="Plán nenalezen." />}
+      {data !== null && (
+        <>
+          <PageHeader
+            title={data ? formatDateLong(data?.day, true) : "Načítání..."}
+          >
+            <button
+              className="btn btn-warning"
+              type="button"
+              onClick={openModal}
+            >
+              <i className="fas fa-briefcase"></i>
+              <span>Přidat job</span>
+            </button>
+            <button className="btn btn-primary" type="button">
+              <i className="fas fa-cog"></i>
+              <span>Vygenerovat plán</span>
+            </button>
+            <button className="btn btn-primary" type="button">
+              <i className="fas fa-print"></i>
+              <span>Tisknout</span>
+            </button>
+          </PageHeader>
 
-      <section>
-        <div className="container-fluid">
-          <div className="row gx-3">
-            <div className="col">
-              <PlanFilters
-                search={filter}
-                onSearchChanged={setFilter}
-                areas={areas}
-                selectedArea={selectedArea}
-                onAreaSelected={onAreaSelected}
-              />
-            </div>
-          </div>
-          <div className="row gx-3">
-            <div className="col-sm-12 col-lg-10">
-              <PlanTable
-                plan={data}
-                shouldShowJob={shouldShowJob}
-                joblessWorkers={workersWithoutJob || []}
-                reloadJoblessWorkers={updateJoblessWorkers}
-                reloadPlan={mutate}
-              />
-            </div>
-            <div className="col-sm-12 col-lg-2">
-              <div className="vstack smj-search-stack smj-shadow rounded-3">
-                <h5>Statistiky</h5>
-                <hr />
-                <ul className="list-group list-group-flush ">
-                  <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
-                    Nasazených pracovníků
-                    <span>{data?.jobs.flatMap((x) => x.workers).length}</span>
-                  </li>
-                  <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
-                    Bez práce
-                    <span>{workersWithoutJob && workersWithoutJob.length}</span>
-                  </li>
-                  <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
-                    Naplánované joby
-                    <span>{data && data.jobs.length}</span>
-                  </li>
-                </ul>
+          <section>
+            <div className="container-fluid">
+              <div className="row gx-3">
+                <div className="col">
+                  <PlanFilters
+                    search={filter}
+                    onSearchChanged={setFilter}
+                    areas={areas}
+                    selectedArea={selectedArea}
+                    onAreaSelected={onAreaSelected}
+                  />
+                </div>
+              </div>
+              <div className="row gx-3">
+                <div className="col-sm-12 col-lg-10">
+                  <PlanTable
+                    plan={data}
+                    shouldShowJob={shouldShowJob}
+                    joblessWorkers={workersWithoutJob || []}
+                    reloadJoblessWorkers={updateJoblessWorkers}
+                    reloadPlan={mutate}
+                  />
+                </div>
+                <div className="col-sm-12 col-lg-2">
+                  <div className="vstack smj-search-stack smj-shadow rounded-3">
+                    <h5>Statistiky</h5>
+                    <hr />
+                    <ul className="list-group list-group-flush ">
+                      <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
+                        Nasazených pracovníků
+                        <span>
+                          {data?.jobs.flatMap((x) => x.workers).length}
+                        </span>
+                      </li>
+                      <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
+                        Bez práce
+                        <span>
+                          {workersWithoutJob && workersWithoutJob.length}
+                        </span>
+                      </li>
+                      <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
+                        Naplánované joby
+                        <span>{data && data.jobs.length}</span>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-        {isJobModalOpen && (
-          <Modal title={"Přidat job do plánu"} onClose={closeModal}>
-            <AddJobToPlanForm planId={id} onComplete={closeModal} />
-          </Modal>
-        )}
-      </section>
+            {isJobModalOpen && (
+              <Modal title={"Přidat job do plánu"} onClose={closeModal}>
+                <AddJobToPlanForm planId={id} onComplete={closeModal} />
+              </Modal>
+            )}
+          </section>
+        </>
+      )}
     </>
   );
 }

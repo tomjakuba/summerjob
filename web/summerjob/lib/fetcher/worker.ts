@@ -1,4 +1,5 @@
-import { WorkerComplete } from "lib/types/worker";
+import type { WorkersAPIGetResponse } from "pages/api/workers";
+import type { WorkerAPIGetResponse } from "pages/api/workers/[id]";
 import { useData, useDataPartialUpdate } from "./fetcher";
 
 export function useAPIWorkerUpdate<T>(workerId: string, options?: any) {
@@ -6,17 +7,17 @@ export function useAPIWorkerUpdate<T>(workerId: string, options?: any) {
 }
 
 export function useAPIWorkers() {
-  return useData<WorkerComplete[]>("/api/workers");
+  return useData<WorkersAPIGetResponse>("/api/workers");
 }
 
 export function useAPIWorkersWithoutJob(planId: string, options?: any) {
   const opts = Object.assign({ refreshInterval: 1000 }, options);
-  return useData<WorkerComplete[]>(
+  return useData<WorkersAPIGetResponse>(
     `/api/workers?withoutJob=true&planId=${planId}`,
     opts
   );
 }
 
 export function useAPIWorker(id: string) {
-  return useData<WorkerComplete>(`/api/workers/${id}`);
+  return useData<WorkerAPIGetResponse>(`/api/workers/${id}`);
 }

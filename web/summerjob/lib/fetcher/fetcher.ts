@@ -1,5 +1,4 @@
 import { ApiError, ApiErrorSchema } from "lib/data/api-error";
-import { Allergy } from "lib/prisma/client";
 import useSWR, { Key } from "swr";
 import useSWRMutation from "swr/mutation";
 
@@ -68,8 +67,4 @@ export function useDataPartialUpdateDynamic<T>(
 
 export function useDataCreate(url: string, options?: any) {
   return useSWRMutation(url, post, options);
-}
-
-export function useAPIAllergies() {
-  return useData<Allergy[]>("/api/allergies");
 }
