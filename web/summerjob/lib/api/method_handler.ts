@@ -1,12 +1,9 @@
 import {
-  PrismaClientInitializationError,
-  PrismaClientKnownRequestError,
-} from "@prisma/client/runtime";
-import {
   ApiBadRequestError,
   ApiDbError,
   ApiInternalServerError,
 } from "lib/data/api-error";
+import { Prisma } from "lib/prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 
 interface MethodHandlerProps {
@@ -64,12 +61,17 @@ async function handle(
   try {
     await func(req, res);
   } catch (error) {
-    if (error instanceof PrismaClientInitializationError) {
+    if (error instanceof Prisma.PrismaClientInitializationError) {
       res.status(500).json({
         error: new ApiDbError(),
       });
       return;
-    } else if (error instanceof PrismaClientKnownRequestError) {
+    } else if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      res.status(400).json({
+        error: new ApiBadRequestError(),
+      });
+      return;
+    } else if (error instanceof Prisma.PrismaClientValidationError) {
       res.status(400).json({
         error: new ApiBadRequestError(),
       });

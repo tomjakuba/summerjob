@@ -1,7 +1,7 @@
 "use client";
 import ErrorPage from "lib/components/error-page/error";
 import AddJobToPlanForm from "lib/components/plan/AddJobToPlanForm";
-import { Modal } from "lib/components/modal/Modal";
+import { Modal, ModalSize } from "lib/components/modal/Modal";
 import PageHeader from "lib/components/page-header/PageHeader";
 import { PlanFilters } from "lib/components/plan/PlanFilters";
 import { PlanTable } from "lib/components/plan/PlanTable";
@@ -10,7 +10,7 @@ import { useAPIWorkersWithoutJob } from "lib/fetcher/worker";
 import { filterUniqueById, formatDateLong } from "lib/helpers/helpers";
 import { ActiveJobNoPlan } from "lib/types/active-job";
 import { PlanComplete } from "lib/types/plan";
-import { WorkerComplete, WorkerWithAllergies } from "lib/types/worker";
+import { WorkerComplete } from "lib/types/worker";
 import { useMemo, useState } from "react";
 import ErrorPage404 from "../404/404";
 
@@ -167,7 +167,11 @@ export default function PlanClientPage({
               </div>
             </div>
             {isJobModalOpen && (
-              <Modal title={"Přidat job do plánu"} onClose={closeModal}>
+              <Modal
+                title={"Přidat job do plánu"}
+                size={ModalSize.LARGE}
+                onClose={closeModal}
+              >
                 <AddJobToPlanForm planId={id} onComplete={closeModal} />
               </Modal>
             )}

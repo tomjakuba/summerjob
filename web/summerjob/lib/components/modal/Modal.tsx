@@ -1,15 +1,21 @@
 interface ModalProps {
   children: React.ReactNode;
   title: string;
+  size: ModalSize;
   onClose: () => void;
 }
 
-export function Modal({ children, title, onClose }: ModalProps) {
+export enum ModalSize {
+  MEDIUM = "",
+  LARGE = "modal-lg",
+}
+
+export function Modal({ children, title, size, onClose }: ModalProps) {
   return (
     <>
       <div className="modal-backdrop fade show"></div>
       <div
-        className={`modal modal-lg fade show`}
+        className={`modal fade show ${size}`}
         style={{ display: "block" }}
         tabIndex={-1}
         onAnimationEnd={() => {}}

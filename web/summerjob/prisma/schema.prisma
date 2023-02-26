@@ -85,6 +85,8 @@ model ActiveJob {
   rides               Ride[]
   responsibleWorker   Worker?     @relation("ResponsibleWorker", fields: [responsibleWorkerId], references: [id])
   responsibleWorkerId String?
+
+  @@unique([proposedJobId, planId])
 }
 
 model Ride {
@@ -100,7 +102,7 @@ model Ride {
 
 model Plan {
   id               String         @id @default(uuid())
-  day              DateTime
+  day              DateTime       @unique @db.Date
   jobs             ActiveJob[]
   summerJobEvent   SummerJobEvent @relation(fields: [summerJobEventId], references: [id])
   summerJobEventId String

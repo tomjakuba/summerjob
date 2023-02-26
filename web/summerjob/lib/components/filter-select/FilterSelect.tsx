@@ -1,5 +1,5 @@
 "use client";
-import { createRef, CSSProperties, useEffect, useState } from "react";
+import { createRef, CSSProperties, useState } from "react";
 
 export interface FilterSelectItem {
   id: string;
@@ -28,32 +28,30 @@ export function FilterSelect({
 }: FilterSelectProps) {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState(DEFAULT);
-  const [open, setOpen] = useState(false);
   const inputRef = createRef<HTMLInputElement>();
   const [dropdownStyle, setDropdownStyle] = useState<CSSProperties>({});
-  useEffect(() => {
-    if (!open) {
-      setDropdownStyle({});
-      return;
-    }
-    if (inputRef.current) {
-      setDropdownStyle({
-        display: "block",
-        transform: `translate(0px, ${inputRef.current?.scrollHeight}px)`,
-      });
-    }
-  }, [open, inputRef]);
+
+  const showDropdown = () => {
+    setDropdownStyle({
+      display: "block",
+      transform: `translate(0px, ${inputRef.current?.scrollHeight}px)`,
+    });
+  };
+
+  const hideDropdown = () => {
+    setDropdownStyle({});
+  };
 
   const selectItem = (item: FilterSelectItem) => {
     setSelected(item);
     setSearch(item.name);
-    setOpen(false);
+    hideDropdown();
     onSelected(item);
   };
 
   const onBlur = (e: React.FocusEvent<HTMLDivElement>) => {
     if (!e.currentTarget.contains(e.relatedTarget as Node)) {
-      setOpen(false);
+      hideDropdown();
     }
   };
 
@@ -73,8 +71,8 @@ export function FilterSelect({
           type="text"
           placeholder={placeholder}
           style={{ border: "0px", outline: "0px" }}
-          onFocus={() => setOpen(true)}
-          onClick={() => setOpen(true)}
+          onFocus={showDropdown}
+          onClick={showDropdown}
           ref={inputRef}
           value={search}
           onChange={(e) => setSearch(e.target.value)}

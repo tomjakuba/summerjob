@@ -43,7 +43,9 @@ export async function getWorkers(
   return users as WorkerComplete[];
 }
 
-export async function getWorkerById(id: string) {
+export async function getWorkerById(
+  id: string
+): Promise<WorkerComplete | null> {
   const user = await prisma.worker.findUnique({
     where: {
       id,

@@ -1,5 +1,7 @@
+import { Plan } from "lib/prisma/client";
 import { prisma } from "lib/prisma/connection";
 import { PlanComplete, PlanWithJobs } from "lib/types/plan";
+import { InvalidDataError } from "./internal-error";
 
 export async function getPlans(): Promise<PlanWithJobs[]> {
   // TODO replace with the currently active year instead of newest
@@ -53,6 +55,29 @@ export async function getPlanById(id: string): Promise<PlanComplete | null> {
           responsibleWorker: true,
         },
       },
+    },
+  });
+  return plan;
+}
+
+export async function createPlan(date: Date): Promise<Plan> {
+  const event = await prisma.summerJobEvent.findFirst({
+    where: {
+      startDate: {
+        lte: date,
+      },
+      endDate: {
+        gte: date,
+      },
+    },
+  });
+  if (!event) {
+    throw new InvalidDataError("No summerjob event found for this date.");
+  }
+  const plan = await prisma.plan.create({
+    data: {
+      day: date,
+      summerJobEventId: event.id,
     },
   });
   return plan;

@@ -50,6 +50,8 @@ export function useData<T>(url: string, options?: any) {
 }
 
 export function useDataPartialUpdate<T>(url: string, options?: any) {
+  // Bugfix until this is solved https://github.com/vercel/swr/issues/2376
+  options = { throwOnError: false, ...options };
   return useSWRMutation<any, any, Key, T>(url, patch, options);
 }
 
@@ -58,6 +60,8 @@ export function useDataPartialUpdateDynamic<T>(
   getUrlFunc: (value: string) => string,
   options?: any
 ) {
+  // Bugfix until this is solved https://github.com/vercel/swr/issues/2376
+  options = { throwOnError: false, ...options };
   return useSWRMutation<any, any, Key, T>(
     () => getUrlFunc(func()),
     patch,
@@ -65,6 +69,8 @@ export function useDataPartialUpdateDynamic<T>(
   );
 }
 
-export function useDataCreate(url: string, options?: any) {
-  return useSWRMutation(url, post, options);
+export function useDataCreate<T>(url: string, options?: any) {
+  // Bugfix until this is solved https://github.com/vercel/swr/issues/2376
+  options = { throwOnError: false, ...options };
+  return useSWRMutation<any, any, Key, T>(url, post, options);
 }

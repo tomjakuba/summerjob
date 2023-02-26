@@ -7,6 +7,7 @@ export const formatDateLong = (date: Date, capitalize: boolean) => {
     weekday: "long",
     month: "long",
     day: "numeric",
+    timeZone: "Europe/Prague",
   };
   const formatted = new Intl.DateTimeFormat("cs-CZ", options).format(date);
   return capitalize ? capitalizeFirstLetter(formatted) : formatted;
