@@ -15,7 +15,7 @@ RUN \
 
 
 # Rebuild the source code only when needed
-FROM node:18 AS builder
+FROM node:18-alpine AS builder
 WORKDIR /app
 
 COPY --from=deps /app/node_modules ./node_modules
@@ -30,4 +30,4 @@ COPY package.json package.json
 # RUN apk add --update libc6-compat openssl openssl-dev
 RUN npx prisma generate
 
-CMD ["/bin/bash"]
+CMD ["/bin/sh"]
