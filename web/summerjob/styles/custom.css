@@ -94,7 +94,8 @@
 }
 
 img.smj-nav-logo {
-  max-width: 60px;
+  width: 60px;
+  height: auto;
 }
 
 .navbar-div span {

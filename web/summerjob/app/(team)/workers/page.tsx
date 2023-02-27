@@ -64,7 +64,10 @@ export default function WorkersPage() {
                               worker.email,
                               worker.isStrong ? "Ano" : "Ne",
                               worker.car ? "Ano" : "Ne",
-                              <Link href={`/workers/${worker.id}`}>
+                              <Link
+                                key={worker.id}
+                                href={`/workers/${worker.id}`}
+                              >
                                 Upravit
                               </Link>,
                             ],

@@ -2,6 +2,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import Image from "next/image";
+import logoImage from "public/logo-smj-yellow.png";
 
 type NavPath = {
   path: string;
@@ -25,10 +27,11 @@ export function Navbar() {
       <nav className="navbar navbar-light navbar-expand-md smj-gray pt-2 pb-2 mb-0">
         <div className="container-fluid">
           <a className="navbar-brand d-flex align-items-center" href="#">
-            <img
-              src="/logo-smj-yellow.png"
+            <Image
+              src={logoImage}
               className="smj-nav-logo"
               alt="SummerJob logo"
+              quality={98}
             />
           </a>
           <button

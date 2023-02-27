@@ -4,6 +4,15 @@ import "../styles/Navbar-With-Button-icons.css";
 import "../styles/bootstrap/css/bootstrap.min.css";
 import "../styles/fonts/fontawesome/fontawesome-all.min.css";
 
+export const metadata = {
+  title: "SummerJob Plánovač",
+  description: "SummerJob Plánovač",
+  author: "SummerJob",
+  icons: {
+    icon: "/favicon.ico",
+  },
+};
+
 export default function RootLayout({
   children,
 }: {
