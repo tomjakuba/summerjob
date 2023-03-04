@@ -1,4 +1,4 @@
-import { prisma } from "lib/prisma/connection";
+import prisma from "lib/prisma/connection";
 import { WorkerComplete, WorkerSerializable } from "lib/types/worker";
 
 export async function getWorkers(

@@ -1,7 +1,6 @@
-import { prisma } from "lib/prisma/connection";
+import prisma from "lib/prisma/connection";
 import {
   ActiveJobComplete,
-  ActiveJobNoPlan,
   CreateActiveJobSerializable,
   UpdateActiveJobSerializable,
 } from "lib/types/active-job";

@@ -1,5 +1,5 @@
 import { Plan } from "lib/prisma/client";
-import { prisma } from "lib/prisma/connection";
+import prisma from "lib/prisma/connection";
 import { PlanComplete, PlanWithJobs } from "lib/types/plan";
 import { InvalidDataError } from "./internal-error";
 

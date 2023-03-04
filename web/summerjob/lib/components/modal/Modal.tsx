@@ -2,7 +2,7 @@ interface ModalProps {
   children: React.ReactNode;
   title: string;
   size: ModalSize;
-  onClose: () => void;
+  onClose?: () => void;
 }
 
 export enum ModalSize {
@@ -24,12 +24,14 @@ export function Modal({ children, title, size, onClose }: ModalProps) {
           <div className="modal-content rounded-3">
             <div className="modal-header">
               <h5 className="modal-title">{title}</h5>
-              <button
-                type="button"
-                className="btn-close"
-                onClick={() => onClose()}
-                aria-label="Close"
-              ></button>
+              {onClose && (
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => onClose()}
+                  aria-label="Close"
+                ></button>
+              )}
             </div>
             <div className="modal-body">{children}</div>
           </div>

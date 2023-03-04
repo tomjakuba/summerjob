@@ -10,10 +10,10 @@ datasource db {
 
 model Worker {
   id             String           @id @default(uuid())
-  firstName      String           @db.VarChar(32)
-  lastName       String           @db.VarChar(32)
-  phone          String           @db.VarChar(16)
-  email          String           @db.VarChar(64)
+  firstName      String
+  lastName       String
+  phone          String
+  email          String
   car            Car?
   isStrong       Boolean          @default(false)
   allergies      Allergy[]
@@ -27,7 +27,7 @@ model Worker {
 model Car {
   id          String        @id @default(uuid())
   name        String        @db.VarChar(64)
-  description String?
+  description String        @default("")
   seats       Int
   owner       Worker        @relation(fields: [ownerId], references: [id])
   ownerId     String        @unique
@@ -36,14 +36,17 @@ model Car {
 }
 
 model CarOdometer {
-  id         String         @id @default(uuid())
-  car        Car            @relation(fields: [carId], references: [id])
-  carId      String
-  start      Int
-  end        Int
-  reimbursed Int            @default(0)
-  event      SummerJobEvent @relation(fields: [eventId], references: [id])
-  eventId    String
+  id                  String         @id @default(uuid())
+  car                 Car            @relation(fields: [carId], references: [id])
+  carId               String
+  start               Int
+  end                 Int
+  reimbursementAmount Int            @default(0)
+  reimbursed          Boolean        @default(false)
+  event               SummerJobEvent @relation(fields: [eventId], references: [id])
+  eventId             String
+
+  @@unique([carId, eventId])
 }
 
 model Allergy {
@@ -56,7 +59,7 @@ model Allergy {
 model ProposedJob {
   id            String      @id @default(uuid())
   name          String      @db.VarChar(64)
-  description   String?
+  description   String      @default("")
   requiredDays  Int
   completed     Boolean     @default(false)
   pinned        Boolean     @default(false)
@@ -75,8 +78,8 @@ model ProposedJob {
 
 model ActiveJob {
   id                  String      @id @default(uuid())
-  privateDescription  String?
-  publicDescription   String?
+  privateDescription  String      @default("")
+  publicDescription   String      @default("")
   proposedJob         ProposedJob @relation(fields: [proposedJobId], references: [id])
   proposedJobId       String
   workers             Worker[]
@@ -91,7 +94,7 @@ model ActiveJob {
 
 model Ride {
   id          String      @id @default(uuid())
-  description String?
+  description String      @default("")
   driver      Worker      @relation("Driver", fields: [driverId], references: [id])
   driverId    String
   car         Car         @relation(fields: [carId], references: [id])
@@ -111,7 +114,7 @@ model Plan {
 model Area {
   id               String         @id @default(uuid())
   name             String         @db.VarChar(64)
-  description      String?
+  description      String         @default("")
   requiresCar      Boolean
   jobs             ProposedJob[]
   SummerJobEvent   SummerJobEvent @relation(fields: [summerJobEventId], references: [id])

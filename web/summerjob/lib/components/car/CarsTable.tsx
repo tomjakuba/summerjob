@@ -1,5 +1,8 @@
+"use client";
 import { CarComplete } from "lib/types/car";
 import Link from "next/link";
+import { useState } from "react";
+import { Modal, ModalSize } from "../modal/Modal";
 import { SimpleRow } from "../table/SimpleRow";
 
 const _columns = [
@@ -43,15 +46,25 @@ export function CarsTable({ data }: CarTableProps) {
 }
 
 function formatCarRow(car: CarComplete) {
-  const drivenKm = car.odometers[0].end - car.odometers[0].start;
+  const drivenKm = car.odometer.end - car.odometer.start;
   return [
     car.name,
     `${car.owner.firstName} ${car.owner.lastName}`,
     car.seats,
     drivenKm,
-    car.odometers[0].reimbursed >= drivenKm ? "Ano" : "Ne",
-    <Link key={car.id} href={`/cars/${car.id}`}>
-      Upravit
-    </Link>,
+    car.odometer.reimbursed ? "Ano" : "Ne",
+    <span
+      key={car.id}
+      className="d-flex align-items-center gap-3 smj-table-actions-cell"
+    >
+      <Link
+        key={car.id}
+        href={`/cars/${car.id}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <i className="fas fa-edit" title="Upravit"></i>
+      </Link>
+      <i className="fas fa-trash-alt smj-action-delete" title="Smazat"></i>
+    </span>,
   ];
 }

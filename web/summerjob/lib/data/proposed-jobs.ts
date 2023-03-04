@@ -1,4 +1,4 @@
-import { prisma } from "lib/prisma/connection";
+import prisma from "lib/prisma/connection";
 import { ProposedJobComplete } from "lib/types/proposed-job";
 
 export async function getProposedJobs(): Promise<ProposedJobComplete[]> {

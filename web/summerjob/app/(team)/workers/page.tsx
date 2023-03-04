@@ -56,22 +56,20 @@ export default function WorkersPage() {
                       data.map((worker) => (
                         <SimpleRow
                           key={worker.id}
-                          {...{
-                            data: [
-                              worker.firstName,
-                              worker.lastName,
-                              worker.phone,
-                              worker.email,
-                              worker.isStrong ? "Ano" : "Ne",
-                              worker.car ? "Ano" : "Ne",
-                              <Link
-                                key={worker.id}
-                                href={`/workers/${worker.id}`}
-                              >
-                                Upravit
-                              </Link>,
-                            ],
-                          }}
+                          data={[
+                            worker.firstName,
+                            worker.lastName,
+                            worker.phone,
+                            worker.email,
+                            worker.isStrong ? "Ano" : "Ne",
+                            worker.car ? "Ano" : "Ne",
+                            <Link
+                              key={worker.id}
+                              href={`/workers/${worker.id}`}
+                            >
+                              Upravit
+                            </Link>,
+                          ]}
                         />
                       ))}
                   </tbody>
