@@ -2,6 +2,8 @@ import CreateCar from "lib/components/car/CreateCar";
 import EditBox from "lib/components/forms/EditBox";
 import { getWorkers } from "lib/data/workers";
 
+export const revalidate = 0;
+
 export default async function CreateCarPage() {
   const workers = await getWorkers();
   const names = workers.map((worker) => {
