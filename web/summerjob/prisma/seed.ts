@@ -54,21 +54,23 @@ async function createWorkers(allergies: Allergy[], eventId: string) {
     const odometerValue = between(10000, 100000);
     return {
       ...worker,
-      car: {
-        create: {
-          name: faker.vehicle.vehicle(),
-          description: faker.vehicle.color(),
-          seats: between(1, 3) * 2,
-          odometers: {
-            create: [
-              {
-                start: odometerValue,
-                end: odometerValue,
-                event: { connect: { id: eventId } },
-              },
-            ],
+      cars: {
+        create: [
+          {
+            name: faker.vehicle.vehicle() + ", " + faker.vehicle.vrm(),
+            description: faker.color.human(),
+            seats: between(1, 3) * 2,
+            odometers: {
+              create: [
+                {
+                  start: odometerValue,
+                  end: odometerValue,
+                  event: { connect: { id: eventId } },
+                },
+              ],
+            },
           },
-        },
+        ],
       },
     };
   };
