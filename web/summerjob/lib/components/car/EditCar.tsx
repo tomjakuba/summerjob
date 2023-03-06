@@ -18,12 +18,7 @@ export default function EditCar({ car }: { car: CarComplete }) {
 
   return (
     <>
-      <CarEditForm
-        onSubmit={onSubmit}
-        car={car}
-        isNewCar={false}
-        isSending={isMutating}
-      ></CarEditForm>
+      <CarEditForm onSubmit={onSubmit} car={car} isSending={isMutating} />
       {saved && (
         <Modal
           title="Úspěch"

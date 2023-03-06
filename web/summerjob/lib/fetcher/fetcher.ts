@@ -2,8 +2,8 @@ import { ApiError, ApiErrorSchema } from "lib/data/api-error";
 import useSWR, { Key } from "swr";
 import useSWRMutation from "swr/mutation";
 
-const get = async (url: string) => {
-  const res = await fetch(url);
+const send = (method: string) => async (url: string) => {
+  const res = await fetch(url, { method: method });
 
   if (!res.ok) {
     const data = await res.json();
@@ -11,7 +11,10 @@ const get = async (url: string) => {
     if (parsingResult.success) {
       throw new ApiError(parsingResult.data.reason, parsingResult.data.type);
     }
-    throw new Error("An error occurred while fetching the data.");
+    throw new Error("An error occurred during this request.");
+  }
+  if (res.status === 204) {
+    return;
   }
 
   return res.json();
@@ -42,8 +45,10 @@ const sendData =
     return res.json();
   };
 
+const get = send("GET");
 const post = sendData("POST");
 const patch = sendData("PATCH");
+const del = send("DELETE");
 
 export function useData<T>(url: string, options?: any) {
   return useSWR<T, Error>(url, get, options);
@@ -73,4 +78,11 @@ export function useDataCreate<T>(url: string, options?: any) {
   // Bugfix until this is solved https://github.com/vercel/swr/issues/2376
   options = { throwOnError: false, ...options };
   return useSWRMutation<any, any, Key, T>(url, post, options);
+}
+
+export function useDataDeleteDynamic(
+  getUrl: () => string | undefined,
+  options?: any
+) {
+  return useSWRMutation<any, any, Key, void>(getUrl, del, options);
 }

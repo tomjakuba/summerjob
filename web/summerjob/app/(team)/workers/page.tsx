@@ -62,7 +62,7 @@ export default function WorkersPage() {
                             worker.phone,
                             worker.email,
                             worker.isStrong ? "Ano" : "Ne",
-                            worker.car ? "Ano" : "Ne",
+                            worker.cars.length > 0 ? "Ano" : "Ne",
                             <Link
                               key={worker.id}
                               href={`/workers/${worker.id}`}

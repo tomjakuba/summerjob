@@ -137,59 +137,56 @@ function moveWorkerToJob(
   }[],
   reloadJoblessWorkers: (workers: WorkerWithAllergies[]) => void
 ) {
-  const planCopy = structuredClone(plan!);
-  const isFromJobless = fromJobId === "jobless";
-  const isToJobless = toJobId === "jobless";
-  let worker: WorkerWithAllergies | WorkerComplete;
-  if (isFromJobless && isToJobless) return;
-
-  let joblessCopy = [...joblessWorkers];
-  let fromJob = planCopy.jobs.find((j) => j.id === fromJobId);
-  let toJob = planCopy.jobs.find((j) => j.id === toJobId);
-
-  if (isFromJobless) {
-    worker = joblessCopy.find((w) => w.id === workerId)!;
-    joblessCopy = joblessCopy.filter((w) => w.id !== workerId);
-  } else {
-    fromJob = fromJob!;
-    worker = fromJob.workers.find((w) => w.id === workerId)!;
-    fromJob.workers = fromJob.workers.filter((w) => w.id !== workerId);
-    const fromRide =
-      fromJob.rides.find((r) => r.driverId === workerId) ||
-      fromJob.rides.find((r) => r.passengers.includes(worker));
-    if (fromRide) {
-      if (fromRide.driverId === workerId) {
-        fromJob.rides.splice(fromJob.rides.indexOf(fromRide), 1);
-      } else {
-        fromRide.passengers = fromRide.passengers.filter(
-          (p) => p.id !== workerId
-        );
-      }
-    }
-  }
-  if (isToJobless) {
-    joblessCopy.push(worker!);
-    const updateData: UpdateActiveJobSerializable = {
-      workerIds: fromJob!.workers.map((w) => w.id),
-    };
-    const trigger = updateHooks.find((h) => h.id === fromJobId)!.hook.trigger;
-    trigger(updateData);
-  } else {
-    toJob = toJob!;
-    toJob.workers.push(worker!);
-    const toRide = toJob.rides[0];
-    if (toRide) {
-      toRide.passengers.push(worker);
-    }
-    const updateData: UpdateActiveJobSerializable = {
-      workerIds: toJob.workers.map((w) => w.id),
-    };
-    const trigger = updateHooks.find((h) => h.id === toJobId)!.hook.trigger;
-    trigger(updateData);
-  }
-
+  // TODO: Optimistic updates for moving workers
+  // const planCopy = structuredClone(plan!);
+  // const isFromJobless = fromJobId === "jobless";
+  // const isToJobless = toJobId === "jobless";
+  // let worker: WorkerWithAllergies | WorkerComplete;
+  // if (isFromJobless && isToJobless) return;
+  // let joblessCopy = [...joblessWorkers];
+  // let fromJob = planCopy.jobs.find((j) => j.id === fromJobId);
+  // let toJob = planCopy.jobs.find((j) => j.id === toJobId);
+  // if (isFromJobless) {
+  //   worker = joblessCopy.find((w) => w.id === workerId)!;
+  //   joblessCopy = joblessCopy.filter((w) => w.id !== workerId);
+  // } else {
+  //   fromJob = fromJob!;
+  //   worker = fromJob.workers.find((w) => w.id === workerId)!;
+  //   fromJob.workers = fromJob.workers.filter((w) => w.id !== workerId);
+  //   const fromRide =
+  //     fromJob.rides.find((r) => r.driverId === workerId) ||
+  //     fromJob.rides.find((r) => r.passengers.includes(worker));
+  //   if (fromRide) {
+  //     if (fromRide.driverId === workerId) {
+  //       fromJob.rides.splice(fromJob.rides.indexOf(fromRide), 1);
+  //     } else {
+  //       fromRide.passengers = fromRide.passengers.filter(
+  //         (p) => p.id !== workerId
+  //       );
+  //     }
+  //   }
+  // }
+  // if (isToJobless) {
+  //   joblessCopy.push(worker!);
+  //   const updateData: UpdateActiveJobSerializable = {
+  //     workerIds: fromJob!.workers.map((w) => w.id),
+  //   };
+  //   const trigger = updateHooks.find((h) => h.id === fromJobId)!.hook.trigger;
+  //   trigger(updateData);
+  // } else {
+  //   toJob = toJob!;
+  //   toJob.workers.push(worker!);
+  //   const toRide = toJob.rides[0];
+  //   if (toRide) {
+  //     toRide.passengers.push(worker);
+  //   }
+  //   const updateData: UpdateActiveJobSerializable = {
+  //     workerIds: toJob.workers.map((w) => w.id),
+  //   };
+  //   const trigger = updateHooks.find((h) => h.id === toJobId)!.hook.trigger;
+  //   trigger(updateData);
+  // }
   // optimisticUpdatePlan({...oldPlan, ...planCopy})
-
   // triggerMoveWorker(planCopy, {
   //   optimisticData: (oldPlan: PlanComplete) => {
   //     return { ...oldPlan, ...planCopy };

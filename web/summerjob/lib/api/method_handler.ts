@@ -3,6 +3,7 @@ import {
   ApiDbError,
   ApiInternalServerError,
 } from "lib/data/api-error";
+import { InternalError } from "lib/data/internal-error";
 import { Prisma } from "lib/prisma/client";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -74,6 +75,11 @@ async function handle(
     } else if (error instanceof Prisma.PrismaClientValidationError) {
       res.status(400).json({
         error: new ApiBadRequestError(),
+      });
+      return;
+    } else if (error instanceof InternalError) {
+      res.status(500).json({
+        error: new ApiInternalServerError(error.reason),
       });
       return;
     }

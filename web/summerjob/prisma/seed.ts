@@ -189,15 +189,15 @@ async function populatePlan(
     }
   }
   // Have driver
-  type WorkerWithCar = Worker & { car: Car };
+  type WorkerWithCar = Worker & { cars: Car[] };
   const drivers = (await prisma.worker.findMany({
     where: {
-      car: {
-        id: {},
+      cars: {
+        some: {},
       },
     },
     include: {
-      car: true,
+      cars: true,
     },
   })) as WorkerWithCar[];
   const assignedWorkersWithCar = drivers.filter((driver) =>
@@ -213,7 +213,7 @@ async function populatePlan(
   const ride = await prisma.ride.create({
     data: {
       driverId: driver.id,
-      carId: driver.car.id,
+      carId: driver.cars[0].id,
       passengers: {
         connect: workersIds
           .filter((id) => id !== driver.id)

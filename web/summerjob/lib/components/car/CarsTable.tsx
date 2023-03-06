@@ -1,8 +1,8 @@
 "use client";
+import { useAPICarDeleteDynamic } from "lib/fetcher/car";
 import { CarComplete } from "lib/types/car";
 import Link from "next/link";
-import { useState } from "react";
-import { Modal, ModalSize } from "../modal/Modal";
+import { useEffect, useState } from "react";
 import { SimpleRow } from "../table/SimpleRow";
 
 const _columns = [
@@ -16,9 +16,33 @@ const _columns = [
 
 interface CarTableProps {
   data?: CarComplete[];
+  reload: (expectedResult: CarComplete[]) => void;
 }
 
-export function CarsTable({ data }: CarTableProps) {
+export function CarsTable({ data, reload }: CarTableProps) {
+  const [deletingCarId, setDeletingCarId] = useState<string | undefined>(
+    undefined
+  );
+  const { trigger, isMutating } = useAPICarDeleteDynamic(() => deletingCarId);
+
+  useEffect(() => {
+    if (deletingCarId) {
+      trigger((() => {})(), {
+        onSuccess: () => {
+          setDeletingCarId(undefined);
+          reload(data?.filter((car) => car.id !== deletingCarId) ?? []);
+        },
+        onError: () => {
+          setDeletingCarId(undefined);
+        },
+      });
+    }
+  }, [setDeletingCarId, deletingCarId, trigger, data, reload]);
+
+  const deleteCar = (carId: string) => {
+    setDeletingCarId(carId);
+  };
+
   return (
     <div className="table-responsive text-nowrap mb-2 smj-shadow rounded-3">
       <table className="table table-hover mb-0">
@@ -35,7 +59,7 @@ export function CarsTable({ data }: CarTableProps) {
               <SimpleRow
                 key={car.id}
                 {...{
-                  data: formatCarRow(car),
+                  data: formatCarRow(car, car.id === deletingCarId, deleteCar),
                 }}
               />
             ))}
@@ -45,7 +69,11 @@ export function CarsTable({ data }: CarTableProps) {
   );
 }
 
-function formatCarRow(car: CarComplete) {
+function formatCarRow(
+  car: CarComplete,
+  isBeingDeleted: boolean,
+  deleteCar: (carId: string) => void
+) {
   const drivenKm = car.odometer.end - car.odometer.start;
   return [
     car.name,
@@ -64,7 +92,23 @@ function formatCarRow(car: CarComplete) {
       >
         <i className="fas fa-edit" title="Upravit"></i>
       </Link>
-      <i className="fas fa-trash-alt smj-action-delete" title="Smazat"></i>
+      {!isBeingDeleted && (
+        <>
+          <i
+            className="fas fa-trash-alt smj-action-delete cursor-pointer"
+            title="Smazat"
+            onClick={() => deleteCar(car.id)}
+          ></i>
+          <span style={{ width: "0px" }}></span>
+        </>
+      )}
+
+      {isBeingDeleted && (
+        <i
+          className="fas fa-spinner smj-action-delete spinning"
+          title="Odstraňování..."
+        ></i>
+      )}
     </span>,
   ];
 }

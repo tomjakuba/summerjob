@@ -197,3 +197,7 @@ img.smj-nav-logo {
 .smj-action-delete {
   color: #9c0000;
 }
+
+.spinning {
+  animation: 1s linear infinite spinner-border;
+}

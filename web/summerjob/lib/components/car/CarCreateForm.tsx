@@ -1,46 +1,50 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CarComplete, CarUpdateData, CarUpdateSchema } from "lib/types/car";
+import { CarCreateData, CarCreateSchema } from "lib/types/car";
+import { WorkerBasicInfo } from "lib/types/worker";
 import { useForm } from "react-hook-form";
+import { FilterSelect, FilterSelectItem } from "../filter-select/FilterSelect";
 
 type CarEditFormProps = {
-  car: CarComplete;
-  onSubmit: (data: CarUpdateData) => void;
+  onSubmit: (data: CarCreateData) => void;
   isSending: boolean;
+  owners: WorkerBasicInfo[];
 };
 
-export default function CarEditForm({
-  car,
+export default function CarCreateForm({
   onSubmit,
   isSending,
+  owners,
 }: CarEditFormProps) {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
-  } = useForm<CarUpdateData>({
-    resolver: zodResolver(CarUpdateSchema),
+  } = useForm<CarCreateData>({
+    resolver: zodResolver(CarCreateSchema),
     defaultValues: {
-      name: car.name,
-      description: car.description ?? "",
-      seats: car.seats,
+      seats: 4,
       odometer: {
-        start: car.odometer.start,
-        end: car.odometer.end,
-        reimbursed: car.odometer.reimbursed,
-        reimbursementAmount: car.odometer.reimbursementAmount,
+        start: 0,
+        end: 0,
+        reimbursed: false,
+        reimbursementAmount: 0,
       },
     },
   });
-  console.log(isSending);
+
+  const ownerItems = owners.map(workerToSelectItem);
+
+  const onOwnerSelected = (item: FilterSelectItem) => {
+    setValue("ownerId", item.id);
+  };
 
   return (
     <>
       <div className="row">
         <div className="col">
-          <h3>
-            {car.name} - {car.owner.firstName} {car.owner.lastName}
-          </h3>
+          <h3>Přidat auto</h3>
         </div>
       </div>
       <div className="row">
@@ -51,7 +55,7 @@ export default function CarEditForm({
             </label>
             <input
               id="name"
-              className="form-control p-0 fs-5"
+              className="form-control p-2 fs-5"
               type="text"
               placeholder="Model auta, značka"
               {...register("name")}
@@ -64,9 +68,9 @@ export default function CarEditForm({
             </label>
             <textarea
               id="description"
-              className="form-control border p-1 fs-5"
+              className="form-control border p-2 fs-5"
               rows={3}
-              placeholder="Popis"
+              placeholder="Speciální vlastnosti, způsob kompenzace za najeté km, ..."
               {...register("description")}
             />
             <label className="form-label fw-bold mt-4" htmlFor="seats">
@@ -74,7 +78,7 @@ export default function CarEditForm({
             </label>
             <input
               id="seats"
-              className="form-control p-0 fs-5"
+              className="form-control p-2 fs-5"
               type="number"
               placeholder="Počet sedadel"
               min="1"
@@ -83,12 +87,26 @@ export default function CarEditForm({
             {errors.seats?.message && (
               <p className="text-danger">{errors.seats.message as string}</p>
             )}
+
+            <label className="form-label fw-bold mt-4" htmlFor="owner">
+              Majitel
+            </label>
+            <FilterSelect
+              placeholder="Vyberte majitele"
+              items={ownerItems}
+              onSelected={onOwnerSelected}
+            />
+            <input type={"hidden"} {...register("ownerId")} />
+            {errors.ownerId?.message && (
+              <p className="text-danger">Vyberte majitele auta.</p>
+            )}
+
             <label className="form-label fw-bold mt-4" htmlFor="odometer-start">
               Počáteční stav kilometrů
             </label>
             <input
               id="odometer-start"
-              className="form-control p-0 fs-5"
+              className="form-control p-2 fs-5"
               type="number"
               placeholder="Počáteční stav kilometrů"
               min="0"
@@ -99,52 +117,7 @@ export default function CarEditForm({
                 {errors.odometer.start.message as string}
               </p>
             )}
-            <label className="form-label fw-bold mt-4" htmlFor="odometer-end">
-              Konečný stav kilometrů
-            </label>
-            <input
-              id="odometer-end"
-              className="form-control p-0 fs-5"
-              type="number"
-              placeholder="Konečný stav kilometrů"
-              min="0"
-              {...register("odometer.end", { valueAsNumber: true })}
-            />
-            {errors.odometer?.end?.message && (
-              <p className="text-danger">
-                {errors.odometer.end.message as string}
-              </p>
-            )}
-            <label
-              className="form-label fw-bold mt-4"
-              htmlFor="odometer-reimbursementAmount"
-            >
-              Částka k proplacení
-            </label>
-            <input
-              id="odometer-reimbursementAmount"
-              className="form-control p-0 fs-5"
-              type="number"
-              placeholder="Částka k proplacení"
-              min="0"
-              {...register("odometer.reimbursementAmount", {
-                valueAsNumber: true,
-              })}
-            />
-            <div className="form-check mt-4">
-              <input
-                className="form-check-input me-2"
-                type="checkbox"
-                id="odometer-reimbursed"
-                {...register("odometer.reimbursed")}
-              />
-              <label
-                className="form-check-label form-label fw-bold"
-                htmlFor="odometer-reimbursed"
-              >
-                Proplaceno
-              </label>
-            </div>
+
             <div className="d-flex justify-content-between gap-3">
               <button
                 className="btn btn-secondary mt-4"
@@ -165,4 +138,17 @@ export default function CarEditForm({
       </div>
     </>
   );
+}
+
+function workerToSelectItem(worker: WorkerBasicInfo): FilterSelectItem {
+  return {
+    id: worker.id,
+    name: `${worker.firstName} ${worker.lastName}`,
+    searchable: `${worker.firstName} ${worker.lastName}`,
+    item: (
+      <div>
+        {worker.firstName} {worker.lastName}
+      </div>
+    ),
+  };
 }

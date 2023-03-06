@@ -27,7 +27,7 @@ export async function getWorkers(
   const users = await prisma.worker.findMany({
     include: {
       allergies: true,
-      car: true,
+      cars: true,
     },
     ...whereClause,
     orderBy: [
@@ -51,7 +51,7 @@ export async function getWorkerById(
       id,
     },
     include: {
-      car: true,
+      cars: true,
       allergies: true,
     },
   });

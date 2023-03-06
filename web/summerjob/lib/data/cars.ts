@@ -1,10 +1,11 @@
-import { Car, CarOdometer } from "lib/prisma/client";
+import { Car, CarOdometer, Ride } from "lib/prisma/client";
 import prisma from "lib/prisma/connection";
-import { CarComplete, CarUpdateData } from "lib/types/car";
+import { CarComplete, CarCreateData, CarUpdateData } from "lib/types/car";
 import { getActiveSummerJobEventId } from "./data-store";
 import type { Worker } from "lib/prisma/client";
+import { NoActiveEventError } from "./internal-error";
 
-export async function getCarById(id: string) {
+export async function getCarById(id: string): Promise<CarComplete | null> {
   const activeEventId = await getActiveSummerJobEventId();
   const car = await prisma.car.findUnique({
     where: {
@@ -18,6 +19,7 @@ export async function getCarById(id: string) {
         },
         take: 1,
       },
+      rides: true,
     },
   });
   if (!car) {
@@ -29,6 +31,7 @@ export async function getCarById(id: string) {
 
 export async function getCars(): Promise<CarComplete[]> {
   const activeEventId = await getActiveSummerJobEventId();
+  if (!activeEventId) throw new NoActiveEventError();
   const cars = await prisma.car.findMany({
     include: {
       owner: true,
@@ -38,6 +41,17 @@ export async function getCars(): Promise<CarComplete[]> {
         },
         take: 1,
       },
+      rides: {
+        where: {
+          jobs: {
+            some: {
+              plan: {
+                summerJobEventId: activeEventId,
+              },
+            },
+          },
+        },
+      },
     },
   });
   const carsWithOdometers = cars.map(databaseCarToCarComplete);
@@ -46,6 +60,7 @@ export async function getCars(): Promise<CarComplete[]> {
 
 type CarWithOdometers = Car & {
   owner: Worker;
+  rides: Ride[];
   odometers: CarOdometer[];
 };
 
@@ -85,5 +100,34 @@ export async function updateCar(carId: string, car: CarUpdateData) {
         },
       });
     }
+  });
+}
+
+export async function createCar(carData: CarCreateData) {
+  const activeEventId = await getActiveSummerJobEventId();
+  if (!activeEventId) {
+    throw new NoActiveEventError();
+  }
+  const { odometer, ...carWithoutOdometer } = carData;
+  odometer.end = odometer.end < odometer.start ? odometer.start : odometer.end;
+  const car = await prisma.car.create({
+    data: {
+      ...carWithoutOdometer,
+      odometers: {
+        create: {
+          ...odometer,
+          eventId: activeEventId,
+        },
+      },
+    },
+  });
+  return car;
+}
+
+export async function deleteCar(carId: string) {
+  await prisma.car.delete({
+    where: {
+      id: carId,
+    },
   });
 }

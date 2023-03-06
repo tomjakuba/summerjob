@@ -1,4 +1,4 @@
-import { Car, CarOdometer } from "lib/prisma/client";
+import { Car, CarOdometer, Ride } from "lib/prisma/client";
 import type { Worker } from "lib/prisma/client";
 import { z } from "zod";
 
@@ -9,6 +9,7 @@ export type CarWithOwner = Car & {
 export type CarComplete = Car & {
   owner: Worker;
   odometer: CarOdometer;
+  rides: Ride[];
 };
 
 export function serializeCars(cars: Car[]) {
@@ -21,7 +22,6 @@ export function deserializeCars(cars: string) {
 
 export const CarUpdateSchema = z
   .object({
-    id: z.string(),
     name: z.string().min(3),
     description: z.string(),
     seats: z.number().positive(),
@@ -38,7 +38,7 @@ export const CarUpdateSchema = z
 export type CarUpdateData = z.infer<typeof CarUpdateSchema>;
 
 export const CarCreateSchema = CarUpdateSchema.merge(
-  z.object({ owner: z.string() })
-);
+  z.object({ ownerId: z.string().min(1) })
+).required();
 
 export type CarCreateData = z.infer<typeof CarCreateSchema>;

@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useAPIWorkerUpdate } from "lib/fetcher/worker";
 import { useAPIAllergies } from "lib/fetcher/allergy";
 import Image from "next/image";
+import Link from "next/link";
 
 const schema = z.object({
   id: z.string(),
@@ -117,14 +118,24 @@ export default function EditWorker({ worker }: { worker: WorkerComplete }) {
                 ))}
             </div>
             <label className="form-label d-block fw-bold mt-4" htmlFor="car">
-              Auto
+              Auta
             </label>
-            <input
-              type="text"
-              className="form-control p-0 fs-5"
-              disabled={true}
-              value={worker.car?.name || "Žádné"}
-            />
+            {worker.cars.length === 0 && <p>Žádná auta</p>}
+            {worker.cars.length > 0 && (
+              <div className="list-group">
+                {worker.cars.map((car) => (
+                  <Link
+                    key={car.id}
+                    href={`/cars/${car.id}`}
+                    className="list-group-item list-group-item-action ps-2 d-flex align-items-center justify-content-between w-50"
+                  >
+                    {car.name}
+                    <i className="fas fa-angle-right ms-2"></i>
+                  </Link>
+                ))}
+              </div>
+            )}
+
             <input
               className="btn btn-warning m-3 ms-0 p-3"
               type="submit"

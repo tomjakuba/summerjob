@@ -1,6 +1,7 @@
 "use client";
 import { useAPICars } from "lib/fetcher/car";
 import { CarComplete, deserializeCars } from "lib/types/car";
+import Link from "next/link";
 import { useState } from "react";
 import PageHeader from "../page-header/PageHeader";
 import { CarsFilters } from "./CarsFilters";
@@ -12,7 +13,9 @@ interface CarsClientPageProps {
 
 export default function CarsClientPage({ initialData }: CarsClientPageProps) {
   const initialCars = deserializeCars(initialData);
-  const { data, error, isLoading } = useAPICars({ fallbackData: initialCars });
+  const { data, error, isLoading, mutate } = useAPICars({
+    fallbackData: initialCars,
+  });
   const [filter, setFilter] = useState("");
 
   const filterCars = (cars: CarComplete[]) => {
@@ -24,13 +27,19 @@ export default function CarsClientPage({ initialData }: CarsClientPageProps) {
     });
   };
 
+  const requestReload = (expectedResult: CarComplete[]) => {
+    mutate(expectedResult);
+  };
+
   return (
     <>
       <PageHeader title={"Seznam vozidel"}>
-        <button className="btn btn-warning" type="button">
-          <i className="fas fa-car"></i>
-          <span>Nové auto</span>
-        </button>
+        <Link href="/cars/new">
+          <button className="btn btn-warning" type="button">
+            <i className="fas fa-car"></i>
+            <span>Nové auto</span>
+          </button>
+        </Link>
       </PageHeader>
 
       <section>
@@ -42,7 +51,7 @@ export default function CarsClientPage({ initialData }: CarsClientPageProps) {
           </div>
           <div className="row gx-3">
             <div className="col-sm-12 col-lg-12">
-              <CarsTable data={filterCars(data!)}></CarsTable>
+              <CarsTable data={filterCars(data!)} reload={requestReload} />
             </div>
           </div>
         </div>

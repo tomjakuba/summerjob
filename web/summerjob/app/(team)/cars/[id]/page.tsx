@@ -9,7 +9,7 @@ type PathProps = {
   };
 };
 
-export default async function EditWorkerPage({ params }: PathProps) {
+export default async function EditCarPage({ params }: PathProps) {
   const car = await getCarById(params.id);
   if (!car) return <ErrorPage404 message="Auto nenalezeno." />;
 

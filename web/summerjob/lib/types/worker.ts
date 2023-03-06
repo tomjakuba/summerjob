@@ -2,7 +2,7 @@ import { z } from "zod";
 import type { Allergy, Car, Worker } from "../../lib/prisma/client";
 
 export type WorkerComplete = Worker & {
-  car: Car | null;
+  cars: Car[];
   allergies: Allergy[];
 };
 
@@ -22,3 +22,5 @@ export const WorkerSerializableSchema = z
   .strict();
 
 export type WorkerSerializable = z.infer<typeof WorkerSerializableSchema>;
+
+export type WorkerBasicInfo = Pick<Worker, "id" | "firstName" | "lastName">;
