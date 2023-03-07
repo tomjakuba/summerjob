@@ -61,17 +61,12 @@ export function useDataPartialUpdate<T>(url: string, options?: any) {
 }
 
 export function useDataPartialUpdateDynamic<T>(
-  func: () => string,
-  getUrlFunc: (value: string) => string,
+  getUrl: () => string | undefined,
   options?: any
 ) {
   // Bugfix until this is solved https://github.com/vercel/swr/issues/2376
   options = { throwOnError: false, ...options };
-  return useSWRMutation<any, any, Key, T>(
-    () => getUrlFunc(func()),
-    patch,
-    options
-  );
+  return useSWRMutation<any, any, Key, T>(getUrl, patch, options);
 }
 
 export function useDataCreate<T>(url: string, options?: any) {
@@ -84,5 +79,7 @@ export function useDataDeleteDynamic(
   getUrl: () => string | undefined,
   options?: any
 ) {
+  // Bugfix until this is solved https://github.com/vercel/swr/issues/2376
+  options = { throwOnError: false, ...options };
   return useSWRMutation<any, any, Key, void>(getUrl, del, options);
 }

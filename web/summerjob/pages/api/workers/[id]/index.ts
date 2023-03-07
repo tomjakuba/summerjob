@@ -1,6 +1,6 @@
 import { http_method_handler } from "lib/api/method_handler";
 import { ApiError, WrappedError } from "lib/data/api-error";
-import { getWorkerById, modifyUser } from "lib/data/workers";
+import { getWorkerById, updateWorker } from "lib/data/workers";
 import { WorkerSerializableSchema } from "lib/types/worker";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -21,7 +21,7 @@ async function get(
 async function patch(req: NextApiRequest, res: NextApiResponse) {
   const id = req.query.id as string;
   const workerData = WorkerSerializableSchema.parse(req.body);
-  await modifyUser(id, workerData);
+  await updateWorker(id, workerData);
   res.status(204).end();
 }
 

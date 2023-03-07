@@ -58,7 +58,7 @@ export async function getWorkerById(
   return user;
 }
 
-export async function modifyUser(id: string, data: WorkerSerializable) {
+export async function updateWorker(id: string, data: WorkerSerializable) {
   const user = await prisma.worker.update({
     where: {
       id,

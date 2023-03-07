@@ -18,12 +18,16 @@ export function useAPIActiveJobUpdate(id: string, options?: any) {
   );
 }
 
-export function useAPIActiveJobUpdateDynamic(id: () => string, options?: any) {
-  return useDataPartialUpdateDynamic<UpdateActiveJobSerializable>(
-    id,
-    (value) => `/api/active-jobs/${value}`,
-    options
-  );
+export function useAPIActiveJobUpdateDynamic(
+  id: () => string | undefined,
+  options?: any
+) {
+  const url = () => {
+    const jobId = id();
+    if (!jobId) return undefined;
+    return `/api/active-jobs/${jobId}`;
+  };
+  return useDataPartialUpdateDynamic<UpdateActiveJobSerializable>(url, options);
 }
 
 export function useAPIActiveJob(id: string) {

@@ -1,5 +1,8 @@
 import prisma from "lib/prisma/connection";
-import { ProposedJobComplete } from "lib/types/proposed-job";
+import {
+  type ProposedJobComplete,
+  type ProposedJobUpdateData,
+} from "lib/types/proposed-job";
 
 export async function getProposedJobs(): Promise<ProposedJobComplete[]> {
   const jobs = await prisma.proposedJob.findMany({
@@ -29,6 +32,7 @@ export async function getUnplannedProposedJobs(
           },
         },
       },
+      completed: false,
     },
     include: {
       area: true,
@@ -42,4 +46,18 @@ export async function getUnplannedProposedJobs(
     ],
   });
   return jobs;
+}
+
+export async function updateProposedJob(
+  id: string,
+  proposedJobData: ProposedJobUpdateData
+) {
+  // TODO update allergens in job
+  const { allergens, ...proposedJobDataWithoutAllergens } = proposedJobData;
+  const proposedJob = await prisma.proposedJob.update({
+    where: {
+      id,
+    },
+    data: proposedJobDataWithoutAllergens,
+  });
 }

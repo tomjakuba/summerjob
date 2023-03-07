@@ -123,6 +123,7 @@ img.smj-nav-logo {
 
 .smj-expandable-row {
   background-color: #f4f1b6;
+  transition: all 0.1s ease-out;
   cursor: pointer;
 }
 
@@ -198,6 +199,26 @@ img.smj-nav-logo {
   color: #9c0000;
 }
 
+.smj-action-pinned {
+  color: #d76e13;
+}
+
+.smj-action-pin:hover {
+  color: #d76e13;
+}
+
+.smj-action-pinned:hover {
+  color: inherit;
+}
+
 .spinning {
   animation: 1s linear infinite spinner-border;
+}
+
+.smj-completed-job-row {
+  background-color: #d4edda;
+}
+
+.smj-pinned-job-row {
+  background-color: #fadaaa;
 }

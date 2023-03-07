@@ -1,6 +1,8 @@
+import { useAPIProposedJobUpdateDynamic } from "lib/fetcher/proposed-job";
 import { ProposedJobComplete } from "lib/types/proposed-job";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { ProposedJobAPIPatchData } from "pages/api/proposed-jobs/[id]";
+import { useEffect, useMemo, useState } from "react";
 import { ExpandableRow } from "../table/ExpandableRow";
 import { LoadingRow } from "../table/LoadingRow";
 import {
@@ -23,9 +25,20 @@ interface JobsTableProps {
   data: ProposedJobComplete[];
   isLoading: boolean;
   shouldShowJob: (job: ProposedJobComplete) => boolean;
+  reload: () => void;
 }
 
-export function JobsTable({ data, isLoading, shouldShowJob }: JobsTableProps) {
+type JobUpdateData = {
+  id: string;
+  data: ProposedJobAPIPatchData;
+};
+
+export function JobsTable({
+  data,
+  isLoading,
+  shouldShowJob,
+  reload,
+}: JobsTableProps) {
   const [sortOrder, setSortOrder] = useState<SortOrder>({
     columnId: undefined,
     direction: "desc",
@@ -33,10 +46,45 @@ export function JobsTable({ data, isLoading, shouldShowJob }: JobsTableProps) {
   const onSortRequested = (direction: SortOrder) => {
     setSortOrder(direction);
   };
+  const [waitingJobs, completedJobs, pinnedJobs] = useMemo(() => {
+    const completed = data.filter((job) => job.completed);
+    const pinned = data.filter((job) => !job.completed && job.pinned);
+    const regular = data.filter((job) => !job.completed && !job.pinned);
+    return [regular, completed, pinned];
+  }, [data]);
+
   const sortedData = useMemo(
-    () => sortJobs(data, sortOrder),
-    [sortOrder, data]
+    () => [
+      ...sortJobs(pinnedJobs, sortOrder),
+      ...sortJobs(waitingJobs, sortOrder),
+      ...sortJobs(completedJobs, sortOrder),
+    ],
+    [sortOrder, waitingJobs, completedJobs]
   );
+
+  const [jobUpdateData, setJobUpdateData] = useState<JobUpdateData | undefined>(
+    undefined
+  );
+  const getUpdateJobId = () => jobUpdateData?.id;
+  const { trigger } = useAPIProposedJobUpdateDynamic(getUpdateJobId, {
+    onSuccess: () => {
+      reload();
+    },
+  });
+
+  useEffect(() => {
+    if (jobUpdateData) {
+      trigger(jobUpdateData.data);
+      setJobUpdateData(undefined);
+    }
+  }, [jobUpdateData, setJobUpdateData, trigger]);
+
+  const setJobPinned = (job: ProposedJobComplete, pinned: boolean) => {
+    setJobUpdateData({
+      id: job.id,
+      data: { pinned: pinned },
+    });
+  };
 
   return (
     <SortableTable
@@ -49,7 +97,11 @@ export function JobsTable({ data, isLoading, shouldShowJob }: JobsTableProps) {
         sortedData.map(
           (job) =>
             shouldShowJob(job) && (
-              <ExpandableRow key={job.id} data={formatJobRow(job)}>
+              <ExpandableRow
+                key={job.id}
+                data={formatJobRow(job, setJobPinned)}
+                className={rowColorClass(job)}
+              >
                 <>
                   <div className="ms-2">
                     <h6>Popis</h6>
@@ -76,7 +128,20 @@ export function JobsTable({ data, isLoading, shouldShowJob }: JobsTableProps) {
   );
 }
 
-function formatJobRow(job: ProposedJobComplete) {
+function rowColorClass(job: ProposedJobComplete) {
+  if (job.completed) {
+    return "smj-completed-job-row";
+  }
+  if (job.pinned) {
+    return "smj-pinned-job-row";
+  }
+  return "";
+}
+
+function formatJobRow(
+  job: ProposedJobComplete,
+  setPinned: (job: ProposedJobComplete, pinned: boolean) => void
+) {
   return [
     job.name,
     job.area.name,
@@ -88,17 +153,44 @@ function formatJobRow(job: ProposedJobComplete) {
       key={job.id}
       className="d-flex align-items-center gap-3 smj-table-actions-cell"
     >
-      <i
-        className="fas fa-check smj-action-complete"
-        title="Označit jako dokončený"
-      ></i>
-      <i className="fas fa-thumbtack" title="Připnout"></i>
+      {markJobAsCompletedIcon(job)}
+      {pinJobIcon(job, setPinned)}
       <Link href={`/jobs/${job.id}`} onClick={(e) => e.stopPropagation()}>
         <i className="fas fa-edit" title="Upravit"></i>
       </Link>
       <i className="fas fa-trash-alt smj-action-delete" title="Smazat"></i>
     </span>,
   ];
+}
+
+function markJobAsCompletedIcon(job: ProposedJobComplete) {
+  const color = job.completed ? "" : "smj-action-complete";
+  const title = job.completed
+    ? "Označit jako nedokončený"
+    : "Označit jako dokončený";
+  const icon = job.completed ? "fa-undo" : "fa-check";
+  return (
+    <i className={`fas ${icon} ${color}`} title={title} onClick={(e) => {}}></i>
+  );
+}
+
+function pinJobIcon(
+  job: ProposedJobComplete,
+  setPinned: (job: ProposedJobComplete, pinned: boolean) => void
+) {
+  const color = job.pinned ? "smj-action-pinned" : "smj-action-pin";
+  const title = job.pinned ? "Odepnout" : "Připnout";
+  const icon = job.pinned ? "fa-thumbtack" : "fa-thumbtack";
+  return (
+    <i
+      className={`fas ${icon} ${color}`}
+      title={title}
+      onClick={(e) => {
+        e.stopPropagation();
+        setPinned(job, !job.pinned);
+      }}
+    ></i>
+  );
 }
 
 function sortJobs(data: ProposedJobComplete[], sortOrder: SortOrder) {

@@ -29,17 +29,12 @@ export function PlanJoblessRow({
   onWorkerDragStart,
   reloadJoblessWorkers,
 }: PlanJoblessRowProps) {
-  const [sourceJobId, setSourceJobId] = useState<string | null>(null);
+  const [sourceJobId, setSourceJobId] = useState<string | undefined>(undefined);
   const [workerIds, setWorkerIds] = useState<string[]>([]);
-  const getMoveSourceJobIdOrThrow = () => {
-    if (!sourceJobId) {
-      throw new Error("No source job id");
-    }
-    return sourceJobId;
-  };
-  const { trigger, isMutating, error } = useAPIActiveJobUpdateDynamic(
-    getMoveSourceJobIdOrThrow
-  );
+  const getSourceJobId = () => sourceJobId;
+
+  const { trigger, isMutating, error } =
+    useAPIActiveJobUpdateDynamic(getSourceJobId);
 
   useEffect(() => {
     if (sourceJobId) {
@@ -51,7 +46,7 @@ export function PlanJoblessRow({
           },
         }
       );
-      setSourceJobId(null);
+      setSourceJobId(undefined);
     }
   }, [sourceJobId, workerIds, trigger, reloadJoblessWorkers]);
 

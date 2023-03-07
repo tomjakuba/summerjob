@@ -9,7 +9,8 @@ import { useAPIProposedJobs } from "lib/fetcher/proposed-job";
 import { filterUniqueById } from "lib/helpers/helpers";
 
 export default function ProposedJobsPage() {
-  const { data, error, isLoading } = useAPIProposedJobs();
+  const { data, error, isLoading, mutate } = useAPIProposedJobs();
+  const reload = () => mutate();
 
   const areas = getAvailableAreas(data);
   const [selectedArea, setSelectedArea] = useState(areas[0]);
@@ -20,22 +21,7 @@ export default function ProposedJobsPage() {
 
   const [filter, setFilter] = useState("");
 
-  const fulltextData = useMemo(() => {
-    const map = new Map<string, string>();
-    data?.forEach((job) => {
-      map.set(
-        job.id,
-        (
-          job.name +
-          job.area.name +
-          job.address +
-          job.contact +
-          job.description
-        ).toLocaleLowerCase()
-      );
-    });
-    return map;
-  }, [data]);
+  const fulltextData = useMemo(() => getFulltextData(data), [data]);
 
   function shouldShowJob(job: ProposedJobComplete) {
     const area =
@@ -77,6 +63,7 @@ export default function ProposedJobsPage() {
                 data={data || []}
                 isLoading={isLoading}
                 shouldShowJob={shouldShowJob}
+                reload={reload}
               />
             </div>
           </div>
@@ -94,4 +81,21 @@ function getAvailableAreas(jobs?: ProposedJobComplete[]) {
   areas.sort((a, b) => a.name.localeCompare(b.name));
   areas.unshift(ALL_AREAS);
   return areas;
+}
+
+function getFulltextData(jobs?: ProposedJobComplete[]) {
+  const map = new Map<string, string>();
+  jobs?.forEach((job) => {
+    map.set(
+      job.id,
+      (
+        job.name +
+        job.area.name +
+        job.address +
+        job.contact +
+        job.description
+      ).toLocaleLowerCase()
+    );
+  });
+  return map;
 }
