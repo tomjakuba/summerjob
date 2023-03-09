@@ -53,7 +53,7 @@ export function JobsTable({ data, shouldShowJob, reload }: JobsTableProps) {
       ...sortJobs(waitingJobs, sortOrder),
       ...sortJobs(completedJobs, sortOrder),
     ],
-    [sortOrder, waitingJobs, completedJobs]
+    [sortOrder, waitingJobs, completedJobs, pinnedJobs]
   );
 
   const [jobUpdateData, setJobUpdateData] = useState<JobUpdateData | undefined>(
