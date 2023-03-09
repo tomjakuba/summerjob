@@ -23,7 +23,6 @@ const _columns: SortableColumn[] = [
 
 interface JobsTableProps {
   data: ProposedJobComplete[];
-  isLoading: boolean;
   shouldShowJob: (job: ProposedJobComplete) => boolean;
   reload: () => void;
 }
@@ -33,12 +32,7 @@ type JobUpdateData = {
   data: ProposedJobAPIPatchData;
 };
 
-export function JobsTable({
-  data,
-  isLoading,
-  shouldShowJob,
-  reload,
-}: JobsTableProps) {
+export function JobsTable({ data, shouldShowJob, reload }: JobsTableProps) {
   const [sortOrder, setSortOrder] = useState<SortOrder>({
     columnId: undefined,
     direction: "desc",
@@ -86,20 +80,26 @@ export function JobsTable({
     });
   };
 
+  const setJobCompleted = (job: ProposedJobComplete, completed: boolean) => {
+    setJobUpdateData({
+      id: job.id,
+      data: { completed: completed },
+    });
+  };
+
   return (
     <SortableTable
       columns={_columns}
       currentSort={sortOrder}
       onRequestedSort={onSortRequested}
     >
-      {isLoading && <LoadingRow colspan={_columns.length} />}
-      {!isLoading &&
+      {data &&
         sortedData.map(
           (job) =>
             shouldShowJob(job) && (
               <ExpandableRow
                 key={job.id}
-                data={formatJobRow(job, setJobPinned)}
+                data={formatJobRow(job, setJobPinned, setJobCompleted)}
                 className={rowColorClass(job)}
               >
                 <>
@@ -140,7 +140,8 @@ function rowColorClass(job: ProposedJobComplete) {
 
 function formatJobRow(
   job: ProposedJobComplete,
-  setPinned: (job: ProposedJobComplete, pinned: boolean) => void
+  setPinned: (job: ProposedJobComplete, pinned: boolean) => void,
+  setCompleted: (job: ProposedJobComplete, completed: boolean) => void
 ) {
   return [
     job.name,
@@ -153,7 +154,7 @@ function formatJobRow(
       key={job.id}
       className="d-flex align-items-center gap-3 smj-table-actions-cell"
     >
-      {markJobAsCompletedIcon(job)}
+      {markJobAsCompletedIcon(job, setCompleted)}
       {pinJobIcon(job, setPinned)}
       <Link href={`/jobs/${job.id}`} onClick={(e) => e.stopPropagation()}>
         <i className="fas fa-edit" title="Upravit"></i>
@@ -163,14 +164,24 @@ function formatJobRow(
   ];
 }
 
-function markJobAsCompletedIcon(job: ProposedJobComplete) {
-  const color = job.completed ? "" : "smj-action-complete";
+function markJobAsCompletedIcon(
+  job: ProposedJobComplete,
+  setCompleted: (job: ProposedJobComplete, completed: boolean) => void
+) {
+  const color = job.completed ? "smj-action-completed" : "smj-action-complete";
   const title = job.completed
     ? "Označit jako nedokončený"
     : "Označit jako dokončený";
-  const icon = job.completed ? "fa-undo" : "fa-check";
+  const icon = job.completed ? "fa-times" : "fa-check";
   return (
-    <i className={`fas ${icon} ${color}`} title={title} onClick={(e) => {}}></i>
+    <i
+      className={`fas ${icon} ${color}`}
+      title={title}
+      onClick={(e) => {
+        e.stopPropagation();
+        setCompleted(job, !job.completed);
+      }}
+    ></i>
   );
 }
 

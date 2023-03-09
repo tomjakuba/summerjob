@@ -9,7 +9,7 @@ import { useAPIPlan } from "lib/fetcher/plan";
 import { useAPIWorkersWithoutJob } from "lib/fetcher/worker";
 import { filterUniqueById, formatDateLong } from "lib/helpers/helpers";
 import { ActiveJobNoPlan } from "lib/types/active-job";
-import { PlanComplete } from "lib/types/plan";
+import { deserializePlan, PlanComplete } from "lib/types/plan";
 import { WorkerComplete } from "lib/types/worker";
 import { useMemo, useState } from "react";
 import ErrorPage404 from "../404/404";
@@ -25,11 +25,10 @@ export default function PlanClientPage({
   initialDataPlan,
   initialDataJoblessWorkers,
 }: PlanClientPageProps) {
-  const initialDataPlanParsed = JSON.parse(initialDataPlan);
-  initialDataPlanParsed.day = new Date(initialDataPlanParsed.day);
+  const initialDataPlanParsed = deserializePlan(initialDataPlan);
 
   const { data, error, mutate } = useAPIPlan(id, {
-    fallbackData: initialDataPlanParsed as PlanComplete,
+    fallbackData: initialDataPlanParsed,
   });
   const { data: workersWithoutJob, mutate: reloadJoblessWorkers } =
     useAPIWorkersWithoutJob(id, {

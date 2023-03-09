@@ -191,7 +191,22 @@ img.smj-nav-logo {
 }
 
 .smj-action-complete {
-  color: #008000;
+  color: #007400;
+}
+
+.smj-action-complete:hover {
+  color: #00b300;
+}
+
+.smj-action-completed {
+  font-size: 110%;
+  width: 1rem;
+  padding-left: 0.1rem;
+  color: #75000a;
+}
+
+.smj-action-completed:hover {
+  color: #af000f;
 }
 
 .smj-action-delete {

@@ -27,7 +27,7 @@ export function serializePlan(plan: PlanComplete) {
 export function deserializePlan(plan: string) {
   const parsed = JSON.parse(plan);
   parsed.day = new Date(parsed.day);
-  return parsed;
+  return parsed as PlanComplete;
 }
 
 export function serializePlans(plans: PlanWithJobs[]) {

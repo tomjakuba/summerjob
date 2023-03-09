@@ -2,8 +2,8 @@ import type { ProposedJobsAPIGetResponse } from "pages/api/proposed-jobs";
 import { ProposedJobAPIPatchData } from "pages/api/proposed-jobs/[id]";
 import { useData, useDataPartialUpdateDynamic } from "./fetcher";
 
-export function useAPIProposedJobs() {
-  return useData<ProposedJobsAPIGetResponse>("/api/proposed-jobs");
+export function useAPIProposedJobs(options?: any) {
+  return useData<ProposedJobsAPIGetResponse>("/api/proposed-jobs", options);
 }
 
 export function useAPIProposedJobsNotInPlan(planId: string) {

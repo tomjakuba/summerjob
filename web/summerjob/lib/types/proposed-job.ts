@@ -29,3 +29,11 @@ export const ProposedJobUpdateSchema = z
   .partial();
 
 export type ProposedJobUpdateData = z.infer<typeof ProposedJobUpdateSchema>;
+
+export function serializeProposedJobs(jobs: ProposedJobComplete[]) {
+  return JSON.stringify(jobs);
+}
+
+export function deserializeProposedJobs(jobs: string) {
+  return JSON.parse(jobs) as ProposedJobComplete[];
+}
