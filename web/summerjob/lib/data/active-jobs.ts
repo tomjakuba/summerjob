@@ -1,8 +1,8 @@
 import prisma from "lib/prisma/connection";
 import {
   ActiveJobComplete,
-  CreateActiveJobSerializable,
-  UpdateActiveJobSerializable,
+  ActiveJobCreateData,
+  ActiveJobUpdateData,
 } from "lib/types/active-job";
 import type { Worker, Prisma } from "lib/prisma/client";
 
@@ -166,7 +166,7 @@ function getActiveJobDetailsById(
   });
 }
 
-export async function updateActiveJob(job: UpdateActiveJobSerializable) {
+export async function updateActiveJob(job: ActiveJobUpdateData) {
   const {
     id,
     privateDescription,
@@ -243,7 +243,7 @@ export async function updateActiveJob(job: UpdateActiveJobSerializable) {
   });
 }
 
-export async function createActiveJob(job: CreateActiveJobSerializable) {
+export async function createActiveJob(job: ActiveJobCreateData) {
   const { proposedJobId, privateDescription, publicDescription, planId } = job;
   const activeJob = await prisma.$transaction(async (tx) => {
     const existingActiveJob = await tx.activeJob.findFirst({

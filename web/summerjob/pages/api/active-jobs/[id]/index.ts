@@ -1,12 +1,12 @@
 import { http_method_handler } from "lib/api/method_handler";
 import { getActiveJobById, updateActiveJob } from "lib/data/active-jobs";
 import { ApiBadRequestError } from "lib/data/api-error";
-import { UpdateActiveJobSerializableSchema } from "lib/types/active-job";
+import { ActiveJobUpdateSchema } from "lib/types/active-job";
 import { NextApiRequest, NextApiResponse } from "next";
 
 async function patch(req: NextApiRequest, res: NextApiResponse) {
   const id = req.query.id as string;
-  const result = UpdateActiveJobSerializableSchema.safeParse(req.body);
+  const result = ActiveJobUpdateSchema.safeParse(req.body);
   if (!result.success) {
     res.status(400).json({
       error: new ApiBadRequestError(JSON.stringify(result.error.issues)),

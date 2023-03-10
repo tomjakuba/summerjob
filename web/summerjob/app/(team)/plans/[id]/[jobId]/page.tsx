@@ -14,7 +14,7 @@ type PathProps = {
 export default async function EditActiveJobPage({ params }: PathProps) {
   const job = await getActiveJobById(params.jobId);
   if (!job) {
-    return <ErrorPage404 message="Job not found"></ErrorPage404>;
+    return <ErrorPage404 message="Job nenalezen."></ErrorPage404>;
   }
   const serialized = serializeActiveJob(job);
   return (

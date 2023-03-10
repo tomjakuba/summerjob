@@ -1,5 +1,5 @@
-import type { CarCreateData, CarUpdateData } from "lib/types/car";
-import type { CarsAPIGetResponse } from "pages/api/cars";
+import type { CarUpdateData } from "lib/types/car";
+import type { CarsAPIGetResponse, CarsAPIPostData } from "pages/api/cars";
 import {
   useData,
   useDataCreate,
@@ -16,7 +16,7 @@ export function useAPICarUpdate(carId: string, options?: any) {
 }
 
 export function useAPICarCreate(options?: any) {
-  return useDataCreate<CarCreateData>("/api/cars", options);
+  return useDataCreate<CarsAPIPostData>("/api/cars", options);
 }
 
 export function useAPICarDeleteDynamic(

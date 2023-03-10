@@ -1,4 +1,4 @@
-import { UpdateActiveJobSerializable } from "lib/types/active-job";
+import { ActiveJobUpdateData } from "lib/types/active-job";
 import {
   useData,
   useDataCreate,
@@ -12,7 +12,7 @@ export function useAPIActiveJobCreate(options?: any) {
 }
 
 export function useAPIActiveJobUpdate(id: string, options?: any) {
-  return useDataPartialUpdate<UpdateActiveJobSerializable>(
+  return useDataPartialUpdate<ActiveJobUpdateData>(
     `/api/active-jobs/${id}`,
     options
   );
@@ -27,7 +27,7 @@ export function useAPIActiveJobUpdateDynamic(
     if (!jobId) return undefined;
     return `/api/active-jobs/${jobId}`;
   };
-  return useDataPartialUpdateDynamic<UpdateActiveJobSerializable>(url, options);
+  return useDataPartialUpdateDynamic<ActiveJobUpdateData>(url, options);
 }
 
 export function useAPIActiveJob(id: string) {

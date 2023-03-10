@@ -1,7 +1,4 @@
-import {
-  ActiveJobNoPlan,
-  UpdateActiveJobSerializable,
-} from "lib/types/active-job";
+import { ActiveJobNoPlan, ActiveJobUpdateData } from "lib/types/active-job";
 import type { Worker } from "lib/prisma/client";
 import { PlanComplete } from "lib/types/plan";
 import {
@@ -133,7 +130,7 @@ function moveWorkerToJob(
   joblessWorkers: WorkerWithAllergies[],
   updateHooks: {
     id: string;
-    hook: SWRMutationResponse<any, any, UpdateActiveJobSerializable, Key>;
+    hook: SWRMutationResponse<any, any, ActiveJobUpdateData, Key>;
   }[],
   reloadJoblessWorkers: (workers: WorkerWithAllergies[]) => void
 ) {

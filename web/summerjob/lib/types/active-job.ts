@@ -29,7 +29,7 @@ export type ActiveJobWithProposed = ActiveJob & {
   proposedJob: ProposedJob;
 };
 
-export const CreateActiveJobSerializableSchema = z
+export const ActiveJobCreateSchema = z
   .object({
     proposedJobId: z.string(),
     privateDescription: z.string(),
@@ -38,11 +38,9 @@ export const CreateActiveJobSerializableSchema = z
   })
   .strict();
 
-export type CreateActiveJobSerializable = z.infer<
-  typeof CreateActiveJobSerializableSchema
->;
+export type ActiveJobCreateData = z.infer<typeof ActiveJobCreateSchema>;
 
-export const UpdateActiveJobSerializableSchema = z
+export const ActiveJobUpdateSchema = z
   .object({
     id: z.string(),
     privateDescription: z.string(),
@@ -55,9 +53,7 @@ export const UpdateActiveJobSerializableSchema = z
   .partial()
   .strict();
 
-export type UpdateActiveJobSerializable = z.infer<
-  typeof UpdateActiveJobSerializableSchema
->;
+export type ActiveJobUpdateData = z.infer<typeof ActiveJobUpdateSchema>;
 
 export function serializeActiveJob(job: ActiveJobComplete) {
   return JSON.stringify(job);
