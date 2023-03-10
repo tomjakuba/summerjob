@@ -58,3 +58,13 @@ export const UpdateActiveJobSerializableSchema = z
 export type UpdateActiveJobSerializable = z.infer<
   typeof UpdateActiveJobSerializableSchema
 >;
+
+export function serializeActiveJob(job: ActiveJobComplete) {
+  return JSON.stringify(job);
+}
+
+export function deserializeActiveJob(job: string) {
+  const parsed = JSON.parse(job) as ActiveJobComplete;
+  parsed.plan.day = new Date(parsed.plan.day);
+  return parsed;
+}

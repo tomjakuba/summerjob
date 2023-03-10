@@ -237,6 +237,8 @@ export async function updateActiveJob(job: UpdateActiveJobSerializable) {
       },
     });
 
+    //TODO update ride
+
     return activeJob;
   });
 }

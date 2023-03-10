@@ -56,21 +56,7 @@ export function PlanJobRow({
         <>
           <ExpandableRow
             key={job.id}
-            data={[
-              job.proposedJob.name,
-              `${job.workers.length}/${job.proposedJob.maxWorkers}`,
-              job.proposedJob.contact,
-              job.proposedJob.area.name,
-              job.proposedJob.address,
-              formatAmenities(job),
-              <Link
-                key={job.id}
-                href={`/plans/${planId}/${job.id}`}
-                onClick={(e) => e.stopPropagation()}
-              >
-                Upravit
-              </Link>,
-            ]}
+            data={formatRowData(job)}
             onDrop={onWorkerDropped(job.id)}
           >
             <>
@@ -163,4 +149,33 @@ function formatAmenities(job: ActiveJobNoPlan) {
       )}
     </>
   );
+}
+
+function formatRowData(job: ActiveJobNoPlan) {
+  return [
+    job.proposedJob.name,
+    `${job.workers.length}/${job.proposedJob.maxWorkers}`,
+    job.proposedJob.contact,
+    job.proposedJob.area.name,
+    job.proposedJob.address,
+    formatAmenities(job),
+    <span
+      key={job.id}
+      className="d-flex align-items-center gap-3 smj-table-actions-cell"
+    >
+      <Link
+        href={`/plans/${job.planId}/${job.id}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <i className="fas fa-edit" title="Upravit"></i>
+      </Link>
+
+      <i
+        className="fas fa-trash-alt smj-action-delete cursor-pointer"
+        title="Smazat"
+        onClick={() => {}}
+      ></i>
+      <span style={{ width: "0px" }}></span>
+    </span>,
+  ];
 }

@@ -1,7 +1,8 @@
-"use client";
-import EditActiveJobForm from "lib/components/active-job/EditActiveJob";
+import ErrorPage404 from "lib/components/404/404";
+import EditActiveJobForm from "lib/components/active-job/EditActiveJobForm";
 import EditBox from "lib/components/forms/EditBox";
-import { useAPIActiveJob } from "lib/fetcher/active-job";
+import { getActiveJobById } from "lib/data/active-jobs";
+import { serializeActiveJob } from "lib/types/active-job";
 
 type PathProps = {
   params: {
@@ -10,22 +11,16 @@ type PathProps = {
   };
 };
 
-export default function EditActiveJobPage({ params }: PathProps) {
-  const { data, error, isLoading } = useAPIActiveJob(params.jobId);
+export default async function EditActiveJobPage({ params }: PathProps) {
+  const job = await getActiveJobById(params.jobId);
+  if (!job) {
+    return <ErrorPage404 message="Job not found"></ErrorPage404>;
+  }
+  const serialized = serializeActiveJob(job);
   return (
     <section>
       <EditBox>
-        {isLoading && (
-          <center>
-            <h4>Načítám...</h4>
-          </center>
-        )}
-        {error && !isLoading && (
-          <center>
-            <h4>Při načítání dat došlo k chybě</h4>
-          </center>
-        )}
-        {data && <EditActiveJobForm job={data}></EditActiveJobForm>}
+        <EditActiveJobForm serializedJob={serialized}></EditActiveJobForm>
       </EditBox>
     </section>
   );

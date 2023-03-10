@@ -12,6 +12,7 @@ interface FilterSelectProps {
   items: FilterSelectItem[];
   placeholder: string;
   onSelected: (item: FilterSelectItem) => void;
+  defaultSelected?: FilterSelectItem;
 }
 
 const DEFAULT: FilterSelectItem = {
@@ -25,9 +26,10 @@ export function FilterSelect({
   items,
   placeholder,
   onSelected,
+  defaultSelected,
 }: FilterSelectProps) {
-  const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState(DEFAULT);
+  const [search, setSearch] = useState(defaultSelected?.name ?? "");
+  const [selected, setSelected] = useState(defaultSelected ?? DEFAULT);
   const inputRef = createRef<HTMLInputElement>();
   const [dropdownStyle, setDropdownStyle] = useState<CSSProperties>({});
 
