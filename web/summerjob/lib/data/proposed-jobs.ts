@@ -4,6 +4,22 @@ import {
   type ProposedJobUpdateData,
 } from "lib/types/proposed-job";
 
+export async function getProposedJobById(
+  id: string
+): Promise<ProposedJobComplete | null> {
+  const job = await prisma.proposedJob.findUnique({
+    where: {
+      id: id,
+    },
+    include: {
+      area: true,
+      activeJobs: true,
+      allergens: true,
+    },
+  });
+  return job;
+}
+
 export async function getProposedJobs(): Promise<ProposedJobComplete[]> {
   const jobs = await prisma.proposedJob.findMany({
     include: {

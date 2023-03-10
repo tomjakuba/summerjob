@@ -32,7 +32,6 @@ export default function CarEditForm({
       },
     },
   });
-  console.log(isSending);
 
   return (
     <>

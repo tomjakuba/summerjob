@@ -20,10 +20,14 @@ export const ProposedJobUpdateSchema = z
     name: z.string(),
     address: z.string(),
     contact: z.string(),
-    maxWorkers: z.number(),
-    minWorkers: z.number(),
+    maxWorkers: z.number().min(1),
+    minWorkers: z.number().min(1),
+    strongWorkers: z.number().nonnegative(),
+    requiredDays: z.number().min(1),
     completed: z.boolean(),
     pinned: z.boolean(),
+    hasFood: z.boolean(),
+    hasShower: z.boolean(),
   })
   .strict()
   .partial();
@@ -36,4 +40,13 @@ export function serializeProposedJobs(jobs: ProposedJobComplete[]) {
 
 export function deserializeProposedJobs(jobs: string) {
   return JSON.parse(jobs) as ProposedJobComplete[];
+}
+
+export function serializeProposedJob(job: ProposedJobComplete) {
+  return JSON.stringify(job);
+}
+
+export function deserializeProposedJob(job: string) {
+  const parsed = JSON.parse(job) as ProposedJobComplete;
+  return parsed;
 }

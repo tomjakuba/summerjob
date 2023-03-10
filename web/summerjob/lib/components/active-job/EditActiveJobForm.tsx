@@ -2,7 +2,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAPIActiveJobUpdate } from "lib/fetcher/active-job";
 import { formatDateLong } from "lib/helpers/helpers";
-import { deserializeActiveJob } from "lib/types/active-job";
+import {
+  ActiveJobUpdateData,
+  ActiveJobUpdateSchema,
+  deserializeActiveJob,
+} from "lib/types/active-job";
 import { WorkerBasicInfo } from "lib/types/worker";
 import Link from "next/link";
 import { useState } from "react";
@@ -17,13 +21,6 @@ interface EditActiveJobProps {
   serializedJob: string;
 }
 
-const schema = z.object({
-  publicDescription: z.string(),
-  privateDescription: z.string(),
-  responsibleWorkerId: z.string(),
-});
-type ActiveJobForm = z.infer<typeof schema>;
-
 export default function EditActiveJobForm({
   serializedJob,
 }: EditActiveJobProps) {
@@ -34,8 +31,9 @@ export default function EditActiveJobForm({
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<ActiveJobForm>({
-    resolver: zodResolver(schema),
+    setValue,
+  } = useForm<ActiveJobUpdateData>({
+    resolver: zodResolver(ActiveJobUpdateSchema),
     defaultValues: {
       publicDescription: job?.publicDescription || "",
       privateDescription: job?.privateDescription || "",
@@ -43,12 +41,16 @@ export default function EditActiveJobForm({
     },
   });
 
-  const onSubmit = (data: ActiveJobForm) => {
+  const onSubmit = (data: ActiveJobUpdateData) => {
     trigger(data, {
       onSuccess: () => {
         setSaved(true);
       },
     });
+  };
+
+  const selectResponsibleWorker = (item: FilterSelectItem) => {
+    setValue("responsibleWorkerId", item.id);
   };
 
   return (
@@ -99,7 +101,7 @@ export default function EditActiveJobForm({
             <FilterSelect
               items={job.workers.map(workerToSelectItem)}
               placeholder="Vyberte pracovníka"
-              onSelected={console.log}
+              onSelected={selectResponsibleWorker}
               {...(job.responsibleWorker && {
                 defaultSelected: workerToSelectItem(job.responsibleWorker),
               })}
