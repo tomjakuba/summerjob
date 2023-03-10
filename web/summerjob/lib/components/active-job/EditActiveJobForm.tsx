@@ -9,7 +9,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { FilterSelect, FilterSelectItem } from "../filter-select/FilterSelect";
-import { Modal, ModalSize } from "../modal/Modal";
+import ErrorMessageModal from "../modal/ErrorMessageModal";
+import SuccessProceedModal from "../modal/SuccessProceedModal";
 import RidesList from "./RidesList";
 
 interface EditActiveJobProps {
@@ -138,39 +139,8 @@ export default function EditActiveJobForm({
           </form>
         </div>
       </div>
-      {saved && (
-        <Modal
-          title="Úspěch"
-          size={ModalSize.MEDIUM}
-          onClose={() => setSaved(false)}
-        >
-          <p>Změny byly úspěšně uloženy.</p>
-          <button
-            className="btn pt-2 pb-2 btn-warning float-end"
-            onClick={() => window.history.back()}
-          >
-            Pokračovat
-          </button>
-        </Modal>
-      )}
-      {error && (
-        <Modal
-          title="Chyba"
-          size={ModalSize.MEDIUM}
-          onClose={() => setSaved(false)}
-        >
-          <p>
-            Během ukládání nastala chyba. Zkontrolujte připojení k internetu a
-            zkuste to znovu.
-          </p>
-          <button
-            className="btn pt-2 pb-2 btn-secondary float-end"
-            onClick={reset}
-          >
-            Zavřít
-          </button>
-        </Modal>
-      )}
+      {saved && <SuccessProceedModal onClose={() => window.history.back()} />}
+      {error && <ErrorMessageModal onClose={reset} />}
     </>
   );
 }

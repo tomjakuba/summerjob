@@ -40,7 +40,9 @@ export function CarsTable({ data, reload }: CarTableProps) {
   }, [setDeletingCarId, deletingCarId, trigger, data, reload]);
 
   const deleteCar = (carId: string) => {
-    setDeletingCarId(carId);
+    if (!isMutating) {
+      setDeletingCarId(carId);
+    }
   };
 
   return (
