@@ -1,10 +1,10 @@
 import { useAPIProposedJobUpdateDynamic } from "lib/fetcher/proposed-job";
+import { translateAllergies } from "lib/types/allergy";
 import { ProposedJobComplete } from "lib/types/proposed-job";
 import Link from "next/link";
 import { ProposedJobAPIPatchData } from "pages/api/proposed-jobs/[id]";
 import { useEffect, useMemo, useState } from "react";
 import { ExpandableRow } from "../table/ExpandableRow";
-import { LoadingRow } from "../table/LoadingRow";
 import {
   SortableColumn,
   SortableTable,
@@ -104,7 +104,7 @@ export function JobsTable({ data, shouldShowJob, reload }: JobsTableProps) {
               >
                 <>
                   <div className="ms-2">
-                    <h6>Popis</h6>
+                    <strong>Popis</strong>
                     <p>{job.description}</p>
                     <p>
                       <strong>Počet pracovníků: </strong>
@@ -114,6 +114,14 @@ export function JobsTable({ data, shouldShowJob, reload }: JobsTableProps) {
                     <p>
                       <strong>Doprava do oblasti požadována: </strong>
                       {job.area.requiresCar ? "Ano" : "Ne"}
+                    </p>
+                    <p>
+                      <strong>Alergeny: </strong>
+                      {job.allergens.length > 0
+                        ? translateAllergies(job.allergens)
+                            .map((a) => a.code)
+                            .join(", ")
+                        : "Žádné"}
                     </p>
                     <p>
                       <strong>Naplánované dny: </strong>

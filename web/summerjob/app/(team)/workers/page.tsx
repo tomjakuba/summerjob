@@ -19,7 +19,7 @@ const _columns = [
 export default function WorkersPage() {
   const { data, error, isLoading } = useAPIWorkers();
 
-  if (error) {
+  if (error && !data) {
     return <ErrorPage error={error} />;
   }
 

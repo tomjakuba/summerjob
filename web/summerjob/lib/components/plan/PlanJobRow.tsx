@@ -6,6 +6,7 @@ import { ExpandableRow } from "../table/ExpandableRow";
 import { SimpleRow } from "../table/SimpleRow";
 import type { Worker } from "lib/prisma/client";
 import { useAPIActiveJobUpdate } from "lib/fetcher/active-job";
+import { translateAllergies } from "lib/types/allergy";
 
 interface PlanJobRowProps {
   job: ActiveJobNoPlan;
@@ -61,13 +62,15 @@ export function PlanJobRow({
           >
             <>
               <div className="ms-2">
-                <h6>Poznámka pro organizátory</h6>
+                <strong>Poznámka pro organizátory</strong>
                 <p>{job.privateDescription}</p>
-                <h6>Popis</h6>
+                <strong>Popis</strong>
                 <p>{job.publicDescription}</p>
 
-                <h6>Doprava: </h6>
+                <strong>Doprava</strong>
                 <p>{formatRideData(job)}</p>
+                <strong>Alergeny</strong>
+                <p>{formatAllergens(job)}</p>
                 <p>
                   <strong>Zodpovědná osoba: </strong>
                   {responsibleWorkerName(job)}
@@ -149,6 +152,13 @@ function formatAmenities(job: ActiveJobNoPlan) {
       )}
     </>
   );
+}
+
+function formatAllergens(job: ActiveJobNoPlan) {
+  if (job.proposedJob.allergens.length == 0) return "Žádné";
+  return translateAllergies(job.proposedJob.allergens)
+    .map((a) => a.code)
+    .join(", ");
 }
 
 function formatRowData(job: ActiveJobNoPlan) {

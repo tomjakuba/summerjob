@@ -1,5 +1,5 @@
 import { ActiveJob, Plan, ProposedJob } from "lib/prisma/client";
-import { ProposedJobWithArea } from "./proposed-job";
+import { ProposedJobNoActive } from "./proposed-job";
 import type { Worker } from "lib/prisma/client";
 import { RideComplete } from "./ride";
 import { z } from "zod";
@@ -7,14 +7,14 @@ import { WorkerWithAllergies } from "./worker";
 
 export type ActiveJobNoPlan = ActiveJob & {
   workers: WorkerWithAllergies[];
-  proposedJob: ProposedJobWithArea;
+  proposedJob: ProposedJobNoActive;
   rides: RideComplete[];
   responsibleWorker: Worker | null;
 };
 
 export type ActiveJobComplete = ActiveJob & {
   workers: WorkerWithAllergies[];
-  proposedJob: ProposedJobWithArea;
+  proposedJob: ProposedJobNoActive;
   rides: RideComplete[];
   responsibleWorker: Worker | null;
   plan: Plan;

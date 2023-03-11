@@ -78,7 +78,7 @@ export function PlanJoblessRow({
         onDrop={onWorkerDropped()}
       >
         <div className="ms-2">
-          <h6>Následující pracovníci nemají přiřazenou práci:</h6>
+          <b>Následující pracovníci nemají přiřazenou práci:</b>
         </div>
         <div className="table-responsive text-nowrap">
           <table className="table table-hover">

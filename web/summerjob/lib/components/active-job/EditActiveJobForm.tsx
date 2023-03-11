@@ -109,7 +109,11 @@ export default function EditActiveJobForm({
             <label className="form-label fw-bold mt-4" htmlFor="rides">
               Přiřazené jízdy
             </label>
-            <RidesList job={job} />
+            {job.rides.length > 0 ? (
+              <RidesList job={job} />
+            ) : (
+              <p>Žádné jízdy</p>
+            )}
 
             <div className="list-group mt-4 w-50">
               <Link

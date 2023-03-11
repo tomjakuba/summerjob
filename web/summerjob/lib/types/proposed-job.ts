@@ -5,6 +5,11 @@ export type ProposedJobWithArea = ProposedJob & {
   area: Area;
 };
 
+export type ProposedJobNoActive = ProposedJob & {
+  area: Area;
+  allergens: Allergy[];
+};
+
 export type ProposedJobComplete = ProposedJob & {
   area: Area;
   allergens: Allergy[];

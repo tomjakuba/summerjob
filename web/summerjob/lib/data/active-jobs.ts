@@ -22,6 +22,7 @@ export async function getActiveJobById(
       proposedJob: {
         include: {
           area: true,
+          allergens: true,
         },
       },
       responsibleWorker: true,
@@ -54,7 +55,7 @@ type ActiveJobSimplified = {
 /**
  * Removes a worker from a job and all rides associated with the job.
  * If the worker is the responsible worker, the responsible worker is set to null.
- * If the worker is the driver of a ride, the ride is deleted.
+ * If the worker is a driver of a ride, the ride is deleted.
  * @param workerId ID of the worker to remove
  * @param jobId ID of the job to remove the worker from
  * @param tx Prisma transaction client
