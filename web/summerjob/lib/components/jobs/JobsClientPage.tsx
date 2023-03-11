@@ -10,6 +10,7 @@ import { useMemo, useState } from "react";
 import { JobsFilters } from "lib/components/jobs/JobsFilters";
 import { useAPIProposedJobs } from "lib/fetcher/proposed-job";
 import { filterUniqueById } from "lib/helpers/helpers";
+import Link from "next/link";
 
 interface ProposedJobsClientPage {
   initialData: string;
@@ -50,10 +51,12 @@ export default function ProposedJobsClientPage({
   return (
     <>
       <PageHeader title="Dostupné joby">
-        <button className="btn btn-warning" type="button">
-          <i className="fas fa-briefcase"></i>
-          <span>Nový job</span>
-        </button>
+        <Link href="/jobs/new">
+          <button className="btn btn-warning" type="button">
+            <i className="fas fa-briefcase"></i>
+            <span>Nový job</span>
+          </button>
+        </Link>
       </PageHeader>
 
       <section>

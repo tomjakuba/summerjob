@@ -2,7 +2,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { deserializeWorker, WorkerComplete } from "lib/types/worker";
+import { deserializeWorker } from "lib/types/worker";
 import { Allergy } from "lib/prisma/client";
 import { useState } from "react";
 import { useAPIWorkerUpdate } from "lib/fetcher/worker";
@@ -10,9 +10,9 @@ import Image from "next/image";
 import Link from "next/link";
 import AllergyPill from "../forms/AllergyPill";
 import { deserializeAllergies } from "lib/types/allergy";
-import error from "next/error";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
 import SuccessProceedModal from "../modal/SuccessProceedModal";
+import { Serialized } from "lib/types/serialize";
 
 const schema = z.object({
   id: z.string(),
@@ -26,7 +26,7 @@ type WorkerForm = z.infer<typeof schema>;
 
 interface EditWorkerProps {
   serializedWorker: string;
-  serializedAllergens: string;
+  serializedAllergens: Serialized<Allergy>;
 }
 
 export default function EditWorker({

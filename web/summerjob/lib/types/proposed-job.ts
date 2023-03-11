@@ -16,24 +16,31 @@ export type ProposedJobComplete = ProposedJob & {
   activeJobs: ActiveJob[];
 };
 
-// TODO add other properties
-export const ProposedJobUpdateSchema = z
+export const ProposedJobCreateSchema = z
   .object({
-    areaId: z.string(),
+    areaId: z.string().min(1),
     allergens: z.array(z.string()),
     description: z.string(),
-    name: z.string(),
-    address: z.string(),
-    contact: z.string(),
+    name: z.string().min(1),
+    address: z.string().min(1),
+    contact: z.string().min(1),
     maxWorkers: z.number().min(1),
     minWorkers: z.number().min(1),
     strongWorkers: z.number().nonnegative(),
     requiredDays: z.number().min(1),
-    completed: z.boolean(),
-    pinned: z.boolean(),
     hasFood: z.boolean(),
     hasShower: z.boolean(),
   })
+  .strict();
+
+export type ProposedJobCreateData = z.infer<typeof ProposedJobCreateSchema>;
+
+export const ProposedJobUpdateSchema = ProposedJobCreateSchema.merge(
+  z.object({
+    completed: z.boolean(),
+    pinned: z.boolean(),
+  })
+)
   .strict()
   .partial();
 

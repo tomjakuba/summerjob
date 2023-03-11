@@ -15,7 +15,7 @@ export function Navbar() {
   const pathname = usePathname();
   const navPaths: NavPath[] = [
     { path: "/plans", name: "Plán", icon: "far fa-calendar-alt" },
-    { path: "/jobs", name: "Joby", icon: "far fa-clock" },
+    { path: "/jobs", name: "Joby", icon: "fas fa-person-digging" },
     { path: "/cars", name: "Auta", icon: "fas fa-car" },
     { path: "/workers", name: "Pracanti", icon: "far fa-user" },
     { path: "/admin", name: "Administrace", icon: "fas fa-cogs" },

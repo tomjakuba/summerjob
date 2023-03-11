@@ -1,13 +1,16 @@
 import { Allergy } from "lib/prisma/client";
 // TODO support other languages
 import { default as t } from "lib/localization/cs-cz";
+import { Serialized } from "./serialize";
 
-export function serializeAllergies(data: Allergy[]) {
-  return JSON.stringify(data);
+export function serializeAllergies(data: Allergy[]): Serialized<Allergy> {
+  return {
+    data: JSON.stringify(data),
+  };
 }
 
-export function deserializeAllergies(data: string) {
-  return JSON.parse(data) as Allergy[];
+export function deserializeAllergies(data: Serialized<Allergy>): Allergy[] {
+  return JSON.parse(data.data);
 }
 
 export function translateAllergies(allergies: Allergy[]) {

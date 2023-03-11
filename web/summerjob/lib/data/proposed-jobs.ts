@@ -1,5 +1,6 @@
 import prisma from "lib/prisma/connection";
 import {
+  ProposedJobCreateData,
   type ProposedJobComplete,
   type ProposedJobUpdateData,
 } from "lib/types/proposed-job";
@@ -86,4 +87,17 @@ export async function updateProposedJob(
       ...allergensUpdate,
     },
   });
+}
+
+export async function createProposedJob(data: ProposedJobCreateData) {
+  const { allergens, ...proposedJobDataWithoutAllergens } = data;
+  const proposedJob = await prisma.proposedJob.create({
+    data: {
+      ...proposedJobDataWithoutAllergens,
+      allergens: {
+        connect: allergens.map((allergyId) => ({ id: allergyId })),
+      },
+    },
+  });
+  return proposedJob;
 }

@@ -1,58 +1,46 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAPIProposedJobUpdate } from "lib/fetcher/proposed-job";
-import { Allergy } from "lib/prisma/client";
+import { useAPIProposedJobCreate } from "lib/fetcher/proposed-job";
+import { Allergy, Area } from "lib/prisma/client";
 import { deserializeAllergies } from "lib/types/allergy";
+import { deserializeAreas } from "lib/types/areas";
 import {
-  deserializeProposedJob,
-  ProposedJobUpdateData,
-  ProposedJobUpdateSchema,
+  ProposedJobCreateData,
+  ProposedJobCreateSchema,
 } from "lib/types/proposed-job";
 import { Serialized } from "lib/types/serialize";
 import { WorkerBasicInfo } from "lib/types/worker";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { FilterSelectItem } from "../filter-select/FilterSelect";
+import { FilterSelect, FilterSelectItem } from "../filter-select/FilterSelect";
 import AllergyPill from "../forms/AllergyPill";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
 import SuccessProceedModal from "../modal/SuccessProceedModal";
 
-interface EditProposedJobProps {
-  serializedJob: string;
+interface CreateProposedJobProps {
+  serializedAreas: Serialized<Area[]>;
   serializedAllergens: Serialized<Allergy>;
 }
 
-export default function EditProposedJobForm({
-  serializedJob,
+export default function CreateProposedJobForm({
+  serializedAreas,
   serializedAllergens,
-}: EditProposedJobProps) {
-  const job = deserializeProposedJob(serializedJob);
+}: CreateProposedJobProps) {
+  const areas = deserializeAreas(serializedAreas);
   const allergens = deserializeAllergies(serializedAllergens);
-  const { trigger, error, isMutating, reset } = useAPIProposedJobUpdate(job.id);
+  const { trigger, error, isMutating, reset } = useAPIProposedJobCreate();
   const [saved, setSaved] = useState(false);
   const {
     register,
     handleSubmit,
     formState: { errors },
     setValue,
-  } = useForm<ProposedJobUpdateData>({
-    resolver: zodResolver(ProposedJobUpdateSchema),
-    defaultValues: {
-      name: job.name,
-      description: job.description,
-      allergens: job.allergens.map((allergy) => allergy.id),
-      address: job.address,
-      contact: job.contact,
-      requiredDays: job.requiredDays,
-      minWorkers: job.minWorkers,
-      maxWorkers: job.maxWorkers,
-      strongWorkers: job.strongWorkers,
-      hasFood: job.hasFood,
-      hasShower: job.hasShower,
-    },
+  } = useForm<ProposedJobCreateData>({
+    resolver: zodResolver(ProposedJobCreateSchema),
+    defaultValues: {},
   });
 
-  const onSubmit = (data: ProposedJobUpdateData) => {
+  const onSubmit = (data: ProposedJobCreateData) => {
     trigger(data, {
       onSuccess: () => {
         setSaved(true);
@@ -60,11 +48,15 @@ export default function EditProposedJobForm({
     });
   };
 
+  const selectArea = (item: FilterSelectItem) => {
+    setValue("areaId", item.id);
+  };
+
   return (
     <>
       <div className="row">
         <div className="col">
-          <h3>Upravit job</h3>
+          <h3>Přidat job</h3>
         </div>
       </div>
       <div className="row">
@@ -78,6 +70,9 @@ export default function EditProposedJobForm({
               id="name"
               {...register("name")}
             />
+            {errors.name && (
+              <div className="text-danger">Zadejte název jobu</div>
+            )}
             <label className="form-label fw-bold mt-4" htmlFor="description">
               Popis navrhované práce
             </label>
@@ -87,6 +82,16 @@ export default function EditProposedJobForm({
               rows={3}
               {...register("description")}
             ></textarea>
+            <label className="form-label fw-bold mt-4" htmlFor="area">
+              Oblast jobu
+            </label>
+            <input type={"hidden"} {...register("areaId")} />
+            <FilterSelect
+              items={areas.map(areaToSelectItem)}
+              placeholder="Vyberte oblast"
+              onSelected={selectArea}
+            />
+            {errors.areaId && <div className="text-danger">Vyberte oblast</div>}
             <label className="form-label fw-bold mt-4" htmlFor="address">
               Adresa
             </label>
@@ -95,6 +100,9 @@ export default function EditProposedJobForm({
               id="address"
               {...register("address")}
             />
+            {errors.address && (
+              <div className="text-danger">Zadejte adresu</div>
+            )}
             <label className="form-label fw-bold mt-4" htmlFor="contact">
               Kontakt
             </label>
@@ -103,14 +111,21 @@ export default function EditProposedJobForm({
               id="contact"
               {...register("contact")}
             />
+            {errors.contact && (
+              <div className="text-danger">Zadejte kontaktní informace</div>
+            )}
             <label className="form-label fw-bold mt-4" htmlFor="requiredDays">
               Celkový počet dnů na splnění
             </label>
             <input
               className="form-control p-1 ps-2"
               id="requiredDays"
+              type="number"
               {...register("requiredDays", { valueAsNumber: true })}
             />
+            {errors.requiredDays && (
+              <div className="text-danger">Zadejte odhadovaný počet dnů</div>
+            )}
             <label className="form-label fw-bold mt-4" htmlFor="minWorkers">
               Počet pracovníků minimálně / maximálně / z toho silných
             </label>
@@ -140,6 +155,11 @@ export default function EditProposedJobForm({
                 {...register("strongWorkers", { valueAsNumber: true })}
               />
             </div>
+            {(errors.minWorkers ||
+              errors.maxWorkers ||
+              errors.strongWorkers) && (
+              <div className="text-danger">Zadejte počty pracovníků</div>
+            )}
 
             <label className="form-label d-block fw-bold mt-4" htmlFor="email">
               Alergie
@@ -203,15 +223,11 @@ export default function EditProposedJobForm({
   );
 }
 
-function workerToSelectItem(worker: WorkerBasicInfo): FilterSelectItem {
+function areaToSelectItem(area: Area): FilterSelectItem {
   return {
-    id: worker.id,
-    searchable: `${worker.firstName} ${worker.lastName}`,
-    name: `${worker.firstName} ${worker.lastName}`,
-    item: (
-      <span>
-        {worker.firstName} {worker.lastName}
-      </span>
-    ),
+    id: area.id,
+    searchable: `${area.name} ${area.description}`,
+    name: area.name,
+    item: <span>{area.name}</span>,
   };
 }

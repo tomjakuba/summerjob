@@ -1,8 +1,12 @@
-import { ProposedJobUpdateData } from "lib/types/proposed-job";
+import {
+  ProposedJobCreateData,
+  ProposedJobUpdateData,
+} from "lib/types/proposed-job";
 import type { ProposedJobsAPIGetResponse } from "pages/api/proposed-jobs";
 import { ProposedJobAPIPatchData } from "pages/api/proposed-jobs/[id]";
 import {
   useData,
+  useDataCreate,
   useDataPartialUpdate,
   useDataPartialUpdateDynamic,
 } from "./fetcher";
@@ -15,6 +19,10 @@ export function useAPIProposedJobsNotInPlan(planId: string) {
   return useData<ProposedJobsAPIGetResponse>(
     `/api/proposed-jobs?notInPlan=${planId}`
   );
+}
+
+export function useAPIProposedJobCreate(options?: any) {
+  return useDataCreate<ProposedJobCreateData>("/api/proposed-jobs", options);
 }
 
 export function useAPIProposedJobUpdate(id: string, options?: any) {
