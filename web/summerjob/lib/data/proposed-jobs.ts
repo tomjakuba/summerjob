@@ -68,12 +68,22 @@ export async function updateProposedJob(
   id: string,
   proposedJobData: ProposedJobUpdateData
 ) {
-  // TODO update allergens in job
   const { allergens, ...proposedJobDataWithoutAllergens } = proposedJobData;
+  let allergensUpdate = {};
+  if (allergens) {
+    allergensUpdate = {
+      allergens: {
+        set: allergens.map((allergyId) => ({ id: allergyId })),
+      },
+    };
+  }
   const proposedJob = await prisma.proposedJob.update({
     where: {
       id,
     },
-    data: proposedJobDataWithoutAllergens,
+    data: {
+      ...proposedJobDataWithoutAllergens,
+      ...allergensUpdate,
+    },
   });
 }

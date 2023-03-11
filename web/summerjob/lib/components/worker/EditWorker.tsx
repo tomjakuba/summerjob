@@ -1,15 +1,18 @@
 "use client";
-import { useForm, UseFormRegister } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { WorkerComplete } from "lib/types/worker";
+import { deserializeWorker, WorkerComplete } from "lib/types/worker";
 import { Allergy } from "lib/prisma/client";
-import { default as t } from "lib/localization/cs-cz";
 import { useState } from "react";
 import { useAPIWorkerUpdate } from "lib/fetcher/worker";
-import { useAPIAllergies } from "lib/fetcher/allergy";
 import Image from "next/image";
 import Link from "next/link";
+import AllergyPill from "../forms/AllergyPill";
+import { deserializeAllergies } from "lib/types/allergy";
+import error from "next/error";
+import ErrorMessageModal from "../modal/ErrorMessageModal";
+import SuccessProceedModal from "../modal/SuccessProceedModal";
 
 const schema = z.object({
   id: z.string(),
@@ -21,7 +24,17 @@ const schema = z.object({
 });
 type WorkerForm = z.infer<typeof schema>;
 
-export default function EditWorker({ worker }: { worker: WorkerComplete }) {
+interface EditWorkerProps {
+  serializedWorker: string;
+  serializedAllergens: string;
+}
+
+export default function EditWorker({
+  serializedWorker,
+  serializedAllergens,
+}: EditWorkerProps) {
+  const worker = deserializeWorker(serializedWorker);
+  const allergies = deserializeAllergies(serializedAllergens);
   const {
     register,
     handleSubmit,
@@ -38,17 +51,18 @@ export default function EditWorker({ worker }: { worker: WorkerComplete }) {
     },
   });
   const [saved, setSaved] = useState(false);
-  const { trigger, isMutating } = useAPIWorkerUpdate<WorkerForm>(worker.id, {
-    onSuccess: () => {
-      setSaved(true);
-    },
-  });
+  const { trigger, isMutating, reset, error } = useAPIWorkerUpdate<WorkerForm>(
+    worker.id,
+    {
+      onSuccess: () => {
+        setSaved(true);
+      },
+    }
+  );
   const onSubmit = (data: WorkerForm) => {
     trigger(data);
   };
 
-  const { data, error, isLoading } = useAPIAllergies();
-  let allergies = parseAllergies(data || []);
   return (
     <>
       <div className="row">
@@ -107,15 +121,13 @@ export default function EditWorker({ worker }: { worker: WorkerComplete }) {
               Alergie
             </label>
             <div className="form-check-inline">
-              {isLoading && <p>Načítání alergií...</p>}
-              {data &&
-                allergies.map((allergy) => (
-                  <AllergyPill
-                    key={allergy.id}
-                    allergy={allergy}
-                    register={register}
-                  />
-                ))}
+              {allergies.map((allergy) => (
+                <AllergyPill
+                  key={allergy.id}
+                  allergy={allergy}
+                  register={() => register("allergyIds")}
+                />
+              ))}
             </div>
             <label className="form-label d-block fw-bold mt-4" htmlFor="car">
               Auta
@@ -136,34 +148,25 @@ export default function EditWorker({ worker }: { worker: WorkerComplete }) {
               </div>
             )}
 
-            <input
-              className="btn btn-warning m-3 ms-0 p-3"
-              type="submit"
-              value={isMutating ? "Ukládání..." : "Uložit"}
-              disabled={isMutating}
-            />
-            <button
-              className="btn btn-secondary m-3 ms-0 p-3"
-              type="button"
-              disabled={isMutating}
-              onClick={() => window.history.back()}
-            >
-              Zpět
-            </button>
-            {saved && (
-              <div
-                className="alert alert-success alert-dismissible d-inline-block mt-3 p-3 pe-5"
-                role="alert"
+            <div className="d-flex justify-content-between gap-3">
+              <button
+                className="btn btn-secondary mt-4"
+                type="button"
+                onClick={() => window.history.back()}
               >
-                Změny byly úspěšně uloženy.
-                <button
-                  type="button"
-                  className="btn-close"
-                  aria-label="Close"
-                  onClick={() => setSaved(false)}
-                ></button>
-              </div>
+                Zpět
+              </button>
+              <input
+                type={"submit"}
+                className="btn btn-warning mt-4"
+                value={"Uložit"}
+                disabled={isMutating}
+              />
+            </div>
+            {saved && (
+              <SuccessProceedModal onClose={() => window.history.back()} />
             )}
+            {error && <ErrorMessageModal onClose={reset} />}
           </form>
         </div>
         <div className="w-100 d-lg-none mt-3"></div>
@@ -186,35 +189,3 @@ export default function EditWorker({ worker }: { worker: WorkerComplete }) {
     </>
   );
 }
-
-function AllergyPill({
-  allergy,
-  register,
-}: {
-  allergy: Allergy;
-  register: UseFormRegister<WorkerForm>;
-}) {
-  return (
-    <div className="d-inline-block me-3">
-      <input
-        id={allergy.id}
-        className="btn-check"
-        type="checkbox"
-        value={allergy.id}
-        {...register("allergyIds")}
-      />
-      <label className="form-label btn-light btn p-2" htmlFor={allergy.id}>
-        {allergy.code}
-      </label>
-    </div>
-  );
-}
-
-const parseAllergies = (allergies: Allergy[]) => {
-  if (!allergies) return [];
-  let result = allergies.map((allergy) => {
-    return { ...allergy, code: t(allergy.code) };
-  });
-  result.sort((a, b) => a.code.localeCompare(b.code));
-  return result;
-};

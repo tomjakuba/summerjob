@@ -1,7 +1,9 @@
 import ErrorPage404 from "lib/components/404/404";
 import EditBox from "lib/components/forms/EditBox";
 import EditProposedJobForm from "lib/components/jobs/EditProposedJobForm";
+import { getAllergies } from "lib/data/allergies";
 import { getProposedJobById } from "lib/data/proposed-jobs";
+import { serializeAllergies, translateAllergies } from "lib/types/allergy";
 import { serializeProposedJob } from "lib/types/proposed-job";
 
 type PathProps = {
@@ -16,10 +18,18 @@ export default async function EditProposedJobPage({ params }: PathProps) {
     return <ErrorPage404 message="Job nenalezen."></ErrorPage404>;
   }
   const serialized = serializeProposedJob(job);
+
+  const allergies = await getAllergies();
+  const translatedAllergens = translateAllergies(allergies);
+  const serializedAllergens = serializeAllergies(translatedAllergens);
+
   return (
     <section>
       <EditBox>
-        <EditProposedJobForm serializedJob={serialized} />
+        <EditProposedJobForm
+          serializedJob={serialized}
+          serializedAllergens={serializedAllergens}
+        />
       </EditBox>
     </section>
   );

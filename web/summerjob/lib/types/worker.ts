@@ -24,3 +24,11 @@ export const WorkerSerializableSchema = z
 export type WorkerSerializable = z.infer<typeof WorkerSerializableSchema>;
 
 export type WorkerBasicInfo = Pick<Worker, "id" | "firstName" | "lastName">;
+
+export function serializeWorker(data: WorkerComplete) {
+  return JSON.stringify(data);
+}
+
+export function deserializeWorker(data: string) {
+  return JSON.parse(data) as WorkerComplete;
+}

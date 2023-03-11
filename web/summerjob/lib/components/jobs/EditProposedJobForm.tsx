@@ -1,30 +1,32 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAPIActiveJobUpdate } from "lib/fetcher/active-job";
 import { useAPIProposedJobUpdate } from "lib/fetcher/proposed-job";
-import { formatDateLong } from "lib/helpers/helpers";
-import { deserializeActiveJob } from "lib/types/active-job";
+import { deserializeAllergies } from "lib/types/allergy";
 import {
   deserializeProposedJob,
   ProposedJobUpdateData,
   ProposedJobUpdateSchema,
 } from "lib/types/proposed-job";
 import { WorkerBasicInfo } from "lib/types/worker";
-import Link from "next/link";
+import allergies from "pages/api/allergies";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { FilterSelect, FilterSelectItem } from "../filter-select/FilterSelect";
+import { FilterSelectItem } from "../filter-select/FilterSelect";
+import AllergyPill from "../forms/AllergyPill";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
 import SuccessProceedModal from "../modal/SuccessProceedModal";
 
 interface EditProposedJobProps {
   serializedJob: string;
+  serializedAllergens: string;
 }
 
 export default function EditProposedJobForm({
   serializedJob,
+  serializedAllergens,
 }: EditProposedJobProps) {
   const job = deserializeProposedJob(serializedJob);
+  const allergens = deserializeAllergies(serializedAllergens);
   const { trigger, error, isMutating, reset } = useAPIProposedJobUpdate(job.id);
   const [saved, setSaved] = useState(false);
   const {
@@ -37,6 +39,7 @@ export default function EditProposedJobForm({
     defaultValues: {
       name: job.name,
       description: job.description,
+      allergens: job.allergens.map((allergy) => allergy.id),
       address: job.address,
       contact: job.contact,
       requiredDays: job.requiredDays,
@@ -139,6 +142,19 @@ export default function EditProposedJobForm({
                 min={0}
                 {...register("strongWorkers", { valueAsNumber: true })}
               />
+            </div>
+
+            <label className="form-label d-block fw-bold mt-4" htmlFor="email">
+              Alergie
+            </label>
+            <div className="form-check-inline">
+              {allergens.map((allergy) => (
+                <AllergyPill
+                  key={allergy.id}
+                  allergy={allergy}
+                  register={() => register("allergens")}
+                />
+              ))}
             </div>
 
             <div className="form-check mt-4">
