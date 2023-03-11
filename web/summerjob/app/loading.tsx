@@ -1,3 +1,5 @@
-export default function Loading() {
-  return <div className="d-flex justify-content-center mt-3">Načítání...</div>;
+import Loading from "lib/components/loading/loading";
+
+export default function LoadingPage() {
+  return <Loading />;
 }
