@@ -1,6 +1,7 @@
 import { Car, CarOdometer, Ride } from "lib/prisma/client";
 import type { Worker } from "lib/prisma/client";
 import { z } from "zod";
+import { Serialized } from "./serialize";
 
 export type CarWithOwner = Car & {
   owner: Worker;
@@ -12,12 +13,16 @@ export type CarComplete = Car & {
   rides: Ride[];
 };
 
-export function serializeCars(cars: Car[]) {
-  return JSON.stringify(cars);
+export function serializeCars(cars: CarComplete[]): Serialized<CarComplete[]> {
+  return {
+    data: JSON.stringify(cars),
+  };
 }
 
-export function deserializeCars(cars: string) {
-  return JSON.parse(cars);
+export function deserializeCars(
+  cars: Serialized<CarComplete[]>
+): CarComplete[] {
+  return JSON.parse(cars.data);
 }
 
 export const CarUpdateSchema = z

@@ -1,6 +1,7 @@
 "use client";
 import { useAPICars } from "lib/fetcher/car";
 import { CarComplete, deserializeCars } from "lib/types/car";
+import { Serialized } from "lib/types/serialize";
 import Link from "next/link";
 import { useState } from "react";
 import PageHeader from "../page-header/PageHeader";
@@ -8,7 +9,7 @@ import { CarsFilters } from "./CarsFilters";
 import { CarsTable } from "./CarsTable";
 
 interface CarsClientPageProps {
-  initialData: string;
+  initialData: Serialized<CarComplete[]>;
 }
 
 export default function CarsClientPage({ initialData }: CarsClientPageProps) {

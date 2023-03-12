@@ -3,14 +3,15 @@ import ErrorPage from "lib/components/error-page/error";
 import PageHeader from "lib/components/page-header/PageHeader";
 import { useAPIPlans } from "lib/fetcher/plan";
 import { formatDateLong } from "lib/helpers/helpers";
-import { deserializePlans } from "lib/types/plan";
+import { deserializePlans, PlanWithJobs } from "lib/types/plan";
+import { Serialized } from "lib/types/serialize";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Modal, ModalSize } from "../modal/Modal";
 import NewPlanForm from "./NewPlanForm";
 
 interface PlansClientPageProps {
-  initialData: string;
+  initialData: Serialized<PlanWithJobs[]>;
 }
 
 export default function PlansClientPage({ initialData }: PlansClientPageProps) {
@@ -27,7 +28,7 @@ export default function PlansClientPage({ initialData }: PlansClientPageProps) {
     return data.sort((a, b) => b.day.getTime() - a.day.getTime());
   }, [data]);
 
-  if (error) {
+  if (error && !data) {
     return <ErrorPage error={error} />;
   }
 

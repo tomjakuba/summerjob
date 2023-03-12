@@ -4,6 +4,7 @@ import type { Worker } from "lib/prisma/client";
 import { RideComplete } from "./ride";
 import { z } from "zod";
 import { WorkerWithAllergies } from "./worker";
+import { Serialized } from "./serialize";
 
 export type ActiveJobNoPlan = ActiveJob & {
   workers: WorkerWithAllergies[];
@@ -55,12 +56,16 @@ export const ActiveJobUpdateSchema = z
 
 export type ActiveJobUpdateData = z.infer<typeof ActiveJobUpdateSchema>;
 
-export function serializeActiveJob(job: ActiveJobComplete) {
-  return JSON.stringify(job);
+export function serializeActiveJob(
+  job: ActiveJobComplete
+): Serialized<ActiveJobComplete> {
+  return {
+    data: JSON.stringify(job),
+  };
 }
 
-export function deserializeActiveJob(job: string) {
-  const parsed = JSON.parse(job) as ActiveJobComplete;
+export function deserializeActiveJob(job: Serialized<ActiveJobComplete>) {
+  const parsed = JSON.parse(job.data) as ActiveJobComplete;
   parsed.plan.day = new Date(parsed.plan.day);
   return parsed;
 }

@@ -1,6 +1,7 @@
 import { ActiveJob, Plan } from "lib/prisma/client";
 import { z } from "zod";
 import { ActiveJobNoPlan } from "./active-job";
+import { Serialized } from "./serialize";
 
 export type PlanComplete = Plan & {
   jobs: ActiveJobNoPlan[];
@@ -30,12 +31,18 @@ export function deserializePlan(plan: string) {
   return parsed as PlanComplete;
 }
 
-export function serializePlans(plans: PlanWithJobs[]) {
-  return JSON.stringify(plans);
+export function serializePlans(
+  plans: PlanWithJobs[]
+): Serialized<PlanWithJobs[]> {
+  return {
+    data: JSON.stringify(plans),
+  };
 }
 
-export function deserializePlans(plans: string) {
-  const parsed = JSON.parse(plans);
+export function deserializePlans(
+  data: Serialized<PlanWithJobs[]>
+): PlanWithJobs[] {
+  const parsed = JSON.parse(data.data);
   for (const plan of parsed) {
     plan.day = new Date(plan.day);
   }
