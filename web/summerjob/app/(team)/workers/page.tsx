@@ -1,10 +1,10 @@
 "use client";
+import ErrorPage from "lib/components/error-page/error";
 import PageHeader from "lib/components/page-header/PageHeader";
 import { LoadingRow } from "lib/components/table/LoadingRow";
 import { SimpleRow } from "lib/components/table/SimpleRow";
 import { useAPIWorkers } from "lib/fetcher/worker";
 import Link from "next/link";
-import ErrorPage from "./error";
 
 const _columns = [
   "Jméno",
