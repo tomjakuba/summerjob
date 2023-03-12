@@ -187,7 +187,7 @@ img.smj-nav-logo {
 }
 
 .smj-table-actions-cell > a {
-  color: inherit;
+  /* color: inherit; */
 }
 
 .smj-action-complete {
@@ -213,6 +213,10 @@ img.smj-nav-logo {
   color: #9c0000;
 }
 
+.smj-action-delete:hover {
+  color: #e40000;
+}
+
 .smj-action-pinned {
   color: #d76e13;
 }
@@ -223,6 +227,14 @@ img.smj-nav-logo {
 
 .smj-action-pinned:hover {
   color: inherit;
+}
+
+.smj-action-edit {
+  color: #000000;
+}
+
+.smj-action-edit:hover {
+  color: #2651c9;
 }
 
 .spinning {

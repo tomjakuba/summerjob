@@ -7,6 +7,7 @@ import { useAPIActiveJobUpdateDynamic } from "lib/fetcher/active-job";
 import { useEffect, useState } from "react";
 
 interface PlanJoblessRowProps {
+  planId: string;
   jobs: ActiveJobNoPlan[];
   joblessWorkers: WorkerWithAllergies[];
   numColumns: number;
@@ -22,6 +23,7 @@ interface PlanJoblessRowProps {
 }
 
 export function PlanJoblessRow({
+  planId,
   jobs,
   joblessWorkers,
   numColumns,
@@ -33,8 +35,10 @@ export function PlanJoblessRow({
   const [workerIds, setWorkerIds] = useState<string[]>([]);
   const getSourceJobId = () => sourceJobId;
 
-  const { trigger, isMutating, error } =
-    useAPIActiveJobUpdateDynamic(getSourceJobId);
+  const { trigger, isMutating, error } = useAPIActiveJobUpdateDynamic(
+    getSourceJobId,
+    planId
+  );
 
   useEffect(() => {
     if (sourceJobId) {

@@ -2,38 +2,58 @@ import { ActiveJobUpdateData } from "lib/types/active-job";
 import {
   useData,
   useDataCreate,
+  useDataDelete,
   useDataPartialUpdate,
   useDataPartialUpdateDynamic,
 } from "./fetcher";
-import type { ActiveJobAPIGetResponse } from "pages/api/active-jobs/[id]";
+import type { ActiveJobAPIGetResponse } from "pages/api/plans/[planId]/active-jobs/[jobId]";
+import { ActiveJobsAPIPostData } from "pages/api/plans/[planId]/active-jobs";
 
-export function useAPIActiveJobCreate(options?: any) {
-  return useDataCreate("/api/active-jobs", options);
+export function useAPIActiveJobCreate(planId: string, options?: any) {
+  return useDataCreate<ActiveJobsAPIPostData>(
+    `/api/plans/${planId}/active-jobs`,
+    options
+  );
 }
 
-export function useAPIActiveJobUpdate(id: string, options?: any) {
+export function useAPIActiveJobUpdate(
+  id: string,
+  planId: string,
+  options?: any
+) {
   return useDataPartialUpdate<ActiveJobUpdateData>(
-    `/api/active-jobs/${id}`,
+    `/api/plans/${planId}/active-jobs/${id}`,
     options
   );
 }
 
 export function useAPIActiveJobUpdateDynamic(
   id: () => string | undefined,
+  planId: string,
   options?: any
 ) {
   const url = () => {
     const jobId = id();
     if (!jobId) return undefined;
-    return `/api/active-jobs/${jobId}`;
+    return `/api/plans/${planId}/active-jobs/${jobId}`;
   };
   return useDataPartialUpdateDynamic<ActiveJobUpdateData>(url, options);
 }
 
-export function useAPIActiveJob(id: string) {
-  const result = useData<ActiveJobAPIGetResponse>(`/api/active-jobs/${id}`);
+export function useAPIActiveJob(id: string, planId: string) {
+  const result = useData<ActiveJobAPIGetResponse>(
+    `/api/plans/${planId}/active-jobs/${id}`
+  );
   if (result.data) {
     result.data.plan.day = new Date(result.data.plan.day);
   }
   return result;
+}
+
+export function useAPIActiveJobDelete(
+  id: string,
+  planId: string,
+  options?: any
+) {
+  return useDataDelete(`/api/plans/${planId}/active-jobs/${id}`, options);
 }

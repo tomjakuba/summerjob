@@ -2,8 +2,11 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAPIActiveJobCreate } from "lib/fetcher/active-job";
 import { useAPIProposedJobsNotInPlan } from "lib/fetcher/proposed-job";
+import {
+  ActiveJobCreateData,
+  ActiveJobCreateSchema,
+} from "lib/types/active-job";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import ErrorPage from "../error-page/error";
 import { FilterSelect, FilterSelectItem } from "../filter-select/FilterSelect";
 
@@ -12,20 +15,15 @@ interface AddJobToPlanFormProps {
   onComplete: () => void;
 }
 
-const schema = z.object({
-  proposedJobId: z.string(),
-  privateDescription: z.string(),
-  publicDescription: z.string(),
-  planId: z.string(),
-});
-type AddJobToPlanFormData = z.infer<typeof schema>;
+type ActiveJobCreateFormData = Omit<ActiveJobCreateData, "planId">;
+const ActiveJobCreateFormSchema = ActiveJobCreateSchema.omit({ planId: true });
 
 export default function AddJobToPlanForm({
   planId,
   onComplete,
 }: AddJobToPlanFormProps) {
   const { data, error, isLoading } = useAPIProposedJobsNotInPlan(planId);
-  const { trigger, isMutating } = useAPIActiveJobCreate({
+  const { trigger, isMutating } = useAPIActiveJobCreate(planId, {
     onSuccess: () => {
       onComplete();
     },
@@ -36,16 +34,15 @@ export default function AddJobToPlanForm({
     handleSubmit,
     setValue,
     formState: { errors },
-  } = useForm<AddJobToPlanFormData>({
-    resolver: zodResolver(schema),
+  } = useForm<ActiveJobCreateFormData>({
+    resolver: zodResolver(ActiveJobCreateFormSchema),
     defaultValues: {
       privateDescription: "",
       publicDescription: "",
-      planId: planId,
     },
   });
 
-  if (error) {
+  if (error && !data) {
     return <ErrorPage error={error} />;
   }
 
@@ -61,7 +58,7 @@ export default function AddJobToPlanForm({
       ),
     })) || [];
 
-  const onSubmit = (data: AddJobToPlanFormData) => {
+  const onSubmit = (data: ActiveJobCreateFormData) => {
     trigger(data);
   };
 
@@ -88,7 +85,6 @@ export default function AddJobToPlanForm({
           placeholder={"Vyberte job..."}
         ></FilterSelect>
         <input type="hidden" {...register("proposedJobId")} />
-        <input type="hidden" {...register("planId")} />
 
         <label className="form-label fw-bold mt-4" htmlFor="public-description">
           Veřejný popis:

@@ -5,12 +5,17 @@ import Link from "next/link";
 import { ExpandableRow } from "../table/ExpandableRow";
 import { SimpleRow } from "../table/SimpleRow";
 import type { Worker } from "lib/prisma/client";
-import { useAPIActiveJobUpdate } from "lib/fetcher/active-job";
+import {
+  useAPIActiveJobDelete,
+  useAPIActiveJobUpdate,
+} from "lib/fetcher/active-job";
 import { translateAllergies } from "lib/types/allergy";
+import { useState } from "react";
+import ConfirmationModal from "../modal/ConfirmationModal";
+import ErrorMessageModal from "../modal/ErrorMessageModal";
 
 interface PlanJobRowProps {
   job: ActiveJobNoPlan;
-  planId: string;
   isDisplayed: boolean;
   formatWorkerData: (
     worker: WorkerWithAllergies,
@@ -25,13 +30,30 @@ interface PlanJobRowProps {
 
 export function PlanJobRow({
   job,
-  planId,
   isDisplayed,
   formatWorkerData,
   onWorkerDragStart,
   reloadPlan,
 }: PlanJobRowProps) {
-  const { trigger, isMutating, error } = useAPIActiveJobUpdate(job.id);
+  const {
+    trigger: triggerUpdate,
+    isMutating: isBeingUpdated,
+    error: updatingError,
+  } = useAPIActiveJobUpdate(job.id, job.planId, {
+    onSuccess: () => {
+      reloadPlan();
+    },
+  });
+
+  const {
+    trigger: triggerDelete,
+    isMutating: isBeingDeleted,
+    error: deleteError,
+    reset: resetDeleteError,
+  } = useAPIActiveJobDelete(job.id, job.planId, {
+    onSuccess: reloadPlan,
+  });
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
 
   const onWorkerDropped =
     (toJobId: string) => (e: React.DragEvent<HTMLTableRowElement>) => {
@@ -42,64 +64,85 @@ export function PlanJobRow({
       }
 
       const newWorkers = [...job.workers.map((w) => w.id), workerId];
-      trigger(
-        { workerIds: newWorkers },
-        {
-          onSuccess: () => {
-            reloadPlan();
-          },
-        }
-      );
+      triggerUpdate({ workerIds: newWorkers });
     };
+
+  const deleteJob = () => {
+    triggerDelete();
+    setShowDeleteConfirmation(false);
+  };
+
+  const confirmDelete = () => {
+    setShowDeleteConfirmation(true);
+  };
+
+  const onErrorMessageClose = () => {
+    resetDeleteError();
+  };
+
   return (
     <>
       {isDisplayed && (
-        <>
-          <ExpandableRow
-            key={job.id}
-            data={formatRowData(job)}
-            onDrop={onWorkerDropped(job.id)}
-          >
-            <>
-              <div className="ms-2">
-                <strong>Poznámka pro organizátory</strong>
-                <p>{job.privateDescription}</p>
-                <strong>Popis</strong>
-                <p>{job.publicDescription}</p>
+        <ExpandableRow
+          key={job.id}
+          data={formatRowData(job, confirmDelete, isBeingDeleted)}
+          onDrop={onWorkerDropped(job.id)}
+        >
+          <>
+            <div className="ms-2">
+              <strong>Poznámka pro organizátory</strong>
+              <p>{job.privateDescription}</p>
+              <strong>Popis</strong>
+              <p>{job.publicDescription}</p>
 
-                <strong>Doprava</strong>
-                <p>{formatRideData(job)}</p>
-                <strong>Alergeny</strong>
-                <p>{formatAllergens(job)}</p>
-                <p>
-                  <strong>Zodpovědná osoba: </strong>
-                  {responsibleWorkerName(job)}
-                </p>
-              </div>
-              <div className="table-responsive text-nowrap">
-                <table className="table table-hover">
-                  <tbody>
-                    {job.workers.length === 0 && (
-                      <tr>
-                        <td colSpan={3}>
-                          <i>Žádní pracovníci</i>
-                        </td>
-                      </tr>
-                    )}
-                    {job.workers.map((worker) => (
-                      <SimpleRow
-                        data={formatWorkerData(worker, job)}
-                        key={worker.id}
-                        draggable={true}
-                        onDragStart={onWorkerDragStart(worker, job.id)}
-                      />
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </>
-          </ExpandableRow>
-        </>
+              <strong>Doprava</strong>
+              <p>{formatRideData(job)}</p>
+              <strong>Alergeny</strong>
+              <p>{formatAllergens(job)}</p>
+              <p>
+                <strong>Zodpovědná osoba: </strong>
+                {responsibleWorkerName(job)}
+              </p>
+            </div>
+            <div className="table-responsive text-nowrap">
+              <table className="table table-hover">
+                <tbody>
+                  {job.workers.length === 0 && (
+                    <tr>
+                      <td colSpan={3}>
+                        <i>Žádní pracovníci</i>
+                      </td>
+                    </tr>
+                  )}
+                  {job.workers.map((worker) => (
+                    <SimpleRow
+                      data={formatWorkerData(worker, job)}
+                      key={worker.id}
+                      draggable={true}
+                      onDragStart={onWorkerDragStart(worker, job.id)}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+          {showDeleteConfirmation && !deleteError && (
+            <ConfirmationModal
+              onConfirm={deleteJob}
+              onReject={() => setShowDeleteConfirmation(false)}
+            >
+              <p>
+                Opravdu chcete smazat job <b>{job.proposedJob.name}</b>?
+              </p>
+            </ConfirmationModal>
+          )}
+          {deleteError && (
+            <ErrorMessageModal
+              onClose={onErrorMessageClose}
+              message={"Nepovedlo se odstranit job."}
+            />
+          )}
+        </ExpandableRow>
       )}
     </>
   );
@@ -161,7 +204,11 @@ function formatAllergens(job: ActiveJobNoPlan) {
     .join(", ");
 }
 
-function formatRowData(job: ActiveJobNoPlan) {
+function formatRowData(
+  job: ActiveJobNoPlan,
+  deleteJob: () => void,
+  isBeingDeleted: boolean
+) {
   return [
     job.proposedJob.name,
     `${job.workers.length}/${job.proposedJob.maxWorkers}`,
@@ -176,16 +223,39 @@ function formatRowData(job: ActiveJobNoPlan) {
       <Link
         href={`/plans/${job.planId}/${job.id}`}
         onClick={(e) => e.stopPropagation()}
+        className="smj-action-edit"
       >
         <i className="fas fa-edit" title="Upravit"></i>
       </Link>
 
-      <i
-        className="fas fa-trash-alt smj-action-delete cursor-pointer"
-        title="Smazat"
-        onClick={() => {}}
-      ></i>
+      {deleteJobIcon(deleteJob, isBeingDeleted)}
       <span style={{ width: "0px" }}></span>
     </span>,
   ];
+}
+
+function deleteJobIcon(deleteJob: () => void, isBeingDeleted: boolean) {
+  return (
+    <>
+      {!isBeingDeleted && (
+        <>
+          <i
+            className="fas fa-trash-alt smj-action-delete"
+            title="Smazat"
+            onClick={(e) => {
+              e.stopPropagation();
+              deleteJob();
+            }}
+          ></i>
+          <span style={{ width: "0px" }}></span>
+        </>
+      )}
+      {isBeingDeleted && (
+        <i
+          className="fas fa-spinner smj-action-delete spinning"
+          title="Odstraňování..."
+        ></i>
+      )}
+    </>
+  );
 }

@@ -269,3 +269,11 @@ export async function createActiveJob(job: ActiveJobCreateData) {
 
   return activeJob;
 }
+
+export function deleteActiveJob(id: string) {
+  return prisma.activeJob.delete({
+    where: {
+      id,
+    },
+  });
+}

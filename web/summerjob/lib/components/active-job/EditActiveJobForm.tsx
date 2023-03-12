@@ -26,7 +26,10 @@ export default function EditActiveJobForm({
   serializedJob,
 }: EditActiveJobProps) {
   const job = deserializeActiveJob(serializedJob);
-  const { trigger, error, isMutating, reset } = useAPIActiveJobUpdate(job.id);
+  const { trigger, error, isMutating, reset } = useAPIActiveJobUpdate(
+    job.id,
+    job.planId
+  );
   const [saved, setSaved] = useState(false);
   const {
     register,

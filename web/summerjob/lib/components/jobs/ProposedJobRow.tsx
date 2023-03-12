@@ -55,42 +55,40 @@ export default function ProposedJobRow({
   };
 
   return (
-    <>
-      <ExpandableRow
-        data={formatJobRow(
-          job,
-          setJobPinned,
-          setJobCompleted,
-          confirmDelete,
-          isBeingDeleted
-        )}
-        className={rowColorClass(job)}
-      >
-        <div className="ms-2">
-          <strong>Popis</strong>
-          <p>{job.description}</p>
-          <p>
-            <strong>Počet pracovníků: </strong>
-            {job.minWorkers} - {job.maxWorkers} ({job.strongWorkers} siláků)
-          </p>
-          <p>
-            <strong>Doprava do oblasti požadována: </strong>
-            {job.area.requiresCar ? "Ano" : "Ne"}
-          </p>
-          <p>
-            <strong>Alergeny: </strong>
-            {job.allergens.length > 0
-              ? translateAllergies(job.allergens)
-                  .map((a) => a.code)
-                  .join(", ")
-              : "Žádné"}
-          </p>
-          <p>
-            <strong>Naplánované dny: </strong>
-            {job.activeJobs.length} / {job.requiredDays}
-          </p>
-        </div>
-      </ExpandableRow>
+    <ExpandableRow
+      data={formatJobRow(
+        job,
+        setJobPinned,
+        setJobCompleted,
+        confirmDelete,
+        isBeingDeleted
+      )}
+      className={rowColorClass(job)}
+    >
+      <div className="ms-2">
+        <strong>Popis</strong>
+        <p>{job.description}</p>
+        <p>
+          <strong>Počet pracovníků: </strong>
+          {job.minWorkers} - {job.maxWorkers} ({job.strongWorkers} siláků)
+        </p>
+        <p>
+          <strong>Doprava do oblasti požadována: </strong>
+          {job.area.requiresCar ? "Ano" : "Ne"}
+        </p>
+        <p>
+          <strong>Alergeny: </strong>
+          {job.allergens.length > 0
+            ? translateAllergies(job.allergens)
+                .map((a) => a.code)
+                .join(", ")
+            : "Žádné"}
+        </p>
+        <p>
+          <strong>Naplánované dny: </strong>
+          {job.activeJobs.length} / {job.requiredDays}
+        </p>
+      </div>
       {showDeleteConfirmation && !deleteError && (
         <ConfirmationModal
           onConfirm={deleteJob}
@@ -114,7 +112,7 @@ export default function ProposedJobRow({
           message={"Nepovedlo se odstranit job."}
         />
       )}
-    </>
+    </ExpandableRow>
   );
 }
 
@@ -148,7 +146,11 @@ function formatJobRow(
     >
       {markJobAsCompletedIcon(job, setCompleted)}
       {pinJobIcon(job, setPinned)}
-      <Link href={`/jobs/${job.id}`} onClick={(e) => e.stopPropagation()}>
+      <Link
+        href={`/jobs/${job.id}`}
+        onClick={(e) => e.stopPropagation()}
+        className="smj-action-edit"
+      >
         <i className="fas fa-edit" title="Upravit"></i>
       </Link>
       {deleteJobIcon(deleteJob, isBeingDeleted)}

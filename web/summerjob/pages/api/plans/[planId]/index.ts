@@ -7,7 +7,7 @@ async function get(
   req: NextApiRequest,
   res: NextApiResponse<PlanAPIGetResponse>
 ) {
-  const id = req.query.id as string;
+  const id = req.query.planId as string;
   const plan = await getPlanById(id);
   if (!plan) {
     res.status(404).end();

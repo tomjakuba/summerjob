@@ -73,14 +73,14 @@ export function PlanTable({
             key={job.id}
             isDisplayed={shouldShowJob(job)}
             job={job}
-            planId={plan!.id}
             formatWorkerData={formatWorkerData}
             onWorkerDragStart={onWorkerDragStart}
             reloadPlan={reload}
           />
         ))}
-      {joblessWorkers && (
+      {joblessWorkers && plan && (
         <PlanJoblessRow
+          planId={plan.id}
           jobs={sortedJobs}
           joblessWorkers={joblessWorkers}
           numColumns={_columns.length}

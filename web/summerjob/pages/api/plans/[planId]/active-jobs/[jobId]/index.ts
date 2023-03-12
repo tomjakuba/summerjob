@@ -1,11 +1,15 @@
 import { http_method_handler } from "lib/api/method_handler";
-import { getActiveJobById, updateActiveJob } from "lib/data/active-jobs";
+import {
+  deleteActiveJob,
+  getActiveJobById,
+  updateActiveJob,
+} from "lib/data/active-jobs";
 import { ApiBadRequestError } from "lib/data/api-error";
 import { ActiveJobUpdateSchema } from "lib/types/active-job";
 import { NextApiRequest, NextApiResponse } from "next";
 
 async function patch(req: NextApiRequest, res: NextApiResponse) {
-  const id = req.query.id as string;
+  const id = req.query.jobId as string;
   const result = ActiveJobUpdateSchema.safeParse(req.body);
   if (!result.success) {
     res.status(400).json({
@@ -27,7 +31,7 @@ async function get(
   req: NextApiRequest,
   res: NextApiResponse<ActiveJobAPIGetResponse>
 ) {
-  const id = req.query.id as string;
+  const id = req.query.jobId as string;
   const job = await getActiveJobById(id);
   if (!job) {
     res.status(404).end();
@@ -36,4 +40,10 @@ async function get(
   res.status(200).json(job);
 }
 
-export default http_method_handler({ get: get, patch: patch });
+async function del(req: NextApiRequest, res: NextApiResponse) {
+  const id = req.query.jobId as string;
+  await deleteActiveJob(id);
+  res.status(204).end();
+}
+
+export default http_method_handler({ get: get, patch: patch, del: del });

@@ -91,6 +91,7 @@ function formatCarRow(
         key={car.id}
         href={`/cars/${car.id}`}
         onClick={(e) => e.stopPropagation()}
+        className="smj-action-edit"
       >
         <i className="fas fa-edit" title="Upravit"></i>
       </Link>

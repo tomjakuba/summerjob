@@ -1,5 +1,5 @@
 import type { PlansAPIGetResponse, PlansAPIPostData } from "pages/api/plans";
-import type { PlanAPIGetResponse } from "pages/api/plans/[id]";
+import type { PlanAPIGetResponse } from "pages/api/plans/[planId]";
 import { useData, useDataCreate, useDataPartialUpdate } from "./fetcher";
 
 export function useAPIPlans(options?: any) {

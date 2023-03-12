@@ -80,7 +80,7 @@ model ActiveJob {
   id                  String      @id @default(uuid())
   privateDescription  String      @default("")
   publicDescription   String      @default("")
-  proposedJob         ProposedJob @relation(fields: [proposedJobId], references: [id])
+  proposedJob         ProposedJob @relation(fields: [proposedJobId], references: [id], onDelete: Cascade)
   proposedJobId       String
   workers             Worker[]
   plan                Plan        @relation(fields: [planId], references: [id])

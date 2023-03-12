@@ -7,7 +7,7 @@ import {
 } from "lib/types/active-job";
 import { NextApiRequest, NextApiResponse } from "next";
 
-export type ActiveJobsAPIPostData = ActiveJobCreateData;
+export type ActiveJobsAPIPostData = Omit<ActiveJobCreateData, "planId">;
 export type ActiveJobsAPIPostResponse = Awaited<
   ReturnType<typeof createActiveJob>
 >;
@@ -15,7 +15,10 @@ async function post(
   req: NextApiRequest,
   res: NextApiResponse<ActiveJobsAPIPostResponse | WrappedError<ApiError>>
 ) {
-  const result = ActiveJobCreateSchema.safeParse(req.body);
+  const result = ActiveJobCreateSchema.safeParse({
+    ...req.body,
+    planId: req.query.planId,
+  });
   if (!result.success) {
     res.status(400).json({
       error: new ApiBadRequestError(JSON.stringify(result.error.issues)),
