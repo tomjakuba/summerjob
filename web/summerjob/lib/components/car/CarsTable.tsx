@@ -27,7 +27,7 @@ export function CarsTable({ data, reload }: CarTableProps) {
 
   useEffect(() => {
     if (deletingCarId) {
-      trigger((() => {})(), {
+      trigger(null, {
         onSuccess: () => {
           setDeletingCarId(undefined);
           reload(data?.filter((car) => car.id !== deletingCarId) ?? []);

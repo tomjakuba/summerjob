@@ -33,7 +33,7 @@ export function Modal({ children, title, size, onClose }: ModalProps) {
                 ></button>
               )}
             </div>
-            <div className="modal-body">{children}</div>
+            <div className="modal-body text-wrap">{children}</div>
           </div>
         </div>
       </div>

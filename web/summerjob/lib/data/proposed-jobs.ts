@@ -101,3 +101,11 @@ export async function createProposedJob(data: ProposedJobCreateData) {
   });
   return proposedJob;
 }
+
+export async function deleteProposedJob(id: string) {
+  await prisma.proposedJob.delete({
+    where: {
+      id,
+    },
+  });
+}

@@ -1,5 +1,5 @@
 import { http_method_handler } from "lib/api/method_handler";
-import { updateProposedJob } from "lib/data/proposed-jobs";
+import { deleteProposedJob, updateProposedJob } from "lib/data/proposed-jobs";
 import {
   type ProposedJobUpdateData,
   ProposedJobUpdateSchema,
@@ -14,4 +14,10 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
   res.status(204).end();
 }
 
-export default http_method_handler({ patch: patch });
+async function del(req: NextApiRequest, res: NextApiResponse) {
+  const id = req.query.id as string;
+  await deleteProposedJob(id);
+  res.status(204).end();
+}
+
+export default http_method_handler({ patch: patch, del: del });

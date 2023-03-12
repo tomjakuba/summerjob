@@ -7,6 +7,7 @@ import { ProposedJobAPIPatchData } from "pages/api/proposed-jobs/[id]";
 import {
   useData,
   useDataCreate,
+  useDataDelete,
   useDataPartialUpdate,
   useDataPartialUpdateDynamic,
 } from "./fetcher";
@@ -42,4 +43,8 @@ export function useAPIProposedJobUpdateDynamic(
     return `/api/proposed-jobs/${id}`;
   };
   return useDataPartialUpdateDynamic<ProposedJobAPIPatchData>(url, options);
+}
+
+export function useAPIProposedJobDelete(id: string, options?: any) {
+  return useDataDelete(`/api/proposed-jobs/${id}`, options);
 }

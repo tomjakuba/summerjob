@@ -49,7 +49,7 @@ export default function CarCreateForm({
       </div>
       <div className="row">
         <div className="col">
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
             <label className="form-label fw-bold mt-4" htmlFor="name">
               Název
             </label>

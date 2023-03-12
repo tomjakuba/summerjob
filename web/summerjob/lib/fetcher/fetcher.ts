@@ -75,11 +75,17 @@ export function useDataCreate<T>(url: string, options?: any) {
   return useSWRMutation<any, any, Key, T>(url, post, options);
 }
 
+export function useDataDelete(url: string, options?: any) {
+  // Bugfix until this is solved
+  options = { throwOnError: false, ...options };
+  return useSWRMutation(url, del, options);
+}
+
 export function useDataDeleteDynamic(
   getUrl: () => string | undefined,
   options?: any
 ) {
   // Bugfix until this is solved https://github.com/vercel/swr/issues/2376
   options = { throwOnError: false, ...options };
-  return useSWRMutation<any, any, Key, void>(getUrl, del, options);
+  return useSWRMutation(getUrl, del, options);
 }
