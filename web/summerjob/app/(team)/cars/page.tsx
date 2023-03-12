@@ -2,7 +2,7 @@ import CarsClientPage from "lib/components/car/CarsClientPage";
 import { getCars } from "lib/data/cars";
 import { serializeCars } from "lib/types/car";
 
-export const revalidate = 0;
+export const dynamic = "force-dynamic";
 
 export default async function CarsPage() {
   const cars = await getCars();

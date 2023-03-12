@@ -5,7 +5,7 @@ import { getAreas } from "lib/data/areas";
 import { translateAllergies, serializeAllergies } from "lib/types/allergy";
 import { serializeAreas } from "lib/types/areas";
 
-const revalidate = 0;
+export const dynamic = "force-dynamic";
 
 export default async function CreateProposedJobPage() {
   const areas = await getAreas();
