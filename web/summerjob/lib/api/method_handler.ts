@@ -78,11 +78,13 @@ async function handle(
       });
       return;
     } else if (error instanceof InternalError) {
+      console.error(error);
       res.status(500).json({
         error: new ApiInternalServerError(error.reason),
       });
       return;
     }
+    console.error(error);
     res.status(500).json({
       error: new ApiInternalServerError(),
     });

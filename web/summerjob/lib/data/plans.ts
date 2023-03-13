@@ -83,3 +83,9 @@ export async function createPlan(date: Date): Promise<Plan> {
   });
   return plan;
 }
+
+export async function deletePlan(id: string) {
+  await prisma.plan.delete({
+    where: { id },
+  });
+}

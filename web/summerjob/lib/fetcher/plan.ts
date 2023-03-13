@@ -1,6 +1,11 @@
 import type { PlansAPIGetResponse, PlansAPIPostData } from "pages/api/plans";
 import type { PlanAPIGetResponse } from "pages/api/plans/[planId]";
-import { useData, useDataCreate, useDataPartialUpdate } from "./fetcher";
+import {
+  useData,
+  useDataCreate,
+  useDataDelete,
+  useDataPartialUpdate,
+} from "./fetcher";
 
 export function useAPIPlans(options?: any) {
   const properties = useData<PlansAPIGetResponse>("/api/plans", options);
@@ -27,4 +32,8 @@ export function useAPIPlanMoveWorker(id: string, options?: any) {
 
 export function useAPIPlansCreate(options?: any) {
   return useDataCreate<PlansAPIPostData>(`/api/plans`, options);
+}
+
+export function useAPIPlanDelete(id: string, options?: any) {
+  return useDataDelete(`/api/plans/${id}`, options);
 }

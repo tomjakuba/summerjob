@@ -1,5 +1,5 @@
 import { http_method_handler } from "lib/api/method_handler";
-import { getPlanById } from "lib/data/plans";
+import { deletePlan, getPlanById } from "lib/data/plans";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export type PlanAPIGetResponse = Awaited<ReturnType<typeof getPlanById>>;
@@ -22,4 +22,10 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
   res.status(204).end();
 }
 
-export default http_method_handler({ get: get, patch: patch });
+async function del(req: NextApiRequest, res: NextApiResponse) {
+  const id = req.query.planId as string;
+  await deletePlan(id);
+  res.status(204).end();
+}
+
+export default http_method_handler({ get: get, patch: patch, del: del });

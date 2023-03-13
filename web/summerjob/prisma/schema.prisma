@@ -22,6 +22,7 @@ model Worker {
   passengerIn    Ride[]
   registeredIn   SummerJobEvent[]
   responsibleFor ActiveJob[]      @relation("ResponsibleWorker")
+  deleted        Boolean          @default(false)
 }
 
 model Car {
@@ -33,6 +34,7 @@ model Car {
   ownerId     String
   rides       Ride[]
   odometers   CarOdometer[]
+  deleted     Boolean       @default(false)
 }
 
 model CarOdometer {
@@ -83,7 +85,7 @@ model ActiveJob {
   proposedJob         ProposedJob @relation(fields: [proposedJobId], references: [id], onDelete: Cascade)
   proposedJobId       String
   workers             Worker[]
-  plan                Plan        @relation(fields: [planId], references: [id])
+  plan                Plan        @relation(fields: [planId], references: [id], onDelete: Cascade)
   planId              String
   rides               Ride[]
   responsibleWorker   Worker?     @relation("ResponsibleWorker", fields: [responsibleWorkerId], references: [id])

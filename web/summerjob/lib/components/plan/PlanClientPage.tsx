@@ -5,7 +5,7 @@ import { Modal, ModalSize } from "lib/components/modal/Modal";
 import PageHeader from "lib/components/page-header/PageHeader";
 import { PlanFilters } from "lib/components/plan/PlanFilters";
 import { PlanTable } from "lib/components/plan/PlanTable";
-import { useAPIPlan } from "lib/fetcher/plan";
+import { useAPIPlan, useAPIPlanDelete } from "lib/fetcher/plan";
 import { useAPIWorkersWithoutJob } from "lib/fetcher/worker";
 import { filterUniqueById, formatDateLong } from "lib/helpers/helpers";
 import { ActiveJobNoPlan } from "lib/types/active-job";
@@ -13,6 +13,8 @@ import { deserializePlan, PlanComplete } from "lib/types/plan";
 import { WorkerComplete } from "lib/types/worker";
 import { useMemo, useState } from "react";
 import ErrorPage404 from "../404/404";
+import ConfirmationModal from "../modal/ConfirmationModal";
+import ErrorMessageModal from "../modal/ErrorMessageModal";
 
 interface PlanClientPageProps {
   id: string;
@@ -46,6 +48,29 @@ export default function PlanClientPage({
     reloadJoblessWorkers([...expectedValue]);
   };
 
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const {
+    trigger: triggerDelete,
+    isMutating: isBeingDeleted,
+    error: deleteError,
+    reset: resetDeleteError,
+  } = useAPIPlanDelete(data!.id, {
+    onSuccess: () => window.history.back(),
+  });
+
+  const deletePlan = () => {
+    triggerDelete();
+    setShowDeleteConfirmation(false);
+  };
+
+  const confirmDelete = () => {
+    setShowDeleteConfirmation(true);
+  };
+
+  const onErrorMessageClose = () => {
+    resetDeleteError();
+  };
+
   const searchableJobs = useMemo(() => {
     const map = new Map<string, string>();
     data?.jobs.forEach((job) => {
@@ -75,7 +100,7 @@ export default function PlanClientPage({
 
   const [filter, setFilter] = useState("");
 
-  if (error) {
+  if (error && !data) {
     return <ErrorPage error={error} />;
   }
 
@@ -113,6 +138,14 @@ export default function PlanClientPage({
             <button className="btn btn-primary" type="button">
               <i className="fas fa-print"></i>
               <span>Tisknout</span>
+            </button>
+            <button
+              className="btn btn-danger"
+              type="button"
+              onClick={confirmDelete}
+            >
+              <i className="fas fa-trash-alt"></i>
+              <span>Odstranit</span>
             </button>
           </PageHeader>
 
@@ -173,6 +206,27 @@ export default function PlanClientPage({
               >
                 <AddJobToPlanForm planId={id} onComplete={closeModal} />
               </Modal>
+            )}
+            {showDeleteConfirmation && !deleteError && (
+              <ConfirmationModal
+                onConfirm={deletePlan}
+                onReject={() => setShowDeleteConfirmation(false)}
+              >
+                <p>Opravdu chcete smazat tento plán?</p>
+                {data!.jobs.length > 0 && (
+                  <div className="alert alert-danger">
+                    Tento plán obsahuje naplánované joby!
+                    <br /> Jeho odstraněním zároveň odstraníte i odpovídající
+                    naplánované joby.
+                  </div>
+                )}
+              </ConfirmationModal>
+            )}
+            {deleteError && (
+              <ErrorMessageModal
+                onClose={onErrorMessageClose}
+                message={"Nepovedlo se odstranit plán."}
+              />
             )}
           </section>
         </>
