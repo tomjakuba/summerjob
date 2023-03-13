@@ -17,6 +17,7 @@ export async function getActiveJobById(
       workers: {
         include: {
           allergies: true,
+          cars: true,
         },
       },
       proposedJob: {

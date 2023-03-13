@@ -14,16 +14,18 @@ export type RideComplete = Ride & {
   passengers: Worker[];
 };
 
-export const RideUpdateSchema = z
+export const RideCreateSchema = z
   .object({
-    id: z.string(),
     driverId: z.string(),
     carId: z.string(),
-    description: z.string(),
+    description: z.string().optional(),
     jobIds: z.array(z.string()),
     passengerIds: z.array(z.string()),
   })
-  .partial()
   .strict();
 
-export type RideUpdate = z.infer<typeof RideUpdateSchema>;
+export type RideCreateData = z.infer<typeof RideCreateSchema>;
+
+export const RideUpdateSchema = RideCreateSchema.partial().strict();
+
+export type RideUpdateData = z.infer<typeof RideUpdateSchema>;

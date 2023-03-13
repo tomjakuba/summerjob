@@ -1,6 +1,6 @@
 import { ActiveJobNoPlan } from "lib/types/active-job";
 import { RideComplete } from "lib/types/ride";
-import { WorkerWithAllergies } from "lib/types/worker";
+import { WorkerComplete } from "lib/types/worker";
 import Link from "next/link";
 import { ExpandableRow } from "../table/ExpandableRow";
 import { SimpleRow } from "../table/SimpleRow";
@@ -19,7 +19,7 @@ interface PlanJobRowProps {
   job: ActiveJobNoPlan;
   isDisplayed: boolean;
   formatWorkerData: (
-    worker: WorkerWithAllergies,
+    worker: WorkerComplete,
     job: ActiveJobNoPlan
   ) => (string | JSX.Element)[];
   onWorkerDragStart: (
@@ -45,7 +45,6 @@ export function PlanJobRow({
       reloadPlan();
     },
   });
-
   const {
     trigger: triggerDelete,
     isMutating: isBeingDeleted,
@@ -156,13 +155,14 @@ export function PlanJobRow({
 function formatRideData(job: ActiveJobNoPlan) {
   if (!job.rides || job.rides.length == 0) return <>Není</>;
 
-  const formatSingleRide = (ride: RideComplete) => {
+  const formatSingleRide = (ride: RideComplete, index: number) => {
     const isDriverFromJob = job.workers.find((w) => w.id === ride.driverId);
     const otherJobs = ride.jobs.filter((j) => j.id !== job.id);
 
     return (
       <>
-        {ride.car.name}: {ride.driver.firstName} {ride.driver.lastName}{" "}
+        {index + 1}
+        {")"} {ride.car.name}: {ride.driver.firstName} {ride.driver.lastName}{" "}
         (obsazenost: {ride.passengers.length + 1}/{ride.car.seats})
         {!isDriverFromJob && <i>(řidič z jiného jobu)</i>}
         <br />
@@ -177,8 +177,8 @@ function formatRideData(job: ActiveJobNoPlan) {
 
   return (
     <>
-      {job.rides.map((r) => (
-        <span key={r.id}>{formatSingleRide(r)}</span>
+      {job.rides.map((r, index) => (
+        <span key={r.id}>{formatSingleRide(r, index)}</span>
       ))}
     </>
   );

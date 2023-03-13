@@ -33,6 +33,7 @@ export async function getPlanById(id: string): Promise<PlanComplete | null> {
           workers: {
             include: {
               allergies: true,
+              cars: true,
             },
           },
           proposedJob: {

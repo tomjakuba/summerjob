@@ -1,5 +1,5 @@
 import { ActiveJobNoPlan } from "lib/types/active-job";
-import { WorkerWithAllergies } from "lib/types/worker";
+import { WorkerComplete, WorkerWithAllergies } from "lib/types/worker";
 import { ExpandableRow } from "../table/ExpandableRow";
 import { SimpleRow } from "../table/SimpleRow";
 import type { Worker } from "lib/prisma/client";
@@ -9,10 +9,10 @@ import { useEffect, useState } from "react";
 interface PlanJoblessRowProps {
   planId: string;
   jobs: ActiveJobNoPlan[];
-  joblessWorkers: WorkerWithAllergies[];
+  joblessWorkers: WorkerComplete[];
   numColumns: number;
   formatWorkerData: (
-    worker: WorkerWithAllergies,
+    worker: WorkerComplete,
     job?: ActiveJobNoPlan
   ) => (string | JSX.Element)[];
   onWorkerDragStart: (

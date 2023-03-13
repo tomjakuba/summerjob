@@ -12,6 +12,7 @@ import { SWRMutationResponse } from "swr/mutation";
 import { Key } from "swr";
 import { PlanJobRow } from "./PlanJobRow";
 import { PlanJoblessRow } from "./PlanJoblessRow";
+import { translateAllergies } from "lib/types/allergy";
 
 const _columns: SortableColumn[] = [
   { id: "name", name: "Práce", sortable: true },
@@ -93,15 +94,16 @@ export function PlanTable({
   );
 }
 
-function formatWorkerData(worker: Worker, job?: ActiveJobNoPlan) {
+function formatWorkerData(worker: WorkerComplete, job?: ActiveJobNoPlan) {
   let name = `${worker.firstName} ${worker.lastName}`;
   const abilities = [];
   let isDriver = false;
   if (job?.rides.map((r) => r.driverId).includes(worker.id)) {
     isDriver = true;
-    abilities.push("Řidič");
   }
+  if (worker.cars.length > 0) abilities.push("Auto");
   if (worker.isStrong) abilities.push("Silák");
+  const allergies = translateAllergies(worker.allergies);
 
   return [
     isDriver ? (
@@ -113,6 +115,7 @@ function formatWorkerData(worker: Worker, job?: ActiveJobNoPlan) {
     ),
     worker.phone,
     abilities.join(", "),
+    allergies.map((a) => a.code).join(", "),
     <>
       <a className="me-3" href="#">
         Odstranit

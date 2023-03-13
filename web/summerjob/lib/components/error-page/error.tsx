@@ -17,7 +17,7 @@ export default function ErrorPage({ error }: ErrorPageProps) {
     if (window.navigator) {
       setIsOffline(!window.navigator.onLine);
     }
-  });
+  }, [setIsOffline]);
 
   return (
     <section className="mb-3 mt-3">

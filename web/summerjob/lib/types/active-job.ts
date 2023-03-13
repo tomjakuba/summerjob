@@ -3,18 +3,18 @@ import { ProposedJobNoActive } from "./proposed-job";
 import type { Worker } from "lib/prisma/client";
 import { RideComplete } from "./ride";
 import { z } from "zod";
-import { WorkerWithAllergies } from "./worker";
+import { WorkerComplete } from "./worker";
 import { Serialized } from "./serialize";
 
 export type ActiveJobNoPlan = ActiveJob & {
-  workers: WorkerWithAllergies[];
+  workers: WorkerComplete[];
   proposedJob: ProposedJobNoActive;
   rides: RideComplete[];
   responsibleWorker: Worker | null;
 };
 
 export type ActiveJobComplete = ActiveJob & {
-  workers: WorkerWithAllergies[];
+  workers: WorkerComplete[];
   proposedJob: ProposedJobNoActive;
   rides: RideComplete[];
   responsibleWorker: Worker | null;
