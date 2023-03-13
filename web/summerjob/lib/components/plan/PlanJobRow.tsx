@@ -13,6 +13,7 @@ import { translateAllergies } from "lib/types/allergy";
 import { useState } from "react";
 import ConfirmationModal from "../modal/ConfirmationModal";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
+import AddRideButton from "./AddRideButton";
 
 interface PlanJobRowProps {
   job: ActiveJobNoPlan;
@@ -95,7 +96,11 @@ export function PlanJobRow({
               <strong>Popis</strong>
               <p>{job.publicDescription}</p>
 
-              <strong>Doprava</strong>
+              <div className="d-flex gap-1">
+                <strong>Doprava</strong>
+                <AddRideButton job={job} />
+              </div>
+
               <p>{formatRideData(job)}</p>
               <strong>Alergeny</strong>
               <p>{formatAllergens(job)}</p>
