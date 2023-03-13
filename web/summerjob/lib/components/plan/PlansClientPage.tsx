@@ -12,9 +12,15 @@ import NewPlanForm from "./NewPlanForm";
 
 interface PlansClientPageProps {
   initialData: Serialized<PlanWithJobs[]>;
+  startDate: string;
+  endDate: string;
 }
 
-export default function PlansClientPage({ initialData }: PlansClientPageProps) {
+export default function PlansClientPage({
+  initialData,
+  startDate,
+  endDate,
+}: PlansClientPageProps) {
   const initialDataParsed = deserializePlans(initialData);
   const { data, error, isLoading } = useAPIPlans({
     fallbackData: initialDataParsed,
@@ -32,15 +38,18 @@ export default function PlansClientPage({ initialData }: PlansClientPageProps) {
     return <ErrorPage error={error} />;
   }
 
+  const firstDay = new Date(startDate);
+  const lastDay = new Date(endDate);
   const nextDay = (date: Date) => {
     const newDate = new Date(date);
     newDate.setDate(newDate.getDate() + 1);
     return newDate;
   };
+
   const nextPlanDate =
     sortedPlans && sortedPlans.length > 0
       ? nextDay(sortedPlans[0].day)
-      : new Date();
+      : firstDay;
 
   return (
     <>
@@ -86,7 +95,12 @@ export default function PlansClientPage({ initialData }: PlansClientPageProps) {
             size={ModalSize.MEDIUM}
             onClose={closeModal}
           >
-            <NewPlanForm initialDate={nextPlanDate} onCompleted={closeModal} />
+            <NewPlanForm
+              initialDate={nextPlanDate}
+              onCompleted={closeModal}
+              from={firstDay}
+              to={lastDay}
+            />
           </Modal>
         )}
       </section>

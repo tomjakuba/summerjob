@@ -6,11 +6,15 @@ import SimpleDatePicker from "../date-picker/date-picker";
 interface NewPlanFormProps {
   initialDate: Date;
   onCompleted: () => void;
+  from: Date;
+  to: Date;
 }
 
 export default function NewPlanForm({
   initialDate,
   onCompleted,
+  from,
+  to,
 }: NewPlanFormProps) {
   const [date, setDate] = useState(initialDate);
   const onDateChanged = (newDate: Date) => {
@@ -45,6 +49,15 @@ export default function NewPlanForm({
           <div className="col-1"></div>
           <div className="col text-danger">
             {error.reason ?? "Invalid input data."}
+          </div>
+          <div className="col-1"></div>
+        </div>
+      )}
+      {(date > to || date < from) && (
+        <div className="row">
+          <div className="col-1"></div>
+          <div className="col text-danger text-center">
+            Tento den je mimo rozsah plánu.
           </div>
           <div className="col-1"></div>
         </div>

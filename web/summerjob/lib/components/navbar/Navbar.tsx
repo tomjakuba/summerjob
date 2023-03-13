@@ -32,6 +32,7 @@ export function Navbar() {
               className="smj-nav-logo"
               alt="SummerJob logo"
               quality={98}
+              priority={true}
             />
           </a>
           <button
