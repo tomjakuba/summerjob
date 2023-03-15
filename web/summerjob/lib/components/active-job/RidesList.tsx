@@ -29,6 +29,7 @@ export default function RidesList({ job }: RidesListProps) {
               {[ride.driver, ...ride.passengers]
                 .map<React.ReactNode>((p) => formatPassengerName(p, job))
                 .reduce((acc, curr) => [acc, ", ", curr])}
+              {/* FIXME show other jobs for this ride
               {ride.jobs.length > 1 && (
                 <>
                   <b>Také odváží na: </b>
@@ -36,7 +37,7 @@ export default function RidesList({ job }: RidesListProps) {
                     .filter((j) => j.id !== job.id)
                     .map((j) => j.proposedJob.name)}
                 </>
-              )}
+              )} */}
             </div>
           );
         })}

@@ -43,11 +43,9 @@ export async function getCars(): Promise<CarComplete[]> {
       },
       rides: {
         where: {
-          jobs: {
-            some: {
-              plan: {
-                summerJobEventId: activeEventId,
-              },
+          job: {
+            plan: {
+              summerJobEventId: activeEventId,
             },
           },
         },

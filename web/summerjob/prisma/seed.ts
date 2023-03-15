@@ -212,6 +212,20 @@ async function populatePlan(
   } else {
     driver = assignedWorkersWithCar[0];
   }
+
+  const activeJob = await prisma.activeJob.create({
+    data: {
+      privateDescription: "Popis úkolu, který vidí jen organizátor",
+      publicDescription: "Popis úkolu, který vidí všichni",
+      planId: plan.id,
+      proposedJobId: job.id,
+      workers: {
+        connect: workersIds.map((id) => ({ id })),
+      },
+      responsibleWorkerId: driver.id,
+    },
+  });
+
   const ride = await prisma.ride.create({
     data: {
       driverId: driver.id,
@@ -221,22 +235,7 @@ async function populatePlan(
           .filter((id) => id !== driver.id)
           .map((id) => ({ id })),
       },
-    },
-  });
-
-  await prisma.activeJob.create({
-    data: {
-      privateDescription: "Popis úkolu, který vidí jen organizátor",
-      publicDescription: "Popis úkolu, který vidí všichni",
-      planId: plan.id,
-      proposedJobId: job.id,
-      workers: {
-        connect: workersIds.map((id) => ({ id })),
-      },
-      rides: {
-        connect: [{ id: ride.id }],
-      },
-      responsibleWorkerId: driver.id,
+      jobId: activeJob.id,
     },
   });
 }

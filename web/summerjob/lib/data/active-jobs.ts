@@ -31,7 +31,7 @@ export async function getActiveJobById(
         include: {
           car: true,
           driver: true,
-          jobs: {
+          job: {
             include: {
               proposedJob: true,
             },
@@ -238,8 +238,6 @@ export async function updateActiveJob(job: ActiveJobUpdateData) {
         ...workersCommand,
       },
     });
-
-    //TODO update ride
 
     return activeJob;
   });

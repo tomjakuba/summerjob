@@ -46,7 +46,7 @@ export async function getPlanById(id: string): Promise<PlanComplete | null> {
             include: {
               driver: true,
               car: true,
-              jobs: {
+              job: {
                 include: {
                   proposedJob: true,
                 },

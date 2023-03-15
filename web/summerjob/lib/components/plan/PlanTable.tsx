@@ -12,7 +12,7 @@ import { SWRMutationResponse } from "swr/mutation";
 import { Key } from "swr";
 import { PlanJobRow } from "./PlanJobRow";
 import { PlanJoblessRow } from "./PlanJoblessRow";
-import { translateAllergies } from "lib/types/allergy";
+import { RidesForJob } from "lib/types/ride";
 
 const _columns: SortableColumn[] = [
   { id: "name", name: "Práce", sortable: true },
@@ -57,6 +57,18 @@ export function PlanTable({
     };
   };
 
+  const rides = useMemo(() => {
+    return (
+      plan?.jobs
+        .map<RidesForJob>((j) => ({
+          jobId: j.id,
+          jobName: j.proposedJob.name,
+          rides: j.rides,
+        }))
+        .filter((j) => j.rides.length > 0) ?? []
+    );
+  }, [plan]);
+
   const reload = () => {
     reloadPlan();
     reloadJoblessWorkers(joblessWorkers);
@@ -74,7 +86,7 @@ export function PlanTable({
             key={job.id}
             isDisplayed={shouldShowJob(job)}
             job={job}
-            formatWorkerData={formatWorkerData}
+            rides={rides}
             onWorkerDragStart={onWorkerDragStart}
             reloadPlan={reload}
           />
@@ -85,44 +97,12 @@ export function PlanTable({
           jobs={sortedJobs}
           joblessWorkers={joblessWorkers}
           numColumns={_columns.length}
-          formatWorkerData={formatWorkerData}
           onWorkerDragStart={onWorkerDragStart}
           reloadJoblessWorkers={reload}
         />
       )}
     </SortableTable>
   );
-}
-
-function formatWorkerData(worker: WorkerComplete, job?: ActiveJobNoPlan) {
-  let name = `${worker.firstName} ${worker.lastName}`;
-  const abilities = [];
-  let isDriver = false;
-  if (job?.rides.map((r) => r.driverId).includes(worker.id)) {
-    isDriver = true;
-  }
-  if (worker.cars.length > 0) abilities.push("Auto");
-  if (worker.isStrong) abilities.push("Silák");
-  const allergies = translateAllergies(worker.allergies);
-
-  return [
-    isDriver ? (
-      <>
-        {name} <i className="fas fa-car ms-2"></i>
-      </>
-    ) : (
-      name
-    ),
-    worker.phone,
-    abilities.join(", "),
-    allergies.map((a) => a.code).join(", "),
-    <>
-      <a className="me-3" href="#">
-        Odstranit
-      </a>
-      <a href="#">Přesunout</a>
-    </>,
-  ];
 }
 
 function moveWorkerToJob(

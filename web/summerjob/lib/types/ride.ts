@@ -1,6 +1,8 @@
-import { ActiveJob, Car, Ride, Worker } from "lib/prisma/client";
+import { Car, Ride, Worker } from "lib/prisma/client";
 import { z } from "zod";
 import { ActiveJobWithProposed } from "./active-job";
+
+export const NO_RIDE = "NO_RIDE";
 
 export type RideWithDriverCarDetails = Ride & {
   driver: Worker;
@@ -10,8 +12,14 @@ export type RideWithDriverCarDetails = Ride & {
 export type RideComplete = Ride & {
   driver: Worker;
   car: Car;
-  jobs: ActiveJobWithProposed[];
+  job: ActiveJobWithProposed;
   passengers: Worker[];
+};
+
+export type RidesForJob = {
+  jobId: string;
+  jobName: string;
+  rides: RideComplete[];
 };
 
 export const RideCreateSchema = z
@@ -19,13 +27,17 @@ export const RideCreateSchema = z
     driverId: z.string(),
     carId: z.string(),
     description: z.string().optional(),
-    jobIds: z.array(z.string()),
     passengerIds: z.array(z.string()),
   })
   .strict();
 
 export type RideCreateData = z.infer<typeof RideCreateSchema>;
 
-export const RideUpdateSchema = RideCreateSchema.partial().strict();
+export const RideUpdateSchema = RideCreateSchema.omit({
+  driverId: true,
+  carId: true,
+})
+  .partial()
+  .strict();
 
 export type RideUpdateData = z.infer<typeof RideUpdateSchema>;

@@ -1,5 +1,5 @@
 import { ActiveJobNoPlan } from "lib/types/active-job";
-import { RideComplete } from "lib/types/ride";
+import { RideComplete, RidesForJob } from "lib/types/ride";
 import { WorkerComplete } from "lib/types/worker";
 import Link from "next/link";
 import { ExpandableRow } from "../table/ExpandableRow";
@@ -14,14 +14,12 @@ import { useState } from "react";
 import ConfirmationModal from "../modal/ConfirmationModal";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
 import AddRideButton from "./AddRideButton";
+import RideSelect from "./RideSelect";
 
 interface PlanJobRowProps {
   job: ActiveJobNoPlan;
   isDisplayed: boolean;
-  formatWorkerData: (
-    worker: WorkerComplete,
-    job: ActiveJobNoPlan
-  ) => (string | JSX.Element)[];
+  rides: RidesForJob[];
   onWorkerDragStart: (
     worker: Worker,
     sourceId: string
@@ -32,7 +30,7 @@ interface PlanJobRowProps {
 export function PlanJobRow({
   job,
   isDisplayed,
-  formatWorkerData,
+  rides,
   onWorkerDragStart,
   reloadPlan,
 }: PlanJobRowProps) {
@@ -54,6 +52,8 @@ export function PlanJobRow({
     onSuccess: reloadPlan,
   });
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+
+  const ridesForOtherJobs = rides.filter((r) => r.jobId !== job.id);
 
   const onWorkerDropped =
     (toJobId: string) => (e: React.DragEvent<HTMLTableRowElement>) => {
@@ -100,7 +100,7 @@ export function PlanJobRow({
                 <AddRideButton job={job} />
               </div>
 
-              <p>{formatRideData(job)}</p>
+              <p>{formatRideData(job, ridesForOtherJobs)}</p>
               <strong>Alergeny</strong>
               <p>{formatAllergens(job)}</p>
               <p>
@@ -110,17 +110,45 @@ export function PlanJobRow({
             </div>
             <div className="table-responsive text-nowrap">
               <table className="table table-hover">
+                <thead>
+                  <tr>
+                    <th>
+                      <strong>Pracovník</strong>
+                    </th>
+                    <th>
+                      <strong>Kontakt</strong>
+                    </th>
+                    <th>
+                      <strong>Vlastnosti</strong>
+                    </th>
+                    <th>
+                      <strong>Alergie</strong>
+                    </th>
+                    <th>
+                      <strong>Doprava</strong>
+                    </th>
+                    <th>
+                      <strong>Akce</strong>
+                    </th>
+                  </tr>
+                </thead>
                 <tbody>
                   {job.workers.length === 0 && (
                     <tr>
-                      <td colSpan={3}>
+                      <td colSpan={6}>
                         <i>Žádní pracovníci</i>
                       </td>
                     </tr>
                   )}
+
                   {job.workers.map((worker) => (
                     <SimpleRow
-                      data={formatWorkerData(worker, job)}
+                      data={formatWorkerData(
+                        worker,
+                        job,
+                        ridesForOtherJobs,
+                        reloadPlan
+                      )}
                       key={worker.id}
                       draggable={true}
                       onDragStart={onWorkerDragStart(worker, job.id)}
@@ -152,25 +180,30 @@ export function PlanJobRow({
   );
 }
 
-function formatRideData(job: ActiveJobNoPlan) {
+function formatRideData(
+  job: ActiveJobNoPlan,
+  ridesForOtherJobs: RidesForJob[]
+) {
   if (!job.rides || job.rides.length == 0) return <>Není</>;
 
   const formatSingleRide = (ride: RideComplete, index: number) => {
-    const isDriverFromJob = job.workers.find((w) => w.id === ride.driverId);
-    const otherJobs = ride.jobs.filter((j) => j.id !== job.id);
-
+    // const passengersFromOtherJobs = ride.passengers.filter(
+    //   (p) => !job.workers.map((w) => w.id).includes(p.id)
+    // );
+    // FIXME - zobrazit i jiné pracovníky, kteří jsou v jiných jobech
     return (
       <>
         {index + 1}
         {")"} {ride.car.name}: {ride.driver.firstName} {ride.driver.lastName}{" "}
         (obsazenost: {ride.passengers.length + 1}/{ride.car.seats})
-        {!isDriverFromJob && <i>(řidič z jiného jobu)</i>}
         <br />
-        {isDriverFromJob && otherJobs.length > 0 && (
+        {/* {passengersFromOtherJobs.length > 0 && (
           <>
-            Dále odváží: {otherJobs.map((j) => j.proposedJob.name).join(", ")}
+            {passengersFromOtherJobs
+              .map((p) => `${p.firstName} ${p.lastName}`)
+              .join(", ")}
           </>
-        )}
+        )} */}
       </>
     );
   };
@@ -263,4 +296,47 @@ function deleteJobIcon(deleteJob: () => void, isBeingDeleted: boolean) {
       )}
     </>
   );
+}
+
+function formatWorkerData(
+  worker: WorkerComplete,
+  job: ActiveJobNoPlan,
+  rides: RidesForJob[],
+  reloadPlan: () => void
+) {
+  let name = `${worker.firstName} ${worker.lastName}`;
+  const abilities = [];
+  let isDriver = false;
+  if (job?.rides.map((r) => r.driverId).includes(worker.id)) {
+    isDriver = true;
+  }
+  if (worker.cars.length > 0) abilities.push("Auto");
+  if (worker.isStrong) abilities.push("Silák");
+  const allergies = translateAllergies(worker.allergies);
+
+  return [
+    isDriver ? (
+      <>
+        {name} <i className="fas fa-car ms-2"></i>
+      </>
+    ) : (
+      name
+    ),
+    worker.phone,
+    abilities.join(", "),
+    allergies.map((a) => a.code).join(", "),
+    <RideSelect
+      key={`rideselect-${worker.id}`}
+      worker={worker}
+      job={job}
+      otherRides={rides}
+      onRideChanged={reloadPlan}
+    />,
+    <>
+      <a className="me-3" href="#">
+        Odstranit
+      </a>
+      <a href="#">Přesunout</a>
+    </>,
+  ];
 }

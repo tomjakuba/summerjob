@@ -12,7 +12,6 @@ async function post(
 ) {
   const result = RideCreateSchema.safeParse({
     ...req.body,
-    jobIds: [req.query.jobId],
   });
   if (!result.success) {
     res.status(400).json({
@@ -20,7 +19,7 @@ async function post(
     });
     return;
   }
-  const ride = await createRide(result.data);
+  const ride = await createRide(result.data, req.query.jobId as string);
   res.status(201).json(ride);
 }
 

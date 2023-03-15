@@ -5,16 +5,13 @@ import { SimpleRow } from "../table/SimpleRow";
 import type { Worker } from "lib/prisma/client";
 import { useAPIActiveJobUpdateDynamic } from "lib/fetcher/active-job";
 import { useEffect, useState } from "react";
+import { translateAllergies } from "lib/types/allergy";
 
 interface PlanJoblessRowProps {
   planId: string;
   jobs: ActiveJobNoPlan[];
   joblessWorkers: WorkerComplete[];
   numColumns: number;
-  formatWorkerData: (
-    worker: WorkerComplete,
-    job?: ActiveJobNoPlan
-  ) => (string | JSX.Element)[];
   onWorkerDragStart: (
     worker: Worker,
     sourceId: string
@@ -27,7 +24,6 @@ export function PlanJoblessRow({
   jobs,
   joblessWorkers,
   numColumns,
-  formatWorkerData,
   onWorkerDragStart,
   reloadJoblessWorkers,
 }: PlanJoblessRowProps) {
@@ -101,4 +97,26 @@ export function PlanJoblessRow({
       </ExpandableRow>
     </>
   );
+}
+
+function formatWorkerData(worker: WorkerComplete) {
+  let name = `${worker.firstName} ${worker.lastName}`;
+  const abilities = [];
+
+  if (worker.cars.length > 0) abilities.push("Auto");
+  if (worker.isStrong) abilities.push("Silák");
+  const allergies = translateAllergies(worker.allergies);
+
+  return [
+    name,
+    worker.phone,
+    abilities.join(", "),
+    allergies.map((a) => a.code).join(", "),
+    <>
+      <a className="me-3" href="#">
+        Odstranit
+      </a>
+      <a href="#">Přesunout</a>
+    </>,
+  ];
 }
