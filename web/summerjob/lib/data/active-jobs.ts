@@ -86,6 +86,18 @@ async function removeWorkerFromJob(
       },
     },
     select: {
+      plan: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  });
+
+  // Remove the worker from all rides of jobs in this day that they are a passenger of
+  const jobsInPlan = await tx.activeJob.findMany({
+    where: { plan: { id: updatedJob.plan.id } },
+    include: {
       rides: {
         select: {
           id: true,
@@ -95,20 +107,22 @@ async function removeWorkerFromJob(
     },
   });
 
-  for (const ride of updatedJob.rides) {
-    if (ride.passengers.some((p) => p.id === workerId)) {
-      await tx.ride.update({
-        where: {
-          id: ride.id,
-        },
-        data: {
-          passengers: {
-            disconnect: {
-              id: workerId,
+  for (const activeJob of jobsInPlan) {
+    for (const ride of activeJob.rides) {
+      if (ride.passengers.some((p) => p.id === workerId)) {
+        await tx.ride.update({
+          where: {
+            id: ride.id,
+          },
+          data: {
+            passengers: {
+              disconnect: {
+                id: workerId,
+              },
             },
           },
-        },
-      });
+        });
+      }
     }
   }
 }

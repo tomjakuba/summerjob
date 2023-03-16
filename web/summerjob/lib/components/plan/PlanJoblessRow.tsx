@@ -6,6 +6,9 @@ import type { Worker } from "lib/prisma/client";
 import { useAPIActiveJobUpdateDynamic } from "lib/fetcher/active-job";
 import { useEffect, useState } from "react";
 import { translateAllergies } from "lib/types/allergy";
+import MoveWorkerModal from "./MoveWorkerModal";
+
+const NO_JOB = "NO_JOB";
 
 interface PlanJoblessRowProps {
   planId: string;
@@ -16,7 +19,7 @@ interface PlanJoblessRowProps {
     worker: Worker,
     sourceId: string
   ) => (e: React.DragEvent<HTMLTableRowElement>) => void;
-  reloadJoblessWorkers: () => void;
+  reloadPlan: () => void;
 }
 
 export function PlanJoblessRow({
@@ -25,7 +28,7 @@ export function PlanJoblessRow({
   joblessWorkers,
   numColumns,
   onWorkerDragStart,
-  reloadJoblessWorkers,
+  reloadPlan,
 }: PlanJoblessRowProps) {
   const [sourceJobId, setSourceJobId] = useState<string | undefined>(undefined);
   const [workerIds, setWorkerIds] = useState<string[]>([]);
@@ -33,27 +36,25 @@ export function PlanJoblessRow({
 
   const { trigger, isMutating, error } = useAPIActiveJobUpdateDynamic(
     getSourceJobId,
-    planId
+    planId,
+    {
+      onSuccess: () => {
+        reloadPlan();
+      },
+    }
   );
 
   useEffect(() => {
     if (sourceJobId) {
-      trigger(
-        { workerIds: workerIds },
-        {
-          onSuccess: () => {
-            reloadJoblessWorkers();
-          },
-        }
-      );
+      trigger({ workerIds: workerIds });
       setSourceJobId(undefined);
     }
-  }, [sourceJobId, workerIds, trigger, reloadJoblessWorkers]);
+  }, [sourceJobId, workerIds, trigger, reloadPlan]);
 
   const onWorkerDropped = () => (e: React.DragEvent<HTMLTableRowElement>) => {
     const workerId = e.dataTransfer.getData("worker-id");
     const fromJobId = e.dataTransfer.getData("source-id");
-    if (fromJobId === "jobless") {
+    if (fromJobId === NO_JOB) {
       return;
     }
 
@@ -69,6 +70,16 @@ export function PlanJoblessRow({
     setSourceJobId(fromJobId);
     setWorkerIds(newWorkers);
   };
+
+  const [workerToMove, setWorkerToMove] = useState<WorkerComplete | undefined>(
+    undefined
+  );
+
+  const onWorkerMoved = () => {
+    setWorkerToMove(undefined);
+    reloadPlan();
+  };
+
   return (
     <>
       <ExpandableRow
@@ -82,24 +93,54 @@ export function PlanJoblessRow({
         </div>
         <div className="table-responsive text-nowrap">
           <table className="table table-hover">
+            <thead>
+              <tr>
+                <th>
+                  <strong>Pracovník</strong>
+                </th>
+                <th>
+                  <strong>Kontakt</strong>
+                </th>
+                <th>
+                  <strong>Vlastnosti</strong>
+                </th>
+                <th>
+                  <strong>Alergie</strong>
+                </th>
+                <th>
+                  <strong>Akce</strong>
+                </th>
+              </tr>
+            </thead>
             <tbody>
               {joblessWorkers.map((worker) => (
                 <SimpleRow
-                  data={formatWorkerData(worker)}
+                  data={formatWorkerData(worker, setWorkerToMove)}
                   key={worker.id}
                   draggable={true}
-                  onDragStart={onWorkerDragStart(worker, "jobless")}
+                  onDragStart={onWorkerDragStart(worker, NO_JOB)}
                 />
               ))}
             </tbody>
           </table>
         </div>
+        {workerToMove && (
+          <MoveWorkerModal
+            onReject={() => setWorkerToMove(undefined)}
+            jobs={jobs}
+            worker={workerToMove}
+            onSuccess={onWorkerMoved}
+          />
+        )}
       </ExpandableRow>
     </>
   );
 }
 
-function formatWorkerData(worker: WorkerComplete) {
+function formatWorkerData(
+  worker: WorkerComplete,
+  requestMoveWorker: (worker: WorkerComplete) => void
+) {
   let name = `${worker.firstName} ${worker.lastName}`;
   const abilities = [];
 
@@ -112,11 +153,26 @@ function formatWorkerData(worker: WorkerComplete) {
     worker.phone,
     abilities.join(", "),
     allergies.map((a) => a.code).join(", "),
-    <>
-      <a className="me-3" href="#">
-        Odstranit
-      </a>
-      <a href="#">Přesunout</a>
-    </>,
+    <span
+      key={`actions-${worker.id}`}
+      className="d-flex align-items-center gap-3"
+    >
+      {moveWorkerToJobIcon(() => requestMoveWorker(worker))}
+    </span>,
   ];
+}
+
+function moveWorkerToJobIcon(move: () => void) {
+  return (
+    <>
+      <i
+        className="fas fa-shuffle smj-action-edit cursor-pointer"
+        title="Přesunout na jiný job"
+        onClick={(e) => {
+          e.stopPropagation();
+          move();
+        }}
+      ></i>
+    </>
+  );
 }

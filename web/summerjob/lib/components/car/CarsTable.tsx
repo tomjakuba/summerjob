@@ -83,10 +83,7 @@ function formatCarRow(
     car.seats,
     drivenKm,
     car.odometer.reimbursed ? "Ano" : "Ne",
-    <span
-      key={car.id}
-      className="d-flex align-items-center gap-3 smj-table-actions-cell"
-    >
+    <span key={car.id} className="d-flex align-items-center gap-3">
       <Link
         key={car.id}
         href={`/cars/${car.id}`}

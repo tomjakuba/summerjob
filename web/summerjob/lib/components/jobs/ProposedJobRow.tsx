@@ -140,10 +140,7 @@ function formatJobRow(
     job.address,
     `${job.activeJobs.length} / ${job.requiredDays}`,
     `${job.minWorkers} - ${job.maxWorkers}`,
-    <span
-      key={job.id}
-      className="d-flex align-items-center gap-3 smj-table-actions-cell"
-    >
+    <span key={job.id} className="d-flex align-items-center gap-3">
       {markJobAsCompletedIcon(job, setCompleted)}
       {pinJobIcon(job, setPinned)}
       <Link
