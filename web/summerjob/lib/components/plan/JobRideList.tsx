@@ -1,12 +1,19 @@
+import { useAPIRideDelete } from "lib/fetcher/rides";
 import { ActiveJobNoPlan } from "lib/types/active-job";
 import { RideComplete } from "lib/types/ride";
+import DeleteRideButton from "./DeleteRideButton";
 
 interface JobRideListProps {
   job: ActiveJobNoPlan;
   otherJobs: ActiveJobNoPlan[];
+  reloadPlan: () => void;
 }
 
-export default function JobRideList({ job, otherJobs }: JobRideListProps) {
+export default function JobRideList({
+  job,
+  otherJobs,
+  reloadPlan,
+}: JobRideListProps) {
   if (!job.rides || job.rides.length == 0) return <div>Není</div>;
 
   const formatSingleRide = (ride: RideComplete, index: number) => {
@@ -27,11 +34,14 @@ export default function JobRideList({ job, otherJobs }: JobRideListProps) {
     return (
       <>
         <div className="row">
-          <div className="col">
+          <div className="col-auto pe-0">
             {index + 1}
             {")"} {ride.car.name}: {ride.driver.firstName}{" "}
             {ride.driver.lastName} (obsazenost: {ride.passengers.length + 1}/
             {ride.car.seats})
+          </div>
+          <div className="col">
+            <DeleteRideButton ride={ride} onSuccess={reloadPlan} />
           </div>
         </div>
 

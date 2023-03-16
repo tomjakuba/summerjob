@@ -136,6 +136,7 @@ export function PlanJobRow({
               <JobRideList
                 job={job}
                 otherJobs={plannedJobs.filter((j) => j.id !== job.id)}
+                reloadPlan={reloadPlan}
               />
               <br />
               <strong>Alergeny</strong>

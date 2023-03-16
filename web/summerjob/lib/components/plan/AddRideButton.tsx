@@ -6,6 +6,8 @@ import { RidesAPIPostData } from "pages/api/plans/[planId]/active-jobs/[jobId]/r
 import { useRef, useState } from "react";
 import { Modal, ModalSize } from "../modal/Modal";
 
+const NO_DRIVER_AVAILABLE = "NO_DRIVER_AVAILABLE";
+
 interface AddRideButtonProps {
   job: ActiveJobNoPlan;
 }
@@ -46,6 +48,7 @@ export default function AddRideButton({ job }: AddRideButtonProps) {
     trigger(payload);
   };
 
+  const areDriversAvailable = unusedCars && unusedCars.length > 0;
   return (
     <>
       <i
@@ -63,17 +66,18 @@ export default function AddRideButton({ job }: AddRideButtonProps) {
             className="form-select border p-2 mt-1"
             id="select-ride"
             ref={selectRef}
+            defaultValue={
+              !areDriversAvailable ? NO_DRIVER_AVAILABLE : undefined
+            }
           >
             {unusedCars?.map((car) => (
               <option value={car.id} key={car.id}>
                 {car.owner.firstName} {car.owner.lastName}, {car.name}
               </option>
             ))}
-            {!isLoadingCars && unusedCars?.length === 0 && (
-              <option disabled selected hidden>
-                Žádný volný řidič
-              </option>
-            )}
+            <option disabled hidden value={NO_DRIVER_AVAILABLE}>
+              Žádný volný řidič
+            </option>
           </select>
           <div className="d-flex justify-content-end mt-3">
             <button
