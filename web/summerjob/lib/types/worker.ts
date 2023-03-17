@@ -41,7 +41,26 @@ export function serializeWorker(
 }
 
 export function deserializeWorker(data: Serialized<WorkerComplete>) {
-  const worker = JSON.parse(data.data) as WorkerComplete;
+  let worker = JSON.parse(data.data) as WorkerComplete;
+  worker = deserializeWorkerAvailability(worker);
+  return worker;
+}
+
+export function serializeWorkers(
+  data: WorkerComplete[]
+): Serialized<WorkerComplete[]> {
+  return {
+    data: JSON.stringify(data),
+  };
+}
+
+export function deserializeWorkers(data: Serialized<WorkerComplete[]>) {
+  let workers = JSON.parse(data.data) as WorkerComplete[];
+  workers = workers.map(deserializeWorkerAvailability);
+  return workers;
+}
+
+export function deserializeWorkerAvailability(worker: WorkerComplete) {
   worker.availability.days = worker.availability.days.map(
     (day) => new Date(day)
   );

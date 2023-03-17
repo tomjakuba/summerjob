@@ -1,3 +1,4 @@
+import { deserializeWorkerAvailability } from "lib/types/worker";
 import type { WorkersAPIGetResponse } from "pages/api/workers";
 import type {
   WorkerAPIGetResponse,
@@ -18,10 +19,14 @@ export function useAPIWorkers() {
 
 export function useAPIWorkersWithoutJob(planId: string, options?: any) {
   const opts = Object.assign({ refreshInterval: 1000 }, options);
-  return useData<WorkersAPIGetResponse>(
+  const res = useData<WorkersAPIGetResponse>(
     `/api/workers?withoutJob=true&planId=${planId}`,
     opts
   );
+  if (res.data) {
+    return { ...res, data: res.data.map(deserializeWorkerAvailability) };
+  }
+  return res;
 }
 
 export function useAPIWorker(id: string) {

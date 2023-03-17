@@ -8,6 +8,10 @@ export async function getWorkers(
   planId: string | undefined = undefined,
   hasJob: boolean | undefined = undefined
 ): Promise<WorkerComplete[]> {
+  const activeEventId = await cache_getActiveSummerJobEventId();
+  if (!activeEventId) {
+    throw new NoActiveEventError();
+  }
   let whereClause: any = {};
   if (planId) {
     whereClause = {
@@ -31,6 +35,12 @@ export async function getWorkers(
     include: {
       allergies: true,
       cars: true,
+      availability: {
+        where: {
+          eventId: activeEventId,
+        },
+        take: 1,
+      },
     },
     ...whereClause,
     orderBy: [
@@ -43,7 +53,11 @@ export async function getWorkers(
     ],
   });
   // TODO: Remove this when the prisma client findMany is fixed
-  return users as WorkerComplete[];
+  let correctType = users as Parameters<
+    typeof databaseWorkerToWorkerComplete
+  >[0][];
+  const res = correctType.map(databaseWorkerToWorkerComplete);
+  return res;
 }
 
 export async function getWorkerById(

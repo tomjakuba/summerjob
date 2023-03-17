@@ -1,3 +1,8 @@
+import {
+  deserializeWorker,
+  deserializeWorkerAvailability,
+  serializeWorker,
+} from "lib/types/worker";
 import type { PlansAPIGetResponse, PlansAPIPostData } from "pages/api/plans";
 import type { PlanAPIGetResponse } from "pages/api/plans/[planId]";
 import {
@@ -22,6 +27,11 @@ export function useAPIPlan(id: string, options?: any) {
   const properties = useData<PlanAPIGetResponse>(`/api/plans/${id}`, opts);
   if (properties.data) {
     properties.data.day = new Date(properties.data.day);
+    for (let i = 0; i < properties.data.jobs.length; i++) {
+      properties.data.jobs[i].workers = properties.data.jobs[i].workers.map(
+        deserializeWorkerAvailability
+      );
+    }
   }
   return properties;
 }

@@ -28,7 +28,7 @@ interface PlanTableProps {
   plan?: PlanComplete;
   shouldShowJob: (job: ActiveJobNoPlan) => boolean;
   joblessWorkers: WorkerComplete[];
-  reloadJoblessWorkers: (expectedResult: WorkerComplete[]) => void;
+  reloadJoblessWorkers: () => void;
   reloadPlan: () => void;
 }
 
@@ -71,7 +71,7 @@ export function PlanTable({
 
   const reload = () => {
     reloadPlan();
-    reloadJoblessWorkers(joblessWorkers);
+    reloadJoblessWorkers();
   };
 
   return (

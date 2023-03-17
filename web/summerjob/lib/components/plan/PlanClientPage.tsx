@@ -10,16 +10,17 @@ import { useAPIWorkersWithoutJob } from "lib/fetcher/worker";
 import { filterUniqueById, formatDateLong } from "lib/helpers/helpers";
 import { ActiveJobNoPlan } from "lib/types/active-job";
 import { deserializePlan, PlanComplete } from "lib/types/plan";
-import { WorkerComplete } from "lib/types/worker";
+import { deserializeWorkers, WorkerComplete } from "lib/types/worker";
 import { useMemo, useState } from "react";
 import ErrorPage404 from "../404/404";
 import ConfirmationModal from "../modal/ConfirmationModal";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
+import { Serialized } from "lib/types/serialize";
 
 interface PlanClientPageProps {
   id: string;
-  initialDataPlan: string;
-  initialDataJoblessWorkers: WorkerComplete[];
+  initialDataPlan: Serialized<PlanComplete>;
+  initialDataJoblessWorkers: Serialized<WorkerComplete[]>;
 }
 
 export default function PlanClientPage({
@@ -29,13 +30,28 @@ export default function PlanClientPage({
 }: PlanClientPageProps) {
   const initialDataPlanParsed = deserializePlan(initialDataPlan);
 
-  const { data, error, mutate } = useAPIPlan(id, {
+  const {
+    data: planData,
+    error,
+    mutate,
+  } = useAPIPlan(id, {
     fallbackData: initialDataPlanParsed,
   });
-  const { data: workersWithoutJob, mutate: reloadJoblessWorkers } =
+  const initialDataJoblessParsed = deserializeWorkers(
+    initialDataJoblessWorkers
+  );
+  const { data: workersWithoutJobData, mutate: reloadJoblessWorkers } =
     useAPIWorkersWithoutJob(id, {
-      fallbackData: initialDataJoblessWorkers,
+      fallbackData: initialDataJoblessParsed,
     });
+
+  const workersWithoutJob = useMemo(() => {
+    if (!workersWithoutJobData) return [];
+    if (!planData) return workersWithoutJobData;
+    return workersWithoutJobData.filter((w) =>
+      isWorkerAvailable(w, planData.day)
+    );
+  }, [planData, workersWithoutJobData]);
 
   const [isJobModalOpen, setIsJobModalOpen] = useState(false);
   const openModal = () => setIsJobModalOpen(true);
@@ -44,17 +60,13 @@ export default function PlanClientPage({
     setIsJobModalOpen(false);
   };
 
-  const updateJoblessWorkers = (expectedValue: WorkerComplete[]) => {
-    reloadJoblessWorkers([...expectedValue]);
-  };
-
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const {
     trigger: triggerDelete,
     isMutating: isBeingDeleted,
     error: deleteError,
     reset: resetDeleteError,
-  } = useAPIPlanDelete(data!.id, {
+  } = useAPIPlanDelete(planData!.id, {
     onSuccess: () => window.history.back(),
   });
 
@@ -73,7 +85,7 @@ export default function PlanClientPage({
 
   const searchableJobs = useMemo(() => {
     const map = new Map<string, string>();
-    data?.jobs.forEach((job) => {
+    planData?.jobs.forEach((job) => {
       const workerNames = job.workers
         .map((w) => `${w.firstName} ${w.lastName}`)
         .join(" ");
@@ -89,9 +101,9 @@ export default function PlanClientPage({
       );
     });
     return map;
-  }, [data?.jobs]);
+  }, [planData?.jobs]);
 
-  const areas = getAvailableAreas(data ?? undefined);
+  const areas = getAvailableAreas(planData ?? undefined);
   const [selectedArea, setSelectedArea] = useState(areas[0]);
 
   const onAreaSelected = (id: string) => {
@@ -100,7 +112,7 @@ export default function PlanClientPage({
 
   const [filter, setFilter] = useState("");
 
-  if (error && !data) {
+  if (error && !planData) {
     return <ErrorPage error={error} />;
   }
 
@@ -117,11 +129,13 @@ export default function PlanClientPage({
 
   return (
     <>
-      {data === null && <ErrorPage404 message="Plán nenalezen." />}
-      {data !== null && (
+      {planData === null && <ErrorPage404 message="Plán nenalezen." />}
+      {planData !== null && (
         <>
           <PageHeader
-            title={data ? formatDateLong(data?.day, true) : "Načítání..."}
+            title={
+              planData ? formatDateLong(planData?.day, true) : "Načítání..."
+            }
           >
             <button
               className="btn btn-warning"
@@ -165,10 +179,10 @@ export default function PlanClientPage({
               <div className="row gx-3">
                 <div className="col-sm-12 col-lg-10">
                   <PlanTable
-                    plan={data}
+                    plan={planData}
                     shouldShowJob={shouldShowJob}
                     joblessWorkers={workersWithoutJob || []}
-                    reloadJoblessWorkers={updateJoblessWorkers}
+                    reloadJoblessWorkers={reloadJoblessWorkers}
                     reloadPlan={mutate}
                   />
                 </div>
@@ -180,7 +194,7 @@ export default function PlanClientPage({
                       <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
                         Nasazených pracovníků
                         <span>
-                          {data?.jobs.flatMap((x) => x.workers).length}
+                          {planData?.jobs.flatMap((x) => x.workers).length}
                         </span>
                       </li>
                       <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
@@ -191,7 +205,7 @@ export default function PlanClientPage({
                       </li>
                       <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
                         Naplánované joby
-                        <span>{data && data.jobs.length}</span>
+                        <span>{planData && planData.jobs.length}</span>
                       </li>
                     </ul>
                   </div>
@@ -213,7 +227,7 @@ export default function PlanClientPage({
                 onReject={() => setShowDeleteConfirmation(false)}
               >
                 <p>Opravdu chcete smazat tento plán?</p>
-                {data!.jobs.length > 0 && (
+                {planData!.jobs.length > 0 && (
                   <div className="alert alert-danger">
                     Tento plán obsahuje naplánované joby!
                     <br /> Jeho odstraněním zároveň odstraníte i odpovídající
@@ -244,4 +258,10 @@ function getAvailableAreas(plan?: PlanComplete) {
   areas.sort((a, b) => a.name.localeCompare(b.name));
   areas.unshift(ALL_AREAS);
   return areas;
+}
+
+function isWorkerAvailable(worker: WorkerComplete, day: Date) {
+  return worker.availability.days
+    .map((d) => d.getTime())
+    .includes(day.getTime());
 }
