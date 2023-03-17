@@ -36,7 +36,11 @@ async function createAllergies() {
   return await prisma.allergy.findMany();
 }
 
-async function createWorkers(allergies: Allergy[], eventId: string) {
+async function createWorkers(
+  allergies: Allergy[],
+  eventId: string,
+  days: Date[]
+) {
   const createWorker = () => {
     const sex = Math.random() > 0.5 ? "male" : "female";
     const firstName = faker.name.firstName(sex);
@@ -48,6 +52,12 @@ async function createWorkers(allergies: Allergy[], eventId: string) {
       email: faker.internet.email(firstName, lastName),
       isStrong: Math.random() > 0.75,
       registeredIn: { connect: { id: eventId } },
+      availability: {
+        create: {
+          eventId: eventId,
+          days: choose(days, between(2, days.length)),
+        },
+      },
     };
   };
   const withCar = (worker: any) => {
@@ -114,7 +124,7 @@ async function createYearlyEvent() {
     data: {
       name: "Krkonoše 2023",
       startDate: new Date("2023-07-03"),
-      endDate: new Date("2023-07-07"),
+      endDate: new Date("2023-07-09"),
       isActive: true,
     },
   });
@@ -245,7 +255,11 @@ async function main() {
   const yearlyEvent = await createYearlyEvent();
   const allergies = await createAllergies();
   console.log("Creating workers, cars...");
-  const workers = await createWorkers(allergies, yearlyEvent.id);
+  const workers = await createWorkers(
+    allergies,
+    yearlyEvent.id,
+    datesBetween(yearlyEvent.startDate, yearlyEvent.endDate)
+  );
   console.log("Creating areas...");
   const areas = await createAreas(yearlyEvent.id);
   console.log("Creating proposed jobs...");
@@ -265,3 +279,11 @@ main()
     await prisma.$disconnect();
     process.exit(1);
   });
+
+function datesBetween(start: Date, end: Date) {
+  const dates: Date[] = [];
+  for (let date = start; date <= end; date.setDate(date.getDate() + 1)) {
+    dates.push(new Date(date));
+  }
+  return dates;
+}

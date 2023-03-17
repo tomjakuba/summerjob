@@ -1,5 +1,8 @@
+import { WorkerAvailability, Worker } from "lib/prisma/client";
 import prisma from "lib/prisma/connection";
-import { WorkerComplete, WorkerSerializable } from "lib/types/worker";
+import { WorkerComplete, WorkerUpdateData } from "lib/types/worker";
+import { cache_getActiveSummerJobEventId } from "./data-store";
+import { NoActiveEventError } from "./internal-error";
 
 export async function getWorkers(
   planId: string | undefined = undefined,
@@ -46,6 +49,10 @@ export async function getWorkers(
 export async function getWorkerById(
   id: string
 ): Promise<WorkerComplete | null> {
+  const activeEventId = await cache_getActiveSummerJobEventId();
+  if (!activeEventId) {
+    throw new NoActiveEventError();
+  }
   const user = await prisma.worker.findUnique({
     where: {
       id,
@@ -53,12 +60,35 @@ export async function getWorkerById(
     include: {
       cars: true,
       allergies: true,
+      availability: {
+        where: {
+          eventId: activeEventId,
+        },
+        take: 1,
+      },
     },
   });
-  return user;
+  if (!user) {
+    return null;
+  }
+  // Only return availability for the active event
+  return databaseWorkerToWorkerComplete(user);
 }
 
-export async function updateWorker(id: string, data: WorkerSerializable) {
+export function databaseWorkerToWorkerComplete(
+  worker: Omit<WorkerComplete, "availability"> & {
+    availability: WorkerAvailability[];
+  }
+): WorkerComplete {
+  const { availability, ...rest } = worker;
+  return { ...rest, availability: availability[0] };
+}
+
+export async function updateWorker(id: string, data: WorkerUpdateData) {
+  const activeEventId = await cache_getActiveSummerJobEventId();
+  if (!activeEventId) {
+    throw new NoActiveEventError();
+  }
   const user = await prisma.worker.update({
     where: {
       id,
@@ -70,6 +100,19 @@ export async function updateWorker(id: string, data: WorkerSerializable) {
       phone: data.phone,
       allergies: {
         set: data.allergyIds.map((allergyId) => ({ id: allergyId })),
+      },
+      availability: {
+        update: {
+          where: {
+            workerId_eventId: {
+              workerId: id,
+              eventId: activeEventId,
+            },
+          },
+          data: {
+            days: data.availability,
+          },
+        },
       },
     },
   });

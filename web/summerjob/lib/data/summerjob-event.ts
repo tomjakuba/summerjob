@@ -1,5 +1,5 @@
 import prisma from "lib/prisma/connection";
-import { setActiveSummerJobEventId } from "./data-store";
+import { cache_setActiveSummerJobEvent } from "./data-store";
 
 export async function getSummerJobEvents() {
   const events = await prisma.summerJobEvent.findMany({});
@@ -16,7 +16,7 @@ export async function getActiveSummerJobEvent() {
 }
 
 export async function setActiveSummerJobEvent(id: string) {
-  await prisma.$transaction([
+  const [_1, _2, event] = await prisma.$transaction([
     // FIXME: This first query is a workaround for a missing feature in Prisma
     // Providing an invalid ID would set all events to inactive
     // This can be avoided once prisma adds `updateOrThrow` or similar
@@ -40,5 +40,5 @@ export async function setActiveSummerJobEvent(id: string) {
       },
     }),
   ]);
-  setActiveSummerJobEventId(id);
+  cache_setActiveSummerJobEvent(event);
 }

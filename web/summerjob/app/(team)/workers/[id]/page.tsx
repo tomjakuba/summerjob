@@ -2,6 +2,7 @@ import ErrorPage404 from "lib/components/404/404";
 import EditBox from "lib/components/forms/EditBox";
 import EditWorker from "lib/components/worker/EditWorker";
 import { getAllergies } from "lib/data/allergies";
+import { getActiveSummerJobEvent } from "lib/data/summerjob-event";
 import { getWorkerById } from "lib/data/workers";
 import { translateAllergies, serializeAllergies } from "lib/types/allergy";
 import { serializeWorker } from "lib/types/worker";
@@ -21,6 +22,8 @@ export default async function EditWorkerPage({ params }: Params) {
   const allergies = await getAllergies();
   const translatedAllergens = translateAllergies(allergies);
   const serializedAllergens = serializeAllergies(translatedAllergens);
+  const summerJobEvent = await getActiveSummerJobEvent();
+  const { startDate, endDate } = summerJobEvent;
 
   return (
     <>
@@ -29,6 +32,8 @@ export default async function EditWorkerPage({ params }: Params) {
           <EditWorker
             serializedWorker={serializedWorker}
             serializedAllergens={serializedAllergens}
+            eventStartDate={startDate.toJSON()}
+            eventEndDate={endDate.toJSON()}
           />
         </EditBox>
       </section>

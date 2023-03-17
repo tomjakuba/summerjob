@@ -1,17 +1,23 @@
+import { SummerJobEvent } from "lib/prisma/client";
 import { getActiveSummerJobEvent } from "./summerjob-event";
 
-let activeSummerjobEventId: string | undefined = undefined;
+let activeSummerjobEvent: SummerJobEvent | undefined = undefined;
 
-export function setActiveSummerJobEventId(id: string) {
-  activeSummerjobEventId = id;
+export async function cache_getActiveSummerJobEventId() {
+  const event = await cache_getActiveSummerJobEvent();
+  return event?.id;
 }
 
-export async function getActiveSummerJobEventId() {
-  if (!activeSummerjobEventId) {
+export async function cache_getActiveSummerJobEvent() {
+  if (!activeSummerjobEvent) {
     const event = await getActiveSummerJobEvent();
     if (event) {
-      setActiveSummerJobEventId(event.id);
+      cache_setActiveSummerJobEvent(event);
     }
   }
-  return activeSummerjobEventId;
+  return activeSummerjobEvent;
+}
+
+export async function cache_setActiveSummerJobEvent(event: SummerJobEvent) {
+  activeSummerjobEvent = event;
 }

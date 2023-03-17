@@ -1,7 +1,10 @@
 import { Plan } from "lib/prisma/client";
 import prisma from "lib/prisma/connection";
+import { ActiveJobNoPlan } from "lib/types/active-job";
 import { PlanComplete, PlanWithJobs } from "lib/types/plan";
-import { InvalidDataError } from "./internal-error";
+import { cache_getActiveSummerJobEventId } from "./data-store";
+import { InvalidDataError, NoActiveEventError } from "./internal-error";
+import { databaseWorkerToWorkerComplete } from "./workers";
 
 export async function getPlans(): Promise<PlanWithJobs[]> {
   // TODO replace with the currently active year instead of newest
@@ -25,6 +28,10 @@ export async function getPlans(): Promise<PlanWithJobs[]> {
 }
 
 export async function getPlanById(id: string): Promise<PlanComplete | null> {
+  const activeEventId = await cache_getActiveSummerJobEventId();
+  if (!activeEventId) {
+    throw new NoActiveEventError();
+  }
   const plan = await prisma.plan.findUnique({
     where: { id },
     include: {
@@ -34,6 +41,12 @@ export async function getPlanById(id: string): Promise<PlanComplete | null> {
             include: {
               allergies: true,
               cars: true,
+              availability: {
+                where: {
+                  eventId: activeEventId,
+                },
+                take: 1,
+              },
             },
           },
           proposedJob: {
@@ -59,7 +72,17 @@ export async function getPlanById(id: string): Promise<PlanComplete | null> {
       },
     },
   });
-  return plan;
+  if (!plan) {
+    return null;
+  }
+  const jobs: ActiveJobNoPlan[] = [];
+  for (const job of plan.jobs) {
+    jobs.push({
+      ...job,
+      workers: job.workers.map(databaseWorkerToWorkerComplete),
+    });
+  }
+  return { ...plan, jobs };
 }
 
 export async function createPlan(date: Date): Promise<Plan> {

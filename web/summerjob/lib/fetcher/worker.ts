@@ -1,9 +1,15 @@
 import type { WorkersAPIGetResponse } from "pages/api/workers";
-import type { WorkerAPIGetResponse } from "pages/api/workers/[id]";
+import type {
+  WorkerAPIGetResponse,
+  WorkerAPIPatchData,
+} from "pages/api/workers/[id]";
 import { useData, useDataPartialUpdate } from "./fetcher";
 
-export function useAPIWorkerUpdate<T>(workerId: string, options?: any) {
-  return useDataPartialUpdate<T>(`/api/workers/${workerId}`, options);
+export function useAPIWorkerUpdate(workerId: string, options?: any) {
+  return useDataPartialUpdate<WorkerAPIPatchData>(
+    `/api/workers/${workerId}`,
+    options
+  );
 }
 
 export function useAPIWorkers() {

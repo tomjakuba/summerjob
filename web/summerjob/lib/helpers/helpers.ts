@@ -7,11 +7,29 @@ export const formatDateLong = (date: Date, capitalize: boolean) => {
     weekday: "long",
     month: "long",
     day: "numeric",
-    timeZone: "Europe/Prague",
+    timeZone: "UTC",
   };
   const formatted = new Intl.DateTimeFormat("cs-CZ", options).format(date);
   return capitalize ? capitalizeFirstLetter(formatted) : formatted;
 };
+
+export const formatDateShort = (date: Date) => {
+  const options: Intl.DateTimeFormatOptions = {
+    month: "numeric",
+    weekday: "short",
+    day: "numeric",
+    timeZone: "UTC",
+  };
+  return new Intl.DateTimeFormat("cs-CZ", options).format(date);
+};
+
+export function datesBetween(start: Date, end: Date) {
+  const dates = [];
+  for (let date = start; date <= end; date.setDate(date.getDate() + 1)) {
+    dates.push(new Date(date));
+  }
+  return dates;
+}
 
 export function filterUniqueById<T extends { id: string }>(elements: T[]): T[] {
   return Array.from(new Map(elements.map((item) => [item.id, item])).values());

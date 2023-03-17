@@ -9,20 +9,32 @@ datasource db {
 }
 
 model Worker {
-  id             String           @id @default(uuid())
+  id             String               @id @default(uuid())
   firstName      String
   lastName       String
   phone          String
   email          String
   cars           Car[]
-  isStrong       Boolean          @default(false)
+  isStrong       Boolean              @default(false)
   allergies      Allergy[]
   jobs           ActiveJob[]
-  driving        Ride[]           @relation("Driver")
+  driving        Ride[]               @relation("Driver")
   passengerIn    Ride[]
   registeredIn   SummerJobEvent[]
-  responsibleFor ActiveJob[]      @relation("ResponsibleWorker")
-  deleted        Boolean          @default(false)
+  responsibleFor ActiveJob[]          @relation("ResponsibleWorker")
+  deleted        Boolean              @default(false)
+  availability   WorkerAvailability[]
+}
+
+model WorkerAvailability {
+  id       String         @id @default(uuid())
+  worker   Worker         @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  workerId String
+  event    SummerJobEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId  String
+  days     DateTime[]     @db.Date
+
+  @@unique([workerId, eventId])
 }
 
 model Car {
@@ -59,23 +71,35 @@ model Allergy {
 }
 
 model ProposedJob {
-  id            String      @id @default(uuid())
-  name          String      @db.VarChar(64)
-  description   String      @default("")
+  id            String                    @id @default(uuid())
+  name          String
+  description   String                    @default("")
   requiredDays  Int
-  completed     Boolean     @default(false)
-  pinned        Boolean     @default(false)
+  completed     Boolean                   @default(false)
+  pinned        Boolean                   @default(false)
   minWorkers    Int
   maxWorkers    Int
   strongWorkers Int
   address       String
   contact       String
-  hasFood       Boolean     @default(false)
-  hasShower     Boolean     @default(false)
-  area          Area        @relation(fields: [areaId], references: [id])
+  hasFood       Boolean                   @default(false)
+  hasShower     Boolean                   @default(false)
+  area          Area                      @relation(fields: [areaId], references: [id])
   areaId        String
   activeJobs    ActiveJob[]
   allergens     Allergy[]
+  availability  ProposedJobAvailability[]
+}
+
+model ProposedJobAvailability {
+  id      String         @id @default(uuid())
+  job     ProposedJob    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId   String
+  event   SummerJobEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId String
+  days    DateTime[]     @db.Date
+
+  @@unique([jobId, eventId])
 }
 
 model ActiveJob {
@@ -125,13 +149,15 @@ model Area {
 }
 
 model SummerJobEvent {
-  id           String        @id @default(uuid())
-  name         String        @db.VarChar(64)
-  startDate    DateTime
-  endDate      DateTime
-  isActive     Boolean       @default(false)
-  areas        Area[]
-  plans        Plan[]
-  workers      Worker[]
-  carOdometers CarOdometer[]
+  id                 String                    @id @default(uuid())
+  name               String                    @db.VarChar(64)
+  startDate          DateTime                  @db.Date
+  endDate            DateTime                  @db.Date
+  isActive           Boolean                   @default(false)
+  areas              Area[]
+  plans              Plan[]
+  workers            Worker[]
+  carOdometers       CarOdometer[]
+  workerAvailability WorkerAvailability[]
+  jobAvailability    ProposedJobAvailability[]
 }

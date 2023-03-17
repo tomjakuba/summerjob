@@ -247,3 +247,18 @@ img.smj-nav-logo {
 .smj-pinned-job-row {
   background-color: #fadaaa;
 }
+
+.btn-check:checked + .allergy-checkbox-label {
+  box-shadow: inset 3px 3px 1px 0px #d7c59d;
+  background-color: #ffe9b8 !important;
+}
+
+.btn-day-select {
+  --bs-btn-color: #000000;
+  --bs-btn-active-bg: #ffe9b8;
+}
+
+.btn-check:checked + .btn-day-select {
+  box-shadow: inset 2px 3px 1px 0px #d7c59d;
+  background-color: #ffe9b8 !important;
+}

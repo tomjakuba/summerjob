@@ -5,10 +5,17 @@ import {
   ActiveJobUpdateData,
 } from "lib/types/active-job";
 import type { Worker, Prisma } from "lib/prisma/client";
+import { cache_getActiveSummerJobEventId } from "./data-store";
+import { NoActiveEventError } from "./internal-error";
+import { databaseWorkerToWorkerComplete } from "./workers";
 
 export async function getActiveJobById(
   id: string
 ): Promise<ActiveJobComplete | null> {
+  const activeEventId = await cache_getActiveSummerJobEventId();
+  if (!activeEventId) {
+    throw new NoActiveEventError();
+  }
   const job = await prisma.activeJob.findFirst({
     where: {
       id,
@@ -18,6 +25,12 @@ export async function getActiveJobById(
         include: {
           allergies: true,
           cars: true,
+          availability: {
+            where: {
+              eventId: activeEventId,
+            },
+            take: 1,
+          },
         },
       },
       proposedJob: {
@@ -42,7 +55,11 @@ export async function getActiveJobById(
       plan: true,
     },
   });
-  return job;
+  if (!job) {
+    return null;
+  }
+  const workers = job.workers.map(databaseWorkerToWorkerComplete);
+  return { ...job, workers };
 }
 
 type ActiveJobSimplified = {

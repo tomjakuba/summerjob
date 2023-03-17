@@ -2,7 +2,11 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { deserializeWorker } from "lib/types/worker";
+import {
+  deserializeWorker,
+  WorkerComplete,
+  WorkerUpdateSchema,
+} from "lib/types/worker";
 import { Allergy } from "lib/prisma/client";
 import { useState } from "react";
 import { useAPIWorkerUpdate } from "lib/fetcher/worker";
@@ -13,28 +17,33 @@ import { deserializeAllergies } from "lib/types/allergy";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
 import SuccessProceedModal from "../modal/SuccessProceedModal";
 import { Serialized } from "lib/types/serialize";
+import DaysSelection from "../forms/DaysSelection";
+import { datesBetween } from "lib/helpers/helpers";
 
-const schema = z.object({
-  id: z.string(),
-  firstName: z.string(),
-  lastName: z.string(),
-  email: z.string().email(),
-  phone: z.string().min(9),
-  allergyIds: z.array(z.string()),
+const schema = WorkerUpdateSchema.omit({ availability: true }).extend({
+  availability: z.array(z.string()),
 });
 type WorkerForm = z.infer<typeof schema>;
 
 interface EditWorkerProps {
-  serializedWorker: string;
+  serializedWorker: Serialized<WorkerComplete>;
   serializedAllergens: Serialized<Allergy>;
+  eventStartDate: string;
+  eventEndDate: string;
 }
 
 export default function EditWorker({
   serializedWorker,
   serializedAllergens,
+  eventStartDate,
+  eventEndDate,
 }: EditWorkerProps) {
   const worker = deserializeWorker(serializedWorker);
   const allergies = deserializeAllergies(serializedAllergens);
+  const allDates = datesBetween(
+    new Date(eventStartDate),
+    new Date(eventEndDate)
+  );
   const {
     register,
     handleSubmit,
@@ -42,23 +51,20 @@ export default function EditWorker({
   } = useForm<WorkerForm>({
     resolver: zodResolver(schema),
     defaultValues: {
-      id: worker.id,
       firstName: worker.firstName,
       lastName: worker.lastName,
       email: worker.email,
       phone: worker.phone,
       allergyIds: worker.allergies.map((allergy) => allergy.id),
+      availability: worker.availability.days.map((day) => day.toJSON()),
     },
   });
   const [saved, setSaved] = useState(false);
-  const { trigger, isMutating, reset, error } = useAPIWorkerUpdate<WorkerForm>(
-    worker.id,
-    {
-      onSuccess: () => {
-        setSaved(true);
-      },
-    }
-  );
+  const { trigger, isMutating, reset, error } = useAPIWorkerUpdate(worker.id, {
+    onSuccess: () => {
+      setSaved(true);
+    },
+  });
   const onSubmit = (data: WorkerForm) => {
     trigger(data);
   };
@@ -75,7 +81,6 @@ export default function EditWorker({
       <div className="row">
         <div className="col">
           <form onSubmit={handleSubmit(onSubmit)}>
-            <input type="hidden" {...register("id")} />
             <label className="form-label fw-bold mt-4" htmlFor="name">
               Jméno
             </label>
@@ -117,7 +122,20 @@ export default function EditWorker({
               type="email"
               {...register("email")}
             />
-            <label className="form-label d-block fw-bold mt-4" htmlFor="email">
+            <label
+              className="form-label d-block fw-bold mt-4"
+              htmlFor="allergy"
+            >
+              Může pracovat v následující dny
+            </label>
+            <DaysSelection
+              days={allDates}
+              register={() => register("availability")}
+            />
+            <label
+              className="form-label d-block fw-bold mt-4"
+              htmlFor="allergy"
+            >
               Alergie
             </label>
             <div className="form-check-inline">

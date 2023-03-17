@@ -1,12 +1,12 @@
 import { Car, CarOdometer, Ride } from "lib/prisma/client";
 import prisma from "lib/prisma/connection";
 import { CarComplete, CarCreateData, CarUpdateData } from "lib/types/car";
-import { getActiveSummerJobEventId } from "./data-store";
+import { cache_getActiveSummerJobEventId } from "./data-store";
 import type { Worker } from "lib/prisma/client";
 import { NoActiveEventError } from "./internal-error";
 
 export async function getCarById(id: string): Promise<CarComplete | null> {
-  const activeEventId = await getActiveSummerJobEventId();
+  const activeEventId = await cache_getActiveSummerJobEventId();
   const car = await prisma.car.findUnique({
     where: {
       id,
@@ -30,7 +30,7 @@ export async function getCarById(id: string): Promise<CarComplete | null> {
 }
 
 export async function getCars(): Promise<CarComplete[]> {
-  const activeEventId = await getActiveSummerJobEventId();
+  const activeEventId = await cache_getActiveSummerJobEventId();
   if (!activeEventId) throw new NoActiveEventError();
   const cars = await prisma.car.findMany({
     include: {
@@ -72,7 +72,7 @@ function databaseCarToCarComplete(car: CarWithOdometers) {
 }
 
 export async function updateCar(carId: string, car: CarUpdateData) {
-  const activeEventId = await getActiveSummerJobEventId();
+  const activeEventId = await cache_getActiveSummerJobEventId();
   const carOdometer = car.odometer;
   await prisma.$transaction(async (tx) => {
     await tx.car.update({
@@ -102,7 +102,7 @@ export async function updateCar(carId: string, car: CarUpdateData) {
 }
 
 export async function createCar(carData: CarCreateData) {
-  const activeEventId = await getActiveSummerJobEventId();
+  const activeEventId = await cache_getActiveSummerJobEventId();
   if (!activeEventId) {
     throw new NoActiveEventError();
   }
