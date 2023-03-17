@@ -262,3 +262,7 @@ img.smj-nav-logo {
   box-shadow: inset 2px 3px 1px 0px #d7c59d;
   background-color: #ffe9b8 !important;
 }
+
+.checkbox-white:not(:checked) {
+  background-color: white;
+}

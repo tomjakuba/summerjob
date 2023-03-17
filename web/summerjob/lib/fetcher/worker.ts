@@ -13,8 +13,8 @@ export function useAPIWorkerUpdate(workerId: string, options?: any) {
   );
 }
 
-export function useAPIWorkers() {
-  return useData<WorkersAPIGetResponse>("/api/workers");
+export function useAPIWorkers(options?: any) {
+  return useData<WorkersAPIGetResponse>("/api/workers", options);
 }
 
 export function useAPIWorkersWithoutJob(planId: string, options?: any) {
