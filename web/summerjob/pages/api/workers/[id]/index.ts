@@ -20,7 +20,7 @@ async function get(
 }
 
 export type WorkerAPIPatchData = Omit<WorkerUpdateData, "availability"> & {
-  availability: string[];
+  availability?: string[];
 };
 async function patch(req: NextApiRequest, res: NextApiResponse) {
   const id = req.query.id as string;

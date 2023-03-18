@@ -2,6 +2,7 @@ import {
   useAPIProposedJobDelete,
   useAPIProposedJobUpdate,
 } from "lib/fetcher/proposed-job";
+import { datesAfterDate } from "lib/helpers/helpers";
 import { translateAllergies } from "lib/types/allergy";
 import { ProposedJobComplete } from "lib/types/proposed-job";
 import Link from "next/link";
@@ -133,12 +134,17 @@ function formatJobRow(
   deleteJob: () => void,
   isBeingDeleted: boolean
 ) {
+  // Show job as available today before 6:00
+  // After that, show job as not available anymore
+  const now = new Date();
+  now.setHours(now.getHours() - 6);
   return [
     job.name,
     job.area.name,
     job.contact,
     job.address,
     `${job.activeJobs.length} / ${job.requiredDays}`,
+    datesAfterDate(job.availability.days, now).length,
     `${job.minWorkers} - ${job.maxWorkers}`,
     <span key={job.id} className="d-flex align-items-center gap-3">
       {markJobAsCompletedIcon(job, setCompleted)}

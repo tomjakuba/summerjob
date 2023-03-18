@@ -1,6 +1,6 @@
 import {
+  deserializeProposedJobAvailability,
   ProposedJobCreateData,
-  ProposedJobUpdateData,
 } from "lib/types/proposed-job";
 import type { ProposedJobsAPIGetResponse } from "pages/api/proposed-jobs";
 import { ProposedJobAPIPatchData } from "pages/api/proposed-jobs/[id]";
@@ -13,7 +13,14 @@ import {
 } from "./fetcher";
 
 export function useAPIProposedJobs(options?: any) {
-  return useData<ProposedJobsAPIGetResponse>("/api/proposed-jobs", options);
+  const res = useData<ProposedJobsAPIGetResponse>(
+    "/api/proposed-jobs",
+    options
+  );
+  if (res.data) {
+    return { ...res, data: res.data.map(deserializeProposedJobAvailability) };
+  }
+  return res;
 }
 
 export function useAPIProposedJobsNotInPlan(planId: string) {

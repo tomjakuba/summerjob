@@ -12,7 +12,8 @@ const _columns: SortableColumn[] = [
   { id: "area", name: "Lokalita", sortable: true },
   { id: "contact", name: "Kontaktní osoba", sortable: false },
   { id: "address", name: "Adresa", sortable: false },
-  { id: "days", name: "Naplánované dny", sortable: true },
+  { id: "daysPlanned", name: "Naplánované dny", sortable: true },
+  { id: "daysLeft", name: "Dostupné dny", sortable: true },
   { id: "workers", name: "Počet pracovníků", sortable: true },
   { id: "actions", name: "Akce", sortable: false },
 ];
@@ -80,7 +81,8 @@ function sortJobs(data: ProposedJobComplete[], sortOrder: SortOrder) {
     name: (job) => job.name,
     area: (job) => job.area.name,
     address: (job) => job.address,
-    days: (job) => job.activeJobs.length,
+    daysPlanned: (job) => job.activeJobs.length,
+    daysLeft: (job) => job.availability.days.length,
     workers: (job) => job.minWorkers,
   };
 

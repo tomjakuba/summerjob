@@ -63,3 +63,7 @@ export function relativeTime(time: Date) {
     duration /= period.amount;
   }
 }
+
+export function datesAfterDate(dates: Date[], date: Date) {
+  return dates.filter((d) => d >= date);
+}
