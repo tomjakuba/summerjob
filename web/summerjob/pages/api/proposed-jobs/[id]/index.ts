@@ -1,4 +1,5 @@
 import { http_method_handler } from "lib/api/method_handler";
+import { validateOrSendError } from "lib/api/validator";
 import { ApiBadRequestError } from "lib/data/api-error";
 import { deleteProposedJob, updateProposedJob } from "lib/data/proposed-jobs";
 import {
@@ -15,16 +16,15 @@ export type ProposedJobAPIPatchData = Omit<
 };
 async function patch(req: NextApiRequest, res: NextApiResponse) {
   const id = req.query.id as string;
-  const proposedJobData = ProposedJobUpdateSchema.safeParse(req.body);
-  if (!proposedJobData.success) {
-    res.status(400).json({
-      error: new ApiBadRequestError(
-        JSON.stringify(proposedJobData.error.issues)
-      ),
-    });
+  const proposedJobData = validateOrSendError(
+    ProposedJobUpdateSchema,
+    req.body,
+    res
+  );
+  if (!proposedJobData) {
     return;
   }
-  await updateProposedJob(id, proposedJobData.data);
+  await updateProposedJob(id, proposedJobData);
   res.status(204).end();
 }
 

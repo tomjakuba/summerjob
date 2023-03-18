@@ -1,4 +1,5 @@
 import { http_method_handler } from "lib/api/method_handler";
+import { validateOrSendError } from "lib/api/validator";
 import { updateRide, deleteRide } from "lib/data/rides";
 import { RideUpdateSchema } from "lib/types/ride";
 import { NextApiRequest, NextApiResponse } from "next";
@@ -6,7 +7,11 @@ import { NextApiRequest, NextApiResponse } from "next";
 async function patch(req: NextApiRequest, res: NextApiResponse) {
   const id = req.query.rideId as string;
   const rideData = RideUpdateSchema.parse(req.body);
-  await updateRide(id, rideData);
+  const data = validateOrSendError(RideUpdateSchema, req.body, res);
+  if (!data) {
+    return;
+  }
+  await updateRide(id, data);
   res.status(204).end();
 }
 

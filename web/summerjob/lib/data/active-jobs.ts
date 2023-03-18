@@ -199,9 +199,8 @@ function getActiveJobDetailsById(
   });
 }
 
-export async function updateActiveJob(job: ActiveJobUpdateData) {
+export async function updateActiveJob(id: string, job: ActiveJobUpdateData) {
   const {
-    id,
     privateDescription,
     publicDescription,
     responsibleWorkerId,

@@ -1,26 +1,20 @@
 import { http_method_handler } from "lib/api/method_handler";
+import { validateOrSendError } from "lib/api/validator";
 import {
   deleteActiveJob,
   getActiveJobById,
   updateActiveJob,
 } from "lib/data/active-jobs";
-import { ApiBadRequestError } from "lib/data/api-error";
 import { ActiveJobUpdateSchema } from "lib/types/active-job";
 import { NextApiRequest, NextApiResponse } from "next";
 
 async function patch(req: NextApiRequest, res: NextApiResponse) {
   const id = req.query.jobId as string;
-  const result = ActiveJobUpdateSchema.safeParse(req.body);
-  if (!result.success) {
-    res.status(400).json({
-      error: new ApiBadRequestError(JSON.stringify(result.error.issues)),
-    });
+  const data = validateOrSendError(ActiveJobUpdateSchema, req.body, res);
+  if (!data) {
     return;
   }
-  const jobData = result.data;
-  jobData.id = id;
-  await updateActiveJob(jobData);
-
+  await updateActiveJob(id, data);
   res.status(204).end();
 }
 

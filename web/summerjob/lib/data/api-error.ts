@@ -11,18 +11,34 @@ export type WrappedError<T extends Error> = {
   error: T;
 };
 
+const ApiErrorReasonsSchema = z.array(
+  z.object({
+    code: z.string(),
+    message: z.string(),
+  })
+);
+
+type ApiErrorReasons = z.infer<typeof ApiErrorReasonsSchema>;
+
 export const ApiErrorSchema = z.object({
   type: z.nativeEnum(ApiErrorType),
   reason: z.string(),
+  issues: ApiErrorReasonsSchema.optional(),
 });
 
 export class ApiError extends Error {
   readonly type: ApiErrorType;
   readonly reason: string;
-  constructor(reason: string, errorType: ApiErrorType) {
+  readonly issues?: ApiErrorReasons;
+  constructor(
+    reason: string,
+    errorType: ApiErrorType,
+    issues?: ApiErrorReasons
+  ) {
     super(reason);
     this.reason = reason;
     this.type = errorType;
+    this.issues = issues;
   }
 }
 
@@ -33,8 +49,8 @@ export class ApiDbError extends ApiError {
 }
 
 export class ApiBadRequestError extends ApiError {
-  constructor(message?: string) {
-    super(message ?? "Invalid input.", ApiErrorType.BAD_REQUEST);
+  constructor(message?: string, issues?: ApiErrorReasons) {
+    super(message ?? "Invalid input.", ApiErrorType.BAD_REQUEST, issues);
   }
 }
 

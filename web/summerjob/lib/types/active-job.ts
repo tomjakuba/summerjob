@@ -43,7 +43,6 @@ export type ActiveJobCreateData = z.infer<typeof ActiveJobCreateSchema>;
 
 export const ActiveJobUpdateSchema = z
   .object({
-    id: z.string(),
     privateDescription: z.string(),
     publicDescription: z.string(),
     proposedJobId: z.string(),

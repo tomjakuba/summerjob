@@ -19,10 +19,10 @@ export type WorkerWithAllergies = Worker & {
 
 export const WorkerUpdateSchema = z
   .object({
-    firstName: z.string(),
-    lastName: z.string(),
-    email: z.string(),
-    phone: z.string(),
+    firstName: z.string().min(1),
+    lastName: z.string().min(1),
+    email: z.string().min(1),
+    phone: z.string().min(1),
     allergyIds: z.array(z.string()),
     availability: z.array(z.coerce.date()),
   })
