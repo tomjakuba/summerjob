@@ -1,5 +1,12 @@
-import { ActiveJob, Allergy, Area, ProposedJob } from "lib/prisma/client";
+import {
+  ActiveJob,
+  Allergy,
+  Area,
+  ProposedJob,
+  ProposedJobAvailability,
+} from "lib/prisma/client";
 import { z } from "zod";
+import { Serialized } from "./serialize";
 
 export type ProposedJobWithArea = ProposedJob & {
   area: Area;
@@ -14,6 +21,7 @@ export type ProposedJobComplete = ProposedJob & {
   area: Area;
   allergens: Allergy[];
   activeJobs: ActiveJob[];
+  availability: ProposedJobAvailability;
 };
 
 export const ProposedJobCreateSchema = z
@@ -30,6 +38,7 @@ export const ProposedJobCreateSchema = z
     requiredDays: z.number().min(1),
     hasFood: z.boolean(),
     hasShower: z.boolean(),
+    availability: z.array(z.coerce.date()),
   })
   .strict();
 
@@ -54,11 +63,20 @@ export function deserializeProposedJobs(jobs: string) {
   return JSON.parse(jobs) as ProposedJobComplete[];
 }
 
-export function serializeProposedJob(job: ProposedJobComplete) {
-  return JSON.stringify(job);
+export function serializeProposedJob(
+  job: ProposedJobComplete
+): Serialized<ProposedJobComplete> {
+  return {
+    data: JSON.stringify(job),
+  };
 }
 
-export function deserializeProposedJob(job: string) {
-  const parsed = JSON.parse(job) as ProposedJobComplete;
-  return parsed;
+export function deserializeProposedJob(job: Serialized<ProposedJobComplete>) {
+  const parsed = JSON.parse(job.data) as ProposedJobComplete;
+  return deserializeProposedJobAvailability(parsed);
+}
+
+export function deserializeProposedJobAvailability(job: ProposedJobComplete) {
+  job.availability.days = job.availability.days.map((date) => new Date(date));
+  return job;
 }

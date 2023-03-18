@@ -26,7 +26,8 @@ export const WorkerUpdateSchema = z
     allergyIds: z.array(z.string()),
     availability: z.array(z.coerce.date()),
   })
-  .strict();
+  .strict()
+  .partial();
 
 export type WorkerUpdateData = z.infer<typeof WorkerUpdateSchema>;
 

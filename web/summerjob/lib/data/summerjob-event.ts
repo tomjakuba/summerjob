@@ -12,7 +12,7 @@ export async function getActiveSummerJobEvent() {
       isActive: true,
     },
   });
-  return events[0];
+  return events.length > 0 ? events[0] : undefined;
 }
 
 export async function setActiveSummerJobEvent(id: string) {

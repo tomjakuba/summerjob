@@ -124,7 +124,7 @@ export default function EditWorker({
             />
             <label
               className="form-label d-block fw-bold mt-4"
-              htmlFor="allergy"
+              htmlFor="availability"
             >
               Může pracovat v následující dny
             </label>

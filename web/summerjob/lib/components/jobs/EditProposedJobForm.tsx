@@ -1,10 +1,12 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAPIProposedJobUpdate } from "lib/fetcher/proposed-job";
+import { datesBetween } from "lib/helpers/helpers";
 import { Allergy } from "lib/prisma/client";
 import { deserializeAllergies } from "lib/types/allergy";
 import {
   deserializeProposedJob,
+  ProposedJobComplete,
   ProposedJobUpdateData,
   ProposedJobUpdateSchema,
 } from "lib/types/proposed-job";
@@ -12,19 +14,30 @@ import { Serialized } from "lib/types/serialize";
 import { WorkerBasicInfo } from "lib/types/worker";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
 import { FilterSelectItem } from "../filter-select/FilterSelect";
 import AllergyPill from "../forms/AllergyPill";
+import DaysSelection from "../forms/DaysSelection";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
 import SuccessProceedModal from "../modal/SuccessProceedModal";
 
 interface EditProposedJobProps {
-  serializedJob: string;
+  serializedJob: Serialized<ProposedJobComplete>;
   serializedAllergens: Serialized<Allergy>;
+  eventStartDate: string;
+  eventEndDate: string;
 }
+
+const schema = ProposedJobUpdateSchema.omit({ availability: true }).extend({
+  availability: z.array(z.string()),
+});
+type ProposedJobForm = z.infer<typeof schema>;
 
 export default function EditProposedJobForm({
   serializedJob,
   serializedAllergens,
+  eventStartDate,
+  eventEndDate,
 }: EditProposedJobProps) {
   const job = deserializeProposedJob(serializedJob);
   const allergens = deserializeAllergies(serializedAllergens);
@@ -35,8 +48,8 @@ export default function EditProposedJobForm({
     handleSubmit,
     formState: { errors },
     setValue,
-  } = useForm<ProposedJobUpdateData>({
-    resolver: zodResolver(ProposedJobUpdateSchema),
+  } = useForm<ProposedJobForm>({
+    resolver: zodResolver(schema),
     defaultValues: {
       name: job.name,
       description: job.description,
@@ -49,10 +62,16 @@ export default function EditProposedJobForm({
       strongWorkers: job.strongWorkers,
       hasFood: job.hasFood,
       hasShower: job.hasShower,
+      availability: job.availability.days.map((day) => day.toJSON()),
     },
   });
 
-  const onSubmit = (data: ProposedJobUpdateData) => {
+  const allDates = datesBetween(
+    new Date(eventStartDate),
+    new Date(eventEndDate)
+  );
+
+  const onSubmit = (data: ProposedJobForm) => {
     trigger(data, {
       onSuccess: () => {
         setSaved(true);
@@ -140,9 +159,18 @@ export default function EditProposedJobForm({
                 {...register("strongWorkers", { valueAsNumber: true })}
               />
             </div>
-
+            <label
+              className="form-label d-block fw-bold mt-4"
+              htmlFor="availability"
+            >
+              Dostupné v následující dny
+            </label>
+            <DaysSelection
+              days={allDates}
+              register={() => register("availability")}
+            />
             <label className="form-label d-block fw-bold mt-4" htmlFor="email">
-              Alergie
+              Alergeny
             </label>
             <div className="form-check-inline">
               {allergens.map((allergy) => (

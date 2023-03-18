@@ -103,6 +103,7 @@ export async function updateWorker(id: string, data: WorkerUpdateData) {
   if (!activeEventId) {
     throw new NoActiveEventError();
   }
+
   const user = await prisma.worker.update({
     where: {
       id,
@@ -113,7 +114,7 @@ export async function updateWorker(id: string, data: WorkerUpdateData) {
       email: data.email,
       phone: data.phone,
       allergies: {
-        set: data.allergyIds.map((allergyId) => ({ id: allergyId })),
+        set: data.allergyIds?.map((allergyId) => ({ id: allergyId })),
       },
       availability: {
         update: {

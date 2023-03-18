@@ -27,7 +27,7 @@ export function useAPIProposedJobCreate(options?: any) {
 }
 
 export function useAPIProposedJobUpdate(id: string, options?: any) {
-  return useDataPartialUpdate<ProposedJobUpdateData>(
+  return useDataPartialUpdate<ProposedJobAPIPatchData>(
     `/api/proposed-jobs/${id}`,
     options
   );

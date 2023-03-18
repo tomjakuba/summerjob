@@ -146,7 +146,12 @@ async function createAreas(eventId: string) {
   return await prisma.area.findMany();
 }
 
-async function createProposedJobs(areaIds: string[]) {
+async function createProposedJobs(
+  areaIds: string[],
+  eventId: string,
+  days: Date[],
+  allergens: Allergy[]
+) {
   const titles = [
     "Hrabání listí",
     "Přesouvání kamení",
@@ -169,9 +174,25 @@ async function createProposedJobs(areaIds: string[]) {
       hasShower: Math.random() > 0.7,
     };
   };
-  await prisma.proposedJob.createMany({
-    data: titles.map((title) => createProposedJob(title)),
-  });
+  for (const title of titles) {
+    await prisma.proposedJob.create({
+      data: {
+        ...createProposedJob(title),
+        availability: {
+          create: {
+            eventId: eventId,
+            days: choose(days, between(2, days.length)),
+          },
+        },
+        allergens: {
+          connect: choose(allergens, between(0, 2)).map((allergen) => ({
+            id: allergen.id,
+          })),
+        },
+      },
+    });
+  }
+
   return await prisma.proposedJob.findMany();
 }
 
@@ -263,7 +284,12 @@ async function main() {
   console.log("Creating areas...");
   const areas = await createAreas(yearlyEvent.id);
   console.log("Creating proposed jobs...");
-  const proposedJobs = await createProposedJobs(areas.map((area) => area.id));
+  const proposedJobs = await createProposedJobs(
+    areas.map((area) => area.id),
+    yearlyEvent.id,
+    datesBetween(yearlyEvent.startDate, yearlyEvent.endDate),
+    allergies
+  );
   console.log("Creating plan...");
   const plan = await createPlan(yearlyEvent);
   console.log("Populating plan...");

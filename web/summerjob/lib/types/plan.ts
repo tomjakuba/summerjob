@@ -1,6 +1,7 @@
 import { ActiveJob, Plan } from "lib/prisma/client";
 import { z } from "zod";
 import { ActiveJobNoPlan } from "./active-job";
+import { deserializeProposedJobAvailability } from "./proposed-job";
 import { Serialized } from "./serialize";
 import {
   deserializeWorker,
