@@ -1,8 +1,22 @@
 import prisma from "lib/prisma/connection";
+import { SummerJobEventCreateData } from "lib/types/summerjob-event";
 import { cache_setActiveSummerJobEvent } from "./data-store";
 
+export async function getSummerJobEventById(id: string) {
+  const event = await prisma.summerJobEvent.findUnique({
+    where: {
+      id,
+    },
+  });
+  return event;
+}
+
 export async function getSummerJobEvents() {
-  const events = await prisma.summerJobEvent.findMany({});
+  const events = await prisma.summerJobEvent.findMany({
+    orderBy: {
+      startDate: "desc",
+    },
+  });
   return events;
 }
 
@@ -41,4 +55,11 @@ export async function setActiveSummerJobEvent(id: string) {
     }),
   ]);
   cache_setActiveSummerJobEvent(event);
+}
+
+export async function createSummerJobEvent(event: SummerJobEventCreateData) {
+  const createdEvent = await prisma.summerJobEvent.create({
+    data: event,
+  });
+  return createdEvent;
 }
