@@ -5,11 +5,8 @@ import {
   type ProposedJobComplete,
   type ProposedJobUpdateData,
 } from "lib/types/proposed-job";
-import {
-  cache_getActiveSummerJobEvent,
-  cache_getActiveSummerJobEventId,
-} from "./data-store";
-import { NoActiveEventError } from "./internal-error";
+import { cache_getActiveSummerJobEventId } from "./data-store";
+import { InvalidDataError, NoActiveEventError } from "./internal-error";
 
 export async function getProposedJobById(
   id: string
@@ -40,14 +37,12 @@ export async function getProposedJobById(
 }
 
 export async function getProposedJobs(): Promise<ProposedJobComplete[]> {
-  const activeEventId = await cache_getActiveSummerJobEventId();
-  if (!activeEventId) {
-    throw new NoActiveEventError();
-  }
   const jobs = await prisma.proposedJob.findMany({
     where: {
       area: {
-        summerJobEventId: activeEventId,
+        summerJobEvent: {
+          isActive: true,
+        },
       },
     },
     include: {
@@ -56,7 +51,9 @@ export async function getProposedJobs(): Promise<ProposedJobComplete[]> {
       allergens: true,
       availability: {
         where: {
-          eventId: activeEventId,
+          event: {
+            isActive: true,
+          },
         },
         take: 1,
       },
@@ -73,10 +70,6 @@ export async function getProposedJobs(): Promise<ProposedJobComplete[]> {
 export async function getUnplannedProposedJobs(
   planId: string
 ): Promise<ProposedJobComplete[]> {
-  const activeEventId = await cache_getActiveSummerJobEventId();
-  if (!activeEventId) {
-    throw new NoActiveEventError();
-  }
   const jobs = await prisma.proposedJob.findMany({
     where: {
       NOT: {
@@ -94,7 +87,9 @@ export async function getUnplannedProposedJobs(
       allergens: true,
       availability: {
         where: {
-          eventId: activeEventId,
+          event: {
+            isActive: true,
+          },
         },
         take: 1,
       },
@@ -147,9 +142,13 @@ export async function updateProposedJob(
 
 export async function createProposedJob(data: ProposedJobCreateData) {
   const { allergens, availability, ...proposedJobDataWithoutAllergens } = data;
-  const activeEventId = await cache_getActiveSummerJobEventId();
-  if (!activeEventId) {
-    throw new NoActiveEventError();
+  const area = await prisma.area.findUnique({
+    where: {
+      id: proposedJobDataWithoutAllergens.areaId,
+    },
+  });
+  if (!area) {
+    throw new InvalidDataError("Area not found");
   }
   const proposedJob = await prisma.proposedJob.create({
     data: {
@@ -159,7 +158,7 @@ export async function createProposedJob(data: ProposedJobCreateData) {
       },
       availability: {
         create: {
-          eventId: activeEventId,
+          eventId: area?.summerJobEventId,
           days: availability,
         },
       },
@@ -184,12 +183,3 @@ export function databaseProposedJobToProposedJobComplete(
   const { availability, ...rest } = proposedJob;
   return { ...rest, availability: availability[0] };
 }
-
-// export function databaseWorkerToWorkerComplete(
-//   worker: Omit<WorkerComplete, "availability"> & {
-//     availability: WorkerAvailability[];
-//   }
-// ): WorkerComplete {
-//   const { availability, ...rest } = worker;
-//   return { ...rest, availability: availability[0] };
-// }

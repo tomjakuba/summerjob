@@ -35,15 +35,13 @@ export default function NewEventModal({
     trigger(data);
   };
 
-  console.log(errors);
-
   return (
     <Modal
       title={"Vytvořit nový ročník"}
       size={ModalSize.MEDIUM}
       onClose={onReject}
     >
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} autoComplete={"off"}>
         <label className="form-label fw-bold" htmlFor="name">
           Název ročníku
         </label>

@@ -8,15 +8,11 @@ export async function getWorkers(
   planId: string | undefined = undefined,
   hasJob: boolean | undefined = undefined
 ): Promise<WorkerComplete[]> {
-  const activeEventId = await cache_getActiveSummerJobEventId();
-  if (!activeEventId) {
-    throw new NoActiveEventError();
-  }
   let whereClause: any = {
     where: {
       registeredIn: {
         some: {
-          id: activeEventId,
+          isActive: true,
         },
       },
     },
@@ -49,7 +45,9 @@ export async function getWorkers(
       cars: true,
       availability: {
         where: {
-          eventId: activeEventId,
+          event: {
+            isActive: true,
+          },
         },
         take: 1,
       },

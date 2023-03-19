@@ -62,8 +62,6 @@ export default function CreateProposedJobForm({
     new Date(eventEndDate)
   );
 
-  console.log("errors", errors);
-
   return (
     <>
       <div className="row">

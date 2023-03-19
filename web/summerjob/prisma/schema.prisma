@@ -144,7 +144,7 @@ model Area {
   description      String         @default("")
   requiresCar      Boolean
   jobs             ProposedJob[]
-  SummerJobEvent   SummerJobEvent @relation(fields: [summerJobEventId], references: [id], onDelete: Cascade)
+  summerJobEvent   SummerJobEvent @relation(fields: [summerJobEventId], references: [id], onDelete: Cascade)
   summerJobEventId String
 }
 

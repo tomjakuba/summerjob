@@ -18,12 +18,12 @@ export default function EventClientPage({ sEvent }: EventClientPageProps) {
 
   const router = useRouter();
   const onEventActive = () => {
-    // TODO see if this is needed
     router.refresh();
   };
 
   const onEventDeleted = () => {
-    router.push("/admin/events");
+    router.replace("/admin/events");
+    router.refresh();
   };
   return (
     <>

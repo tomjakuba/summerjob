@@ -7,15 +7,11 @@ import { InvalidDataError, NoActiveEventError } from "./internal-error";
 import { databaseWorkerToWorkerComplete } from "./workers";
 
 export async function getPlans(): Promise<PlanWithJobs[]> {
-  // TODO replace with the currently active year instead of newest
-  const eventId = await cache_getActiveSummerJobEventId();
-  if (!eventId) {
-    throw new NoActiveEventError();
-  }
-
   const plans = await prisma.plan.findMany({
     where: {
-      summerJobEventId: eventId,
+      summerJobEvent: {
+        isActive: true,
+      },
     },
     include: {
       jobs: true,

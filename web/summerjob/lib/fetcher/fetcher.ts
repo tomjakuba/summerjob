@@ -46,7 +46,7 @@ const sendData =
     if (res.status === 204) {
       return;
     }
-    return res.json();
+    return await res.json();
   };
 
 const get = send("GET");

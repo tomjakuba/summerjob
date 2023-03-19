@@ -30,14 +30,12 @@ export async function getCarById(id: string): Promise<CarComplete | null> {
 }
 
 export async function getCars(): Promise<CarComplete[]> {
-  const activeEventId = await cache_getActiveSummerJobEventId();
-  if (!activeEventId) throw new NoActiveEventError();
   const cars = await prisma.car.findMany({
     where: {
       owner: {
         registeredIn: {
           some: {
-            id: activeEventId,
+            isActive: true,
           },
         },
       },
@@ -46,7 +44,9 @@ export async function getCars(): Promise<CarComplete[]> {
       owner: true,
       odometers: {
         where: {
-          eventId: activeEventId,
+          event: {
+            isActive: true,
+          },
         },
         take: 1,
       },
@@ -54,7 +54,9 @@ export async function getCars(): Promise<CarComplete[]> {
         where: {
           job: {
             plan: {
-              summerJobEventId: activeEventId,
+              summerJobEvent: {
+                isActive: true,
+              },
             },
           },
         },
