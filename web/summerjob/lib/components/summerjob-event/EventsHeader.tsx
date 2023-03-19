@@ -7,6 +7,7 @@ import NewEventModal from "./NewEventModal";
 export default function EventsHeader() {
   const router = useRouter();
   const onSuccess = (planId: string) => {
+    setIsNewEventModalOpen(false);
     router.refresh();
   };
   const [isNewEventModalOpen, setIsNewEventModalOpen] = useState(false);

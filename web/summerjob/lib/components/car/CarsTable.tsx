@@ -3,6 +3,7 @@ import { useAPICarDeleteDynamic } from "lib/fetcher/car";
 import { CarComplete } from "lib/types/car";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { MessageRow } from "../table/MessageRow";
 import { SimpleRow } from "../table/SimpleRow";
 
 const _columns = [
@@ -56,6 +57,9 @@ export function CarsTable({ data, reload }: CarTableProps) {
           </tr>
         </thead>
         <tbody className="smj-table-body mb-0">
+          {data !== undefined && data.length === 0 && (
+            <MessageRow message="Žádná auta" colspan={_columns.length} />
+          )}
           {data !== undefined &&
             data.map((car) => (
               <SimpleRow

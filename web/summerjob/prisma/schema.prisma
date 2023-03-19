@@ -84,7 +84,7 @@ model ProposedJob {
   contact       String
   hasFood       Boolean                   @default(false)
   hasShower     Boolean                   @default(false)
-  area          Area                      @relation(fields: [areaId], references: [id])
+  area          Area                      @relation(fields: [areaId], references: [id], onDelete: Cascade)
   areaId        String
   activeJobs    ActiveJob[]
   allergens     Allergy[]
@@ -134,7 +134,7 @@ model Plan {
   id               String         @id @default(uuid())
   day              DateTime       @unique @db.Date
   jobs             ActiveJob[]
-  summerJobEvent   SummerJobEvent @relation(fields: [summerJobEventId], references: [id])
+  summerJobEvent   SummerJobEvent @relation(fields: [summerJobEventId], references: [id], onDelete: Cascade)
   summerJobEventId String
 }
 
@@ -144,7 +144,7 @@ model Area {
   description      String         @default("")
   requiresCar      Boolean
   jobs             ProposedJob[]
-  SummerJobEvent   SummerJobEvent @relation(fields: [summerJobEventId], references: [id])
+  SummerJobEvent   SummerJobEvent @relation(fields: [summerJobEventId], references: [id], onDelete: Cascade)
   summerJobEventId String
 }
 

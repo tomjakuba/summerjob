@@ -1,7 +1,8 @@
 import ErrorPage404 from "lib/components/404/404";
 import PageHeader from "lib/components/page-header/PageHeader";
-import EventsHeader from "lib/components/summerjob-event/EventsHeader";
+import EventClientPage from "lib/components/summerjob-event/EventClientPage";
 import { getSummerJobEventById } from "lib/data/summerjob-event";
+import { serializeSummerJobEvent } from "lib/types/summerjob-event";
 
 type Props = {
   params: {
@@ -14,11 +15,13 @@ export default async function SummerJobEventPage({ params }: Props) {
   if (!event) {
     return <ErrorPage404 message="Ročník nenalezen."></ErrorPage404>;
   }
+  const sEvent = serializeSummerJobEvent(event);
   return (
     <>
       <PageHeader title={event.name} isFluid={false}>
         {}
       </PageHeader>
+      <EventClientPage sEvent={sEvent} />
     </>
   );
 }

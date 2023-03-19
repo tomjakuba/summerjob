@@ -1,5 +1,6 @@
 import { ProposedJobComplete } from "lib/types/proposed-job";
 import { useMemo, useState } from "react";
+import { MessageRow } from "../table/MessageRow";
 import {
   SortableColumn,
   SortableTable,
@@ -58,6 +59,9 @@ export function JobsTable({ data, shouldShowJob, reload }: JobsTableProps) {
       currentSort={sortOrder}
       onRequestedSort={onSortRequested}
     >
+      {data && data.length === 0 && (
+        <MessageRow message="Žádné joby" colspan={_columns.length} />
+      )}
       {data &&
         sortedData.map(
           (job) =>

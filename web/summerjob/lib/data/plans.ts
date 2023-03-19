@@ -8,23 +8,21 @@ import { databaseWorkerToWorkerComplete } from "./workers";
 
 export async function getPlans(): Promise<PlanWithJobs[]> {
   // TODO replace with the currently active year instead of newest
-  const events = await prisma.summerJobEvent.findMany({
-    orderBy: {
-      startDate: "desc",
+  const eventId = await cache_getActiveSummerJobEventId();
+  if (!eventId) {
+    throw new NoActiveEventError();
+  }
+
+  const plans = await prisma.plan.findMany({
+    where: {
+      summerJobEventId: eventId,
     },
-    take: 1,
-    select: {
-      plans: {
-        include: {
-          jobs: true,
-        },
-      },
+    include: {
+      jobs: true,
     },
   });
-  if (events.length === 0) {
-    return [];
-  }
-  return events[0].plans;
+
+  return plans;
 }
 
 export async function getPlanById(id: string): Promise<PlanComplete | null> {

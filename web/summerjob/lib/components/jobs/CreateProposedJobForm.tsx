@@ -1,6 +1,7 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAPIProposedJobCreate } from "lib/fetcher/proposed-job";
+import { datesBetween } from "lib/helpers/helpers";
 import { Allergy, Area } from "lib/prisma/client";
 import { deserializeAllergies } from "lib/types/allergy";
 import { deserializeAreas } from "lib/types/areas";
@@ -9,22 +10,26 @@ import {
   ProposedJobCreateSchema,
 } from "lib/types/proposed-job";
 import { Serialized } from "lib/types/serialize";
-import { WorkerBasicInfo } from "lib/types/worker";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FilterSelect, FilterSelectItem } from "../filter-select/FilterSelect";
 import AllergyPill from "../forms/AllergyPill";
+import DaysSelection from "../forms/DaysSelection";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
 import SuccessProceedModal from "../modal/SuccessProceedModal";
 
 interface CreateProposedJobProps {
   serializedAreas: Serialized<Area[]>;
   serializedAllergens: Serialized<Allergy>;
+  eventStartDate: string;
+  eventEndDate: string;
 }
 
 export default function CreateProposedJobForm({
   serializedAreas,
   serializedAllergens,
+  eventStartDate,
+  eventEndDate,
 }: CreateProposedJobProps) {
   const areas = deserializeAreas(serializedAreas);
   const allergens = deserializeAllergies(serializedAllergens);
@@ -51,6 +56,13 @@ export default function CreateProposedJobForm({
   const selectArea = (item: FilterSelectItem) => {
     setValue("areaId", item.id);
   };
+
+  const allDates = datesBetween(
+    new Date(eventStartDate),
+    new Date(eventEndDate)
+  );
+
+  console.log("errors", errors);
 
   return (
     <>
@@ -160,7 +172,16 @@ export default function CreateProposedJobForm({
               errors.strongWorkers) && (
               <div className="text-danger">Zadejte počty pracovníků</div>
             )}
-
+            <label
+              className="form-label d-block fw-bold mt-4"
+              htmlFor="availability"
+            >
+              Dostupné v následující dny
+            </label>
+            <DaysSelection
+              days={allDates}
+              register={() => register("availability")}
+            />
             <label className="form-label d-block fw-bold mt-4" htmlFor="email">
               Alergie
             </label>

@@ -1,13 +1,8 @@
 import { ActiveJob, Plan } from "lib/prisma/client";
 import { z } from "zod";
 import { ActiveJobNoPlan } from "./active-job";
-import { deserializeProposedJobAvailability } from "./proposed-job";
 import { Serialized } from "./serialize";
-import {
-  deserializeWorker,
-  deserializeWorkerAvailability,
-  serializeWorker,
-} from "./worker";
+import { deserializeWorkerAvailability } from "./worker";
 
 export type PlanComplete = Plan & {
   jobs: ActiveJobNoPlan[];
@@ -34,8 +29,8 @@ export function serializePlan(plan: PlanComplete): Serialized<PlanComplete> {
 }
 
 export function deserializePlan(plan: Serialized<PlanComplete>) {
-  const parsed = JSON.parse(plan.data) as PlanComplete;
-  parsed.day = new Date(parsed.day);
+  let parsed = JSON.parse(plan.data) as PlanComplete;
+  parsed = deserializePlanDate(parsed);
   for (let i = 0; i < parsed.jobs.length; i++) {
     parsed.jobs[i].workers = parsed.jobs[i].workers.map(
       deserializeWorkerAvailability
@@ -55,9 +50,12 @@ export function serializePlans(
 export function deserializePlans(
   data: Serialized<PlanWithJobs[]>
 ): PlanWithJobs[] {
-  const parsed = JSON.parse(data.data);
-  for (const plan of parsed) {
-    plan.day = new Date(plan.day);
-  }
+  let parsed = JSON.parse(data.data);
+  parsed = parsed.map(deserializePlanDate);
   return parsed;
+}
+
+export function deserializePlanDate<T extends Plan>(data: T) {
+  data.day = new Date(data.day);
+  return data;
 }

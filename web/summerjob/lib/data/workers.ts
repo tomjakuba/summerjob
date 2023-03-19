@@ -12,26 +12,38 @@ export async function getWorkers(
   if (!activeEventId) {
     throw new NoActiveEventError();
   }
-  let whereClause: any = {};
+  let whereClause: any = {
+    where: {
+      registeredIn: {
+        some: {
+          id: activeEventId,
+        },
+      },
+    },
+  };
   if (planId) {
-    whereClause = {
-      where: {
-        jobs: {
-          some: {
-            planId,
-          },
+    let inPlan: any = {
+      jobs: {
+        some: {
+          planId,
         },
       },
     };
-  }
-  if (!hasJob) {
+    if (!hasJob) {
+      inPlan = {
+        NOT: inPlan,
+      };
+    }
     whereClause = {
       where: {
-        NOT: whereClause.where,
+        ...whereClause.where,
+        ...inPlan,
       },
     };
   }
+
   const users = await prisma.worker.findMany({
+    ...whereClause,
     include: {
       allergies: true,
       cars: true,
@@ -42,7 +54,6 @@ export async function getWorkers(
         take: 1,
       },
     },
-    ...whereClause,
     orderBy: [
       {
         firstName: "asc",

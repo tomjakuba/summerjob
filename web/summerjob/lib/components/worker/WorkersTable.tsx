@@ -1,5 +1,6 @@
 import { WorkerComplete } from "lib/types/worker";
 import Link from "next/link";
+import { MessageRow } from "../table/MessageRow";
 import { SimpleRow } from "../table/SimpleRow";
 
 interface WorkersTableProps {
@@ -18,6 +19,9 @@ export default function WorkersTable({ workers }: WorkersTableProps) {
           </tr>
         </thead>
         <tbody className="smj-table-body mb-0">
+          {workers.length === 0 && (
+            <MessageRow message="Žádní pracanti" colspan={_columns.length} />
+          )}
           {workers.map((worker) => (
             <SimpleRow
               key={worker.id}

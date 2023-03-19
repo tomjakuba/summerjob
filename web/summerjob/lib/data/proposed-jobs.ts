@@ -45,6 +45,11 @@ export async function getProposedJobs(): Promise<ProposedJobComplete[]> {
     throw new NoActiveEventError();
   }
   const jobs = await prisma.proposedJob.findMany({
+    where: {
+      area: {
+        summerJobEventId: activeEventId,
+      },
+    },
     include: {
       area: true,
       activeJobs: true,
@@ -142,8 +147,8 @@ export async function updateProposedJob(
 
 export async function createProposedJob(data: ProposedJobCreateData) {
   const { allergens, availability, ...proposedJobDataWithoutAllergens } = data;
-  const activeEvent = await cache_getActiveSummerJobEvent();
-  if (!activeEvent) {
+  const activeEventId = await cache_getActiveSummerJobEventId();
+  if (!activeEventId) {
     throw new NoActiveEventError();
   }
   const proposedJob = await prisma.proposedJob.create({
@@ -154,7 +159,7 @@ export async function createProposedJob(data: ProposedJobCreateData) {
       },
       availability: {
         create: {
-          eventId: activeEvent.id,
+          eventId: activeEventId,
           days: availability,
         },
       },

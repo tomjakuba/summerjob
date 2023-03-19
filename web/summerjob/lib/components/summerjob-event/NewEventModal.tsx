@@ -35,6 +35,8 @@ export default function NewEventModal({
     trigger(data);
   };
 
+  console.log(errors);
+
   return (
     <Modal
       title={"Vytvořit nový ročník"}
@@ -97,16 +99,12 @@ export default function NewEventModal({
               {...register("endDate", { valueAsDate: true })}
             />
             <p className="text-danger">
-              {errors.startDate?.message
-                ? (errors.startDate.message as string)
+              {errors.endDate?.message
+                ? (errors.endDate.message as string)
                 : " "}
             </p>
           </div>
         </div>
-
-        {!errors.startDate && errors.endDate?.message && (
-          <p className="text-danger">{errors.endDate.message as string}</p>
-        )}
         <div className="d-flex justify-content-end mt-4">
           <input
             type="submit"
@@ -126,8 +124,4 @@ const schema = SummerJobEventCreateSchema.refine(
     message: "Final date must be after starting date",
     path: ["endDate"],
   })
-).transform((data) => ({
-  ...data,
-  startDate: data.startDate.toJSON(),
-  endDate: data.endDate.toJSON(),
-}));
+);

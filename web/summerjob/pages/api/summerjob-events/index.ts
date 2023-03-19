@@ -3,21 +3,15 @@ import { validateOrSendError } from "lib/api/validator";
 import {
   createSummerJobEvent,
   getSummerJobEvents,
-  setActiveSummerJobEvent,
 } from "lib/data/summerjob-event";
 import {
   SummerJobEventCreateData,
+  SummerJobEventCreateDataInput,
   SummerJobEventCreateSchema,
 } from "lib/types/summerjob-event";
 import { NextApiRequest, NextApiResponse } from "next";
 
-export type SummerJobEventsAPIPostData = Omit<
-  SummerJobEventCreateData,
-  "startDate" | "endDate"
-> & {
-  startDate: string;
-  endDate: string;
-};
+export type SummerJobEventsAPIPostData = SummerJobEventCreateDataInput;
 export type SummerJobEventsAPIPostResponse = Awaited<
   ReturnType<typeof createSummerJobEvent>
 >;
@@ -28,13 +22,6 @@ async function post(req: NextApiRequest, res: NextApiResponse) {
   }
   const job = await createSummerJobEvent(data);
   res.status(201).json(job);
-}
-
-async function patch(req: NextApiRequest, res: NextApiResponse) {
-  // TODO: Update event instead of only setting active
-  const { id } = req.body;
-  await setActiveSummerJobEvent(id as string);
-  res.status(204).end();
 }
 
 type SummerJobEventsAPIGetResponse = Awaited<
@@ -48,4 +35,4 @@ async function get(
   res.status(200).json(events);
 }
 
-export default http_method_handler({ get: get, patch: patch, post: post });
+export default http_method_handler({ get: get, post: post });
