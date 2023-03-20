@@ -14,7 +14,12 @@ export default function JobRideList({
   otherJobs,
   reloadPlan,
 }: JobRideListProps) {
-  if (!job.rides || job.rides.length == 0) return <div>Není</div>;
+  if (!job.rides || job.rides.length == 0) {
+    if (!job.proposedJob.area.requiresCar) {
+      return <div className="text-muted">Tato oblast nevyžaduje dopravu.</div>;
+    }
+    return <div className="text-muted">Zatím nejsou naplánovány jízdy.</div>;
+  }
 
   const formatSingleRide = (ride: RideComplete, index: number) => {
     const passengersFromOtherJobsIds = ride.passengers

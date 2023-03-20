@@ -3,7 +3,7 @@ import PlanClientPage from "lib/components/plan/PlanClientPage";
 import { getPlanById } from "lib/data/plans";
 import { getWorkers } from "lib/data/workers";
 import { serializePlan } from "lib/types/plan";
-import { serializeWorker, serializeWorkers } from "lib/types/worker";
+import { serializeWorkers } from "lib/types/worker";
 
 type PathProps = {
   params: {

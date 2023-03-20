@@ -10,13 +10,14 @@ import {
   useAPIActiveJobUpdate,
 } from "lib/fetcher/active-job";
 import { translateAllergies } from "lib/types/allergy";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import ConfirmationModal from "../modal/ConfirmationModal";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
 import AddRideButton from "./AddRideButton";
 import RideSelect from "./RideSelect";
 import MoveWorkerModal from "./MoveWorkerModal";
 import JobRideList from "./JobRideList";
+import { ActiveJobIssueBanner, ActiveJobIssueIcon } from "./ActiveJobIssue";
 
 interface PlanJobRowProps {
   job: ActiveJobNoPlan;
@@ -111,17 +112,29 @@ export function PlanJobRow({
 
   //#endregion
 
-  const ridesForOtherJobs = rides.filter((r) => r.jobId !== job.id);
+  const ridesForOtherJobs = useMemo(
+    () => rides.filter((r) => r.jobId !== job.id),
+    [rides, job]
+  );
 
   return (
     <>
       {isDisplayed && (
         <ExpandableRow
           key={job.id}
-          data={formatRowData(job, confirmDelete, isBeingDeleted)}
+          data={formatRowData(
+            job,
+            ridesForOtherJobs,
+            confirmDelete,
+            isBeingDeleted
+          )}
           onDrop={onWorkerDropped(job.id)}
         >
           <>
+            <ActiveJobIssueBanner
+              job={job}
+              ridesForOtherJobs={ridesForOtherJobs}
+            />
             <div className="ms-2">
               <strong>Poznámka pro organizátory</strong>
               <p>{job.privateDescription}</p>
@@ -140,6 +153,12 @@ export function PlanJobRow({
               />
               <br />
               <strong>Alergeny</strong>
+              <p>{formatAllergens(job)}</p>
+              <strong>Pracovníků (min/max/silných)</strong>
+              <p>
+                {job.proposedJob.minWorkers}/{job.proposedJob.maxWorkers}/
+                {job.proposedJob.strongWorkers}
+              </p>
               <p>{formatAllergens(job)}</p>
               <p>
                 <strong>Zodpovědná osoba: </strong>
@@ -256,17 +275,24 @@ function formatAllergens(job: ActiveJobNoPlan) {
 
 function formatRowData(
   job: ActiveJobNoPlan,
+  ridesForOtherJobs: RidesForJob[],
   deleteJob: () => void,
   isBeingDeleted: boolean
 ) {
   return [
-    job.proposedJob.name,
-    `${job.workers.length}/${job.proposedJob.maxWorkers}`,
+    <span
+      className="d-inline-flex gap-1 align-items-center"
+      key={`name-${job.id}`}
+    >
+      {job.proposedJob.name}
+      <ActiveJobIssueIcon job={job} ridesForOtherJobs={ridesForOtherJobs} />
+    </span>,
+    `${job.workers.length} / ${job.proposedJob.minWorkers} .. ${job.proposedJob.maxWorkers}`,
     job.proposedJob.contact,
     job.proposedJob.area.name,
     job.proposedJob.address,
     formatAmenities(job),
-    <span key={job.id} className="d-flex align-items-center gap-3">
+    <span key={`actions-${job.id}`} className="d-flex align-items-center gap-3">
       <Link
         href={`/plans/${job.planId}/${job.id}`}
         onClick={(e) => e.stopPropagation()}
