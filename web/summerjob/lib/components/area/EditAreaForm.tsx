@@ -10,6 +10,7 @@ import {
   deserializeArea,
 } from "lib/types/area";
 import { Serialized } from "lib/types/serialize";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
@@ -42,6 +43,12 @@ export default function EditAreaForm({ sArea }: EditAreaProps) {
         setSaved(true);
       },
     });
+  };
+
+  const router = useRouter();
+  const onSuccessMessageClose = () => {
+    router.back();
+    router.refresh();
   };
 
   return (
@@ -106,7 +113,7 @@ export default function EditAreaForm({ sArea }: EditAreaProps) {
           </form>
         </div>
       </div>
-      {saved && <SuccessProceedModal onClose={() => window.history.back()} />}
+      {saved && <SuccessProceedModal onClose={onSuccessMessageClose} />}
       {error && <ErrorMessageModal onClose={reset} />}
     </>
   );

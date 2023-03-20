@@ -2,6 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAPIAreaCreate } from "lib/fetcher/area";
 import { AreaCreateData, AreaCreateSchema } from "lib/types/area";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
@@ -31,6 +32,12 @@ export default function CreateAreaForm({ eventId }: CreateAreaProps) {
         setSaved(true);
       },
     });
+  };
+
+  const router = useRouter();
+  const onSuccessMessageClose = () => {
+    router.back();
+    router.refresh();
   };
 
   return (
@@ -96,7 +103,7 @@ export default function CreateAreaForm({ eventId }: CreateAreaProps) {
           </form>
         </div>
       </div>
-      {saved && <SuccessProceedModal onClose={() => window.history.back()} />}
+      {saved && <SuccessProceedModal onClose={onSuccessMessageClose} />}
       {error && <ErrorMessageModal onClose={reset} />}
     </>
   );

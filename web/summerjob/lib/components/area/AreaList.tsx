@@ -94,7 +94,7 @@ function AreaRow({ area, eventId, onDataChanged }: AreaRowProps) {
           >
             <i className="fas fa-edit me-2"></i>
           </Link>
-          <DeleteIcon onClick={confirmDelete} isBeingDeleted={false} />
+          <DeleteIcon onClick={confirmDelete} isBeingDeleted={isMutating} />
         </div>
       </div>
       {showDeleteConfirmation && !error && (
