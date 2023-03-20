@@ -2,7 +2,11 @@ import {
   useAPIProposedJobDelete,
   useAPIProposedJobUpdate,
 } from "lib/fetcher/proposed-job";
-import { datesAfterDate } from "lib/helpers/helpers";
+import {
+  capitalizeFirstLetter,
+  datesAfterDate,
+  formatDateShort,
+} from "lib/helpers/helpers";
 import { translateAllergies } from "lib/types/allergy";
 import { ProposedJobComplete } from "lib/types/proposed-job";
 import Link from "next/link";
@@ -85,6 +89,13 @@ export default function ProposedJobRow({
                 .map((a) => a.code)
                 .join(", ")
             : "Žádné"}
+        </p>
+        <p>
+          <strong>Dostupné: </strong>
+          {job.availability.days
+            .map(formatDateShort)
+            .map(capitalizeFirstLetter)
+            .join(", ")}
         </p>
         <p>
           <strong>Naplánované dny: </strong>

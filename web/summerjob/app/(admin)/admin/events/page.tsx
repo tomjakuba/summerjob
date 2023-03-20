@@ -1,6 +1,6 @@
 import EventsHeader from "lib/components/summerjob-event/EventsHeader";
 import { getSummerJobEvents } from "lib/data/summerjob-event";
-import { formatDateShort } from "lib/helpers/helpers";
+import { formatDateNumeric } from "lib/helpers/helpers";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -23,8 +23,8 @@ export default async function SummerJobEventsPage() {
                   <div className="col">
                     <h5>{event.name}</h5>
                     <p>
-                      {formatDateShort(event.startDate)} -{" "}
-                      {formatDateShort(event.endDate)}
+                      {formatDateNumeric(event.startDate)} -{" "}
+                      {formatDateNumeric(event.endDate)}
                     </p>
                   </div>
                   <div className="col d-flex justify-content-end align-items-center gap-3">

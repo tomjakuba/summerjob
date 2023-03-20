@@ -13,6 +13,17 @@ export const formatDateLong = (date: Date, capitalize: boolean) => {
   return capitalize ? capitalizeFirstLetter(formatted) : formatted;
 };
 
+export const formatDateNumeric = (date: Date) => {
+  const options: Intl.DateTimeFormatOptions = {
+    month: "numeric",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  };
+  const formatted = new Intl.DateTimeFormat("cs-CZ", options).format(date);
+  return formatted;
+};
+
 export const formatDateShort = (date: Date) => {
   const options: Intl.DateTimeFormatOptions = {
     month: "numeric",
