@@ -6,7 +6,6 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 async function patch(req: NextApiRequest, res: NextApiResponse) {
   const id = req.query.rideId as string;
-  const rideData = RideUpdateSchema.parse(req.body);
   const data = validateOrSendError(RideUpdateSchema, req.body, res);
   if (!data) {
     return;

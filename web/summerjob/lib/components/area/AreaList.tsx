@@ -23,10 +23,12 @@ export default function AreaList({
     <>
       <div className="d-flex justify-content-between align-items-center">
         <h4 className="mb-3">Oblasti</h4>
-        <button className="btn btn-light pt-2 pb-2 align-self-start">
-          <i className="fas fa-plus me-2"></i>
-          Přidat oblast
-        </button>
+        <Link href={`/admin/events/${eventId}/areas/new`}>
+          <button className="btn btn-light pt-2 pb-2 align-self-start">
+            <i className="fas fa-plus me-2"></i>
+            Přidat oblast
+          </button>
+        </Link>
       </div>
       <ul className="list-group mt-3">
         {areas.length === 0 && (
@@ -87,7 +89,7 @@ function AreaRow({ area, eventId, onDataChanged }: AreaRowProps) {
         </div>
         <div className="d-flex align-items-center gap-3">
           <Link
-            href={`/admin/events/${eventId}/${area.id}`}
+            href={`/admin/events/${eventId}/areas/${area.id}`}
             className="smj-action-edit"
           >
             <i className="fas fa-edit me-2"></i>

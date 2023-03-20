@@ -5,7 +5,6 @@ import {
   getSummerJobEvents,
 } from "lib/data/summerjob-event";
 import {
-  SummerJobEventCreateData,
   SummerJobEventCreateDataInput,
   SummerJobEventCreateSchema,
 } from "lib/types/summerjob-event";

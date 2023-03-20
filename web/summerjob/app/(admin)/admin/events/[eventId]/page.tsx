@@ -6,12 +6,12 @@ import { serializeSummerJobEvent } from "lib/types/summerjob-event";
 
 type Props = {
   params: {
-    id: string;
+    eventId: string;
   };
 };
 
 export default async function SummerJobEventPage({ params }: Props) {
-  const event = await getSummerJobEventById(params.id);
+  const event = await getSummerJobEventById(params.eventId);
   if (!event) {
     return <ErrorPage404 message="Ročník nenalezen."></ErrorPage404>;
   }
