@@ -7,6 +7,7 @@ import { translateAllergies } from "lib/types/allergy";
 import { ProposedJobComplete } from "lib/types/proposed-job";
 import Link from "next/link";
 import { useState } from "react";
+import DeleteIcon from "../forms/DeleteIcon";
 import ConfirmationModal from "../modal/ConfirmationModal";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
 import { ExpandableRow } from "../table/ExpandableRow";
@@ -156,7 +157,7 @@ function formatJobRow(
       >
         <i className="fas fa-edit" title="Upravit"></i>
       </Link>
-      {deleteJobIcon(deleteJob, isBeingDeleted)}
+      <DeleteIcon onClick={deleteJob} isBeingDeleted={isBeingDeleted} />
     </span>,
   ];
 }
@@ -198,31 +199,5 @@ function pinJobIcon(
         setPinned(!job.pinned);
       }}
     ></i>
-  );
-}
-
-function deleteJobIcon(deleteJob: () => void, isBeingDeleted: boolean) {
-  return (
-    <>
-      {!isBeingDeleted && (
-        <>
-          <i
-            className="fas fa-trash-alt smj-action-delete"
-            title="Smazat"
-            onClick={(e) => {
-              e.stopPropagation();
-              deleteJob();
-            }}
-          ></i>
-          <span style={{ width: "0px" }}></span>
-        </>
-      )}
-      {isBeingDeleted && (
-        <i
-          className="fas fa-spinner smj-action-delete spinning"
-          title="Odstraňování..."
-        ></i>
-      )}
-    </>
   );
 }

@@ -7,5 +7,16 @@ export async function getAreas() {
         isActive: true,
       },
     },
+    include: {
+      jobs: true,
+    },
+  });
+}
+
+export async function deleteArea(id: string) {
+  await prisma.area.delete({
+    where: {
+      id,
+    },
   });
 }

@@ -5,7 +5,7 @@ import { getAllergies } from "lib/data/allergies";
 import { getAreas } from "lib/data/areas";
 import { cache_getActiveSummerJobEvent } from "lib/data/data-store";
 import { translateAllergies, serializeAllergies } from "lib/types/allergy";
-import { serializeAreas } from "lib/types/areas";
+import { serializeAreas } from "lib/types/area";
 
 export const dynamic = "force-dynamic";
 

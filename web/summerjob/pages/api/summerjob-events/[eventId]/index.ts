@@ -12,7 +12,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 
 export type SummerJobEventsAPIPatchData = SummerJobEventUpdateDataInput;
 async function patch(req: NextApiRequest, res: NextApiResponse) {
-  const id = req.query.id as string;
+  const id = req.query.eventId as string;
   const data = validateOrSendError(SummerJobEventUpdateSchema, req.body, res);
   if (!data) {
     return;
@@ -23,7 +23,7 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
 }
 
 async function del(req: NextApiRequest, res: NextApiResponse) {
-  const id = req.query.id as string;
+  const id = req.query.eventId as string;
   await deleteSummerJobEvent(id);
   res.status(204).end();
 }

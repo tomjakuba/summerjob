@@ -5,6 +5,7 @@ import {
   SummerJobEventComplete,
 } from "lib/types/summerjob-event";
 import { useRouter } from "next/navigation";
+import AreaList from "../area/AreaList";
 import EditBox from "../forms/EditBox";
 import DeleteEventButton from "./DeleteEventButton";
 import SetEventActiveButton from "./SetEventActiveButton";
@@ -17,7 +18,7 @@ export default function EventClientPage({ sEvent }: EventClientPageProps) {
   const event = deserializeSummerJobEvent(sEvent);
 
   const router = useRouter();
-  const onEventActive = () => {
+  const onDataChanged = () => {
     router.refresh();
   };
 
@@ -28,7 +29,7 @@ export default function EventClientPage({ sEvent }: EventClientPageProps) {
   return (
     <>
       <section>
-        <div className="container">
+        <div className="container mb-3">
           <EditBox>
             <h4 className="mb-3">Základní nastavení</h4>
             <div className="d-flex justify-content-between align-items-center flex-sm-row flex-column">
@@ -41,7 +42,7 @@ export default function EventClientPage({ sEvent }: EventClientPageProps) {
               </div>
               <SetEventActiveButton
                 smjEvent={event}
-                onSuccess={onEventActive}
+                onSuccess={onDataChanged}
               />
             </div>
             <hr />
@@ -57,40 +58,14 @@ export default function EventClientPage({ sEvent }: EventClientPageProps) {
             </div>
           </EditBox>
           <EditBox>
-            <div className="d-flex justify-content-between align-items-center">
-              <h4 className="mb-3">Oblasti</h4>
-              <button className="btn btn-light pt-2 pb-2 align-self-start">
-                <i className="fas fa-plus me-2"></i>
-                Přidat oblast
-              </button>
-            </div>
-            <ul className="list-group mt-3">
-              <AreaRow />
-              <AreaRow />
-              <AreaRow />
-              <AreaRow />
-              <AreaRow />
-            </ul>
+            <AreaList
+              areas={event.areas}
+              eventId={event.id}
+              onDataChanged={onDataChanged}
+            />
           </EditBox>
         </div>
       </section>
     </>
-  );
-}
-
-function AreaRow() {
-  return (
-    <li className="list-group-item list-group-item-action">
-      <div className="d-flex justify-content-between align-items-center">
-        <div className="d-flex flex-column">
-          <label className="fs-5">Praha</label>
-          <p className="text-muted">Doprava nutná: Ano.</p>
-        </div>
-        <div className="d-flex align-items-center gap-3">
-          <i className="fas fa-edit me-2"></i>
-          <i className="fas fa-trash-alt me-2"></i>
-        </div>
-      </div>
-    </li>
   );
 }

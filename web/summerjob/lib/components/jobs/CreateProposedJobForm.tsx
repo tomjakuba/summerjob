@@ -4,7 +4,7 @@ import { useAPIProposedJobCreate } from "lib/fetcher/proposed-job";
 import { datesBetween } from "lib/helpers/helpers";
 import { Allergy, Area } from "lib/prisma/client";
 import { deserializeAllergies } from "lib/types/allergy";
-import { deserializeAreas } from "lib/types/areas";
+import { deserializeAreas } from "lib/types/area";
 import {
   ProposedJobCreateData,
   ProposedJobCreateSchema,

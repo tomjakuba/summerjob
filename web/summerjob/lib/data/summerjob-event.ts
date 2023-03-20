@@ -13,7 +13,11 @@ export async function getSummerJobEventById(
       id,
     },
     include: {
-      areas: true,
+      areas: {
+        include: {
+          jobs: true,
+        },
+      },
       plans: true,
     },
   });
@@ -26,7 +30,11 @@ export async function getSummerJobEvents(): Promise<SummerJobEventComplete[]> {
       startDate: "desc",
     },
     include: {
-      areas: true,
+      areas: {
+        include: {
+          jobs: true,
+        },
+      },
       plans: true,
     },
   });

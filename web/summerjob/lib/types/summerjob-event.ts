@@ -1,10 +1,11 @@
-import { Area, Plan, SummerJobEvent } from "lib/prisma/client";
+import { Plan, SummerJobEvent } from "lib/prisma/client";
 import { z } from "zod";
+import { AreaComplete } from "./area";
 import { deserializePlanDate } from "./plan";
 import { Serialized } from "./serialize";
 
 export type SummerJobEventComplete = SummerJobEvent & {
-  areas: Area[];
+  areas: AreaComplete[];
   plans: Plan[];
 };
 

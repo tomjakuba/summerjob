@@ -43,8 +43,6 @@ export default function WorkersTable({ workers }: WorkersTableProps) {
                   >
                     <i className="fas fa-edit" title="Upravit"></i>
                   </Link>
-
-                  <span style={{ width: "0px" }}></span>
                 </span>,
               ]}
             />
