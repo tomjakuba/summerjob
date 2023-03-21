@@ -16,7 +16,7 @@ export default function SimpleDatePicker({
   };
 
   return (
-    <div className="input-group mb-3">
+    <div className="input-group">
       <button
         className="btn btn-secondary p-2 pe-3 ps-3"
         type="button"

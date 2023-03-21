@@ -10,8 +10,6 @@ import {
 import { Allergy } from "lib/prisma/client";
 import { useState } from "react";
 import { useAPIWorkerUpdate } from "lib/fetcher/worker";
-import Image from "next/image";
-import Link from "next/link";
 import AllergyPill from "../forms/AllergyPill";
 import { deserializeAllergies } from "lib/types/allergy";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
@@ -19,6 +17,7 @@ import SuccessProceedModal from "../modal/SuccessProceedModal";
 import { Serialized } from "lib/types/serialize";
 import DaysSelection from "../forms/DaysSelection";
 import { datesBetween } from "lib/helpers/helpers";
+import { useRouter } from "next/navigation";
 
 const schema = WorkerUpdateSchema.omit({ availability: true }).extend({
   availability: z.array(z.string()),
@@ -59,10 +58,12 @@ export default function EditWorker({
       availability: worker.availability.days.map((day) => day.toJSON()),
     },
   });
+  const router = useRouter();
   const [saved, setSaved] = useState(false);
   const { trigger, isMutating, reset, error } = useAPIWorkerUpdate(worker.id, {
     onSuccess: () => {
       setSaved(true);
+      router.refresh();
     },
   });
   const onSubmit = (data: WorkerForm) => {
@@ -110,8 +111,10 @@ export default function EditWorker({
             <input
               id="phone"
               className="form-control p-0 fs-5"
-              type="text"
+              type="tel"
               maxLength={20}
+              pattern="((+|00)[0-9]{1,3})?[ ]?[0-9]{3}[ ]?[0-9]{3}[ ]?[0-9]{3}"
+              placeholder="+420 123 456 789 / 123 456 789"
               {...register("phone")}
             />
             <label className="form-label fw-bold mt-4" htmlFor="email">
@@ -127,7 +130,7 @@ export default function EditWorker({
               className="form-label d-block fw-bold mt-4"
               htmlFor="availability"
             >
-              Může pracovat v následující dny
+              Můžu pracovat v následující dny
             </label>
             <DaysSelection
               days={allDates}
@@ -148,24 +151,6 @@ export default function EditWorker({
                 />
               ))}
             </div>
-            <label className="form-label d-block fw-bold mt-4" htmlFor="car">
-              Auta
-            </label>
-            {worker.cars.length === 0 && <p>Žádná auta</p>}
-            {worker.cars.length > 0 && (
-              <div className="list-group">
-                {worker.cars.map((car) => (
-                  <Link
-                    key={car.id}
-                    href={`/cars/${car.id}`}
-                    className="list-group-item list-group-item-action ps-2 d-flex align-items-center justify-content-between w-50"
-                  >
-                    {car.name}
-                    <i className="fas fa-angle-right ms-2"></i>
-                  </Link>
-                ))}
-              </div>
-            )}
 
             <div className="d-flex justify-content-between gap-3">
               <button
@@ -182,31 +167,10 @@ export default function EditWorker({
                 disabled={isMutating}
               />
             </div>
-            {saved && (
-              <SuccessProceedModal onClose={() => window.history.back()} />
-            )}
+            {saved && <SuccessProceedModal onClose={() => setSaved(false)} />}
             {error && <ErrorMessageModal onClose={reset} />}
           </form>
         </div>
-        {/* <div className="w-100 d-lg-none mt-3"></div> */}
-        {/* <div className="col-sm-auto col-lg-3 d-flex flex-column">
-          <div className="position-relative">
-            <Image
-              className="position-relative"
-              src="/profile.webp"
-              alt="Worker photo"
-              fill={true}
-              quality={95}
-              sizes="(max-width: 768px) 100vw,
-              (max-width: 1200px) 50vw,
-              33vw"
-            />
-          </div>
-
-          <button className="btn btn-warning ms-auto mt-2" type="button">
-            Změnit obrázek
-          </button>
-        </div> */}
       </div>
     </>
   );

@@ -1,6 +1,7 @@
 enum InternalErrorType {
   INVALID_DATA = "INVALID_DATA",
   NO_ACTIVE_EVENT = "NO_ACTIVE_EVENT",
+  WORKER_NOT_REGISTERED_IN_EVENT = "WORKER_NOT_REGISTERED_IN_EVENT",
 }
 
 export class InternalError extends Error {
@@ -24,6 +25,15 @@ export class NoActiveEventError extends InternalError {
     super(
       "No active SummerJob event is set.",
       InternalErrorType.NO_ACTIVE_EVENT
+    );
+  }
+}
+
+export class WorkerNotRegisteredInEventError extends InternalError {
+  constructor() {
+    super(
+      "Worker is not registered in the active SummerJob event.",
+      InternalErrorType.WORKER_NOT_REGISTERED_IN_EVENT
     );
   }
 }

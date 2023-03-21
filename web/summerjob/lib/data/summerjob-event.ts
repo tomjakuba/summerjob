@@ -46,6 +46,9 @@ export async function getActiveSummerJobEvent() {
     where: {
       isActive: true,
     },
+    include: {
+      workers: true,
+    },
   });
   return events.length > 0 ? events[0] : undefined;
 }

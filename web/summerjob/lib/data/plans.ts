@@ -21,6 +21,65 @@ export async function getPlans(): Promise<PlanWithJobs[]> {
   return plans;
 }
 
+export async function getCompletePlans(): Promise<PlanComplete[]> {
+  const activeEventId = await cache_getActiveSummerJobEventId();
+  if (!activeEventId) {
+    throw new NoActiveEventError();
+  }
+  const plans = await prisma.plan.findMany({
+    include: {
+      jobs: {
+        include: {
+          workers: {
+            include: {
+              allergies: true,
+              cars: true,
+              availability: {
+                where: {
+                  eventId: activeEventId,
+                },
+                take: 1,
+              },
+            },
+          },
+          proposedJob: {
+            include: {
+              area: true,
+              allergens: true,
+            },
+          },
+          rides: {
+            include: {
+              driver: true,
+              car: true,
+              job: {
+                include: {
+                  proposedJob: true,
+                },
+              },
+              passengers: true,
+            },
+          },
+          responsibleWorker: true,
+        },
+      },
+    },
+  });
+  const plansComplete: PlanComplete[] = [];
+  for (const plan of plans) {
+    const jobs: ActiveJobNoPlan[] = [];
+    for (const job of plan.jobs) {
+      jobs.push({
+        ...job,
+        workers: job.workers.map(databaseWorkerToWorkerComplete),
+      });
+    }
+    plansComplete.push({ ...plan, jobs });
+  }
+
+  return plansComplete;
+}
+
 export async function getPlanById(id: string): Promise<PlanComplete | null> {
   const activeEventId = await cache_getActiveSummerJobEventId();
   if (!activeEventId) {

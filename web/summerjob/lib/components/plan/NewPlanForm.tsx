@@ -37,7 +37,7 @@ export default function NewPlanForm({
 
   return (
     <div className="container">
-      <div className="row">
+      <div className="row mb-3">
         <div className="col-1"></div>
         <div className="col">
           <SimpleDatePicker initialDate={date} onDateChanged={onDateChanged} />
