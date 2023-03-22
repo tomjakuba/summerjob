@@ -5,7 +5,6 @@ import { Serialized } from "./serialize";
 export const AreaCreateSchema = z
   .object({
     name: z.string().min(1),
-    description: z.string().optional(),
     requiresCar: z.boolean(),
     summerJobEventId: z.string().min(1),
   })

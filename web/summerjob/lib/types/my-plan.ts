@@ -20,7 +20,6 @@ export type MyPlan = {
     allergens: Allergy[];
     location: {
       name: string;
-      description: string;
       address: string;
     };
     hasFood: boolean;

@@ -84,8 +84,6 @@ export default function MyPlanClientPage({ sPlan }: MyPlanProps) {
                   <strong>Adresa: </strong>
                   {selectedPlan.job.location.address},{" "}
                   {selectedPlan.job.location.name}
-                  <br />
-                  {selectedPlan.job.location.description}
                 </p>
                 <p>
                   <strong>Občerstvení k dispozici: </strong>

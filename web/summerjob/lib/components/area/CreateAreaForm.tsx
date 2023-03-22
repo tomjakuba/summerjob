@@ -62,15 +62,6 @@ export default function CreateAreaForm({ eventId }: CreateAreaProps) {
             {errors.name && (
               <div className="text-danger">Zadejte název oblasti</div>
             )}
-            <label className="form-label fw-bold mt-4" htmlFor="description">
-              Popis oblasti
-            </label>
-            <textarea
-              className="form-control border p-1 ps-2"
-              id="description"
-              rows={3}
-              {...register("description")}
-            ></textarea>
 
             <div className="form-check mt-4">
               <input

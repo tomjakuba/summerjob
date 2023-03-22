@@ -245,7 +245,7 @@ export default function CreateProposedJobForm({
 function areaToSelectItem(area: Area): FilterSelectItem {
   return {
     id: area.id,
-    searchable: `${area.name} ${area.description}`,
+    searchable: `${area.name}`,
     name: area.name,
     item: <span>{area.name}</span>,
   };

@@ -141,7 +141,6 @@ model Plan {
 model Area {
   id               String         @id @default(uuid())
   name             String         @db.VarChar(64)
-  description      String         @default("")
   requiresCar      Boolean
   jobs             ProposedJob[]
   summerJobEvent   SummerJobEvent @relation(fields: [summerJobEventId], references: [id], onDelete: Cascade)

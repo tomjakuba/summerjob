@@ -2,13 +2,11 @@ import { MyPlan, MyRide } from "lib/types/my-plan";
 import { PlanComplete } from "lib/types/plan";
 import { RideComplete } from "lib/types/ride";
 import {
-  InternalError,
   NoActiveEventError,
   WorkerNotRegisteredInEventError,
 } from "./internal-error";
-import { getCompletePlans, getPlans } from "./plans";
+import { getCompletePlans } from "./plans";
 import { getActiveSummerJobEvent } from "./summerjob-event";
-import { getWorkerById } from "./workers";
 
 export function getMyPlan(plan: PlanComplete, workerId: string): MyPlan {
   // Find if worker has a job on this day
@@ -65,7 +63,6 @@ export function getMyPlan(plan: PlanComplete, workerId: string): MyPlan {
       allergens: myJob.proposedJob.allergens,
       location: {
         name: myJob.proposedJob.area.name,
-        description: myJob.proposedJob.area.description,
         address: myJob.proposedJob.address,
       },
       hasFood: myJob.proposedJob.hasFood,

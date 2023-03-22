@@ -1,9 +1,7 @@
 import { useAPIAreaDelete } from "lib/fetcher/area";
-import { Area } from "lib/prisma/client";
 import { AreaComplete } from "lib/types/area";
 import Link from "next/link";
 import { useState } from "react";
-import { flattenDiagnosticMessageText } from "typescript";
 import DeleteIcon from "../forms/DeleteIcon";
 import ConfirmationModal from "../modal/ConfirmationModal";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
@@ -82,7 +80,6 @@ function AreaRow({ area, eventId, onDataChanged }: AreaRowProps) {
       <div className="d-flex justify-content-between align-items-center">
         <div className="d-flex flex-column pe-5">
           <label className="fs-5">{area.name}</label>
-          <p className="text-muted">{area.description}</p>
           <p className="text-muted">
             Doprava nutná: {area.requiresCar ? "Ano" : "Ne"}.
           </p>
