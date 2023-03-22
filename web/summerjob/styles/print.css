@@ -17,6 +17,10 @@ html {
   padding: 0;
 }
 
+body:has(.print-a4) {
+  background-color: initial;
+}
+
 h1 {
   margin: 0;
   display: inline-block;
