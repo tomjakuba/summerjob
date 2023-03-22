@@ -135,7 +135,6 @@ async function createAreas(eventId: string) {
   const createArea = () => {
     return {
       name: faker.address.city(),
-      description: faker.lorem.paragraph(),
       summerJobEventId: eventId,
       requiresCar: Math.random() > 0.5,
     };
