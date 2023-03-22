@@ -1,6 +1,3 @@
-import { Navbar } from "../lib/components/navbar/Navbar";
-import "../styles/custom.css";
-import "../styles/bootstrap/css/bootstrap.min.css";
 import "../styles/fonts/fontawesome/all.min.css";
 
 export const metadata = {
@@ -19,10 +16,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="cs">
-      <body>
-        <Navbar />
-        <main>{children}</main>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

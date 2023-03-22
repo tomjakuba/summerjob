@@ -1,23 +1,19 @@
 import { ActiveJobNoPlan } from "lib/types/active-job";
 import { RideComplete } from "lib/types/ride";
-import DeleteRideButton from "./DeleteRideButton";
 
-interface JobRideListProps {
+interface RideListPrintProps {
   job: ActiveJobNoPlan;
   otherJobs: ActiveJobNoPlan[];
-  reloadPlan: () => void;
 }
 
-export default function JobRideList({
-  job,
-  otherJobs,
-  reloadPlan,
-}: JobRideListProps) {
+export default function RideListPrint({ job, otherJobs }: RideListPrintProps) {
   if (!job.rides || job.rides.length == 0) {
     if (!job.proposedJob.area.requiresCar) {
-      return <div className="text-muted">Tato oblast nevyžaduje dopravu.</div>;
+      return (
+        <span className="text-muted">Tato oblast nevyžaduje dopravu.</span>
+      );
     }
-    return <div className="text-muted">Zatím nejsou naplánovány jízdy.</div>;
+    return <span className="text-muted">Zatím nejsou naplánovány jízdy.</span>;
   }
 
   const formatSingleRide = (ride: RideComplete, index: number) => {
@@ -35,6 +31,11 @@ export default function JobRideList({
         passengers: workersInThisRide,
       });
     }
+    const passengersFromThisJob = ride.passengers
+      .filter((p) => job.workers.map((w) => w.id).includes(p.id))
+      .map((p) => `${p.firstName} ${p.lastName}`);
+    const passengersFromThisJobString =
+      [passengersFromThisJob].join(", ") || "-";
     return (
       <>
         <div className="row">
@@ -44,33 +45,24 @@ export default function JobRideList({
             {ride.driver.lastName} (obsazenost: {ride.passengers.length + 1}/
             {ride.car.seats})
           </div>
-          <div className="col">
-            <DeleteRideButton ride={ride} onSuccess={reloadPlan} />
-          </div>
         </div>
-
+        <div className="ms-2">
+          Z tohoto jobu jede: {passengersFromThisJobString}
+        </div>
         {passengersFromOtherJobsData.length > 0 && (
-          <div className="row ms-4 mt-0 text-muted">
-            <div className="col-auto p-0">
-              <i className="fas fa-person-digging" />
-            </div>
-            <div className="col">
-              {passengersFromOtherJobsData.map<React.ReactNode>((data) => (
-                <div
-                  className="row"
-                  key={`rideinfo-${ride.id}-${data.jobName}`}
-                >
-                  <div className="col">
-                    {data.jobName}:{" "}
-                    <i>
-                      {data.passengers
-                        .map((p) => `${p.firstName} ${p.lastName}`)
-                        .join(", ")}
-                    </i>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="ms-2">
+            Navíc odváží:{" "}
+            {passengersFromOtherJobsData
+              .map<React.ReactNode>((data) => (
+                <span key={`rideinfo-${ride.id}-${data.jobName}`}>
+                  <i>{data.jobName}: </i>
+
+                  {data.passengers
+                    .map((p) => `${p.firstName} ${p.lastName}`)
+                    .join(", ")}
+                </span>
+              ))
+              .reduce((prev, curr) => [prev, ", ", curr])}
           </div>
         )}
       </>
@@ -78,10 +70,10 @@ export default function JobRideList({
   };
 
   return (
-    <>
+    <div className="ms-1">
       {job.rides.map((r, index) => (
         <span key={r.id}>{formatSingleRide(r, index)}</span>
       ))}
-    </>
+    </div>
   );
 }

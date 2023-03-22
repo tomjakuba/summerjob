@@ -16,6 +16,7 @@ import ErrorPage404 from "../404/404";
 import ConfirmationModal from "../modal/ConfirmationModal";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
 import { Serialized } from "lib/types/serialize";
+import Link from "next/link";
 
 interface PlanClientPageProps {
   id: string;
@@ -149,10 +150,12 @@ export default function PlanClientPage({
               <i className="fas fa-cog"></i>
               <span>Vygenerovat plán</span>
             </button>
-            <button className="btn btn-primary" type="button">
-              <i className="fas fa-print"></i>
-              <span>Tisknout</span>
-            </button>
+            <Link href={`/print-plan/${planData?.id}`}>
+              <button className="btn btn-primary" type="button">
+                <i className="fas fa-print"></i>
+                <span>Tisknout</span>
+              </button>
+            </Link>
             <button
               className="btn btn-danger"
               type="button"
