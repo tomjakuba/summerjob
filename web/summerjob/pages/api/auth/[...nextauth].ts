@@ -14,9 +14,12 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     signIn(params) {
-      console.log(JSON.stringify(params, null, 2));
       return true;
     },
+  },
+  pages: {
+    signIn: "/auth/signIn",
+    verifyRequest: "/auth/checkEmail",
   },
 };
 
