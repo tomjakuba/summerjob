@@ -1,4 +1,6 @@
 import "../styles/fonts/fontawesome/all.min.css";
+import { SessionProvider } from "next-auth/react";
+import { Session } from "next-auth";
 
 export const metadata = {
   title: "SummerJob Plánovač",

@@ -4,6 +4,8 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
 import logoImage from "public/logo-smj-yellow.png";
+import { UserSession } from "lib/types/auth";
+import { signIn, signOut } from "next-auth/react";
 
 type NavPath = {
   path: string;
@@ -11,7 +13,11 @@ type NavPath = {
   icon: string;
 };
 
-export function Navbar() {
+interface NavbarProps {
+  session: UserSession | null;
+}
+
+export function Navbar({ session }: NavbarProps) {
   const pathname = usePathname();
   const navPaths: NavPath[] = [
     { path: "/plans", name: "Plán", icon: "fas fa-calendar-alt" },
@@ -47,7 +53,7 @@ export function Navbar() {
             <span className="navbar-toggler-icon"></span>
           </button>
           <div
-            className={`collapse navbar-collapse ${expanded && "show"}`}
+            className={`collapse navbar-collapse ${expanded ? "show" : ""}`}
             id="navcol-1"
           >
             <ul className="navbar-nav me-auto">
@@ -74,9 +80,31 @@ export function Navbar() {
                 );
               })}
             </ul>
-            <button className="btn" id="btn-nav-logout" type="button">
-              Odhlásit
-            </button>
+            {session && (
+              <>
+                <div>{session.name}</div>
+                <button
+                  className="btn"
+                  id="btn-nav-logout"
+                  type="button"
+                  onClick={() => signOut()}
+                >
+                  Odhlásit
+                </button>
+              </>
+            )}
+            {!session && (
+              <>
+                <button
+                  className="btn"
+                  id="btn-nav-logout"
+                  type="button"
+                  onClick={() => signIn()}
+                >
+                  Přihlásit se
+                </button>
+              </>
+            )}
           </div>
         </div>
       </nav>
