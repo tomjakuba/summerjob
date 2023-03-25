@@ -42,7 +42,7 @@ function onMessageReceived(msg: string) {
       console.log(" [x] No planId in message: %s", msg);
       return;
     }
-    planner.plan(message.planId);
+    planner.start(message.planId);
   } catch (e) {
     console.log(" [x] Failed to parse message: %s", msg);
     return;

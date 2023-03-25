@@ -84,16 +84,16 @@ async function createWorkers(
       },
     };
   };
-  for (let i = 0; i < 7; i++) {
+  for (let i = 0; i < 14; i++) {
     const worker = createWorker();
-    if (i === 0) {
+    if (i === 0 || Math.random() < 10) {
       worker.isStrong = true;
     }
     await prisma.worker.create({
       data: worker,
     });
   }
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < 4; i++) {
     const worker = withCar(createWorker());
     await prisma.worker.create({
       data: worker,
