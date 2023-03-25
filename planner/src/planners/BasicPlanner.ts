@@ -8,9 +8,9 @@ export class BasicPlanner implements Planner {
     this.datasource = datasource;
   }
 
-  plan(planId: string): void {
+  async plan(planId: string) {
     console.log("BasicPlanner.plan()");
-    const plan = this.datasource.getPlan(planId);
+    const plan = await this.datasource.getPlan(planId);
     console.log("plan: %s", plan);
   }
 }
