@@ -1,0 +1,210 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Worker {
+  id             String               @id @default(uuid())
+  firstName      String
+  lastName       String
+  phone          String
+  email          String               @unique
+  cars           Car[]
+  isStrong       Boolean              @default(false)
+  allergies      Allergy[]
+  jobs           ActiveJob[]
+  driving        Ride[]               @relation("Driver")
+  passengerIn    Ride[]
+  registeredIn   SummerJobEvent[]
+  responsibleFor ActiveJob[]          @relation("ResponsibleWorker")
+  deleted        Boolean              @default(false)
+  availability   WorkerAvailability[]
+  permissions    String[]
+}
+
+model WorkerAvailability {
+  id       String         @id @default(uuid())
+  worker   Worker         @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  workerId String
+  event    SummerJobEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId  String
+  days     DateTime[]     @db.Date
+
+  @@unique([workerId, eventId])
+}
+
+model Car {
+  id          String        @id @default(uuid())
+  name        String        @db.VarChar(64)
+  description String        @default("")
+  seats       Int
+  owner       Worker        @relation(fields: [ownerId], references: [id])
+  ownerId     String
+  rides       Ride[]
+  odometers   CarOdometer[]
+  deleted     Boolean       @default(false)
+}
+
+model CarOdometer {
+  id                  String         @id @default(uuid())
+  car                 Car            @relation(fields: [carId], references: [id], onDelete: Cascade)
+  carId               String
+  start               Int
+  end                 Int
+  reimbursementAmount Int            @default(0)
+  reimbursed          Boolean        @default(false)
+  event               SummerJobEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId             String
+
+  @@unique([carId, eventId])
+}
+
+model Allergy {
+  id                 String        @id @default(uuid())
+  code               String        @db.VarChar(32)
+  workersWithAllergy Worker[]
+  jobsWithAllergens  ProposedJob[]
+}
+
+model ProposedJob {
+  id            String                    @id @default(uuid())
+  name          String
+  description   String                    @default("")
+  requiredDays  Int
+  completed     Boolean                   @default(false)
+  pinned        Boolean                   @default(false)
+  minWorkers    Int
+  maxWorkers    Int
+  strongWorkers Int
+  address       String
+  contact       String
+  hasFood       Boolean                   @default(false)
+  hasShower     Boolean                   @default(false)
+  area          Area                      @relation(fields: [areaId], references: [id], onDelete: Cascade)
+  areaId        String
+  activeJobs    ActiveJob[]
+  allergens     Allergy[]
+  availability  ProposedJobAvailability[]
+}
+
+model ProposedJobAvailability {
+  id      String         @id @default(uuid())
+  job     ProposedJob    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId   String
+  event   SummerJobEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId String
+  days    DateTime[]     @db.Date
+
+  @@unique([jobId, eventId])
+}
+
+model ActiveJob {
+  id                  String      @id @default(uuid())
+  privateDescription  String      @default("")
+  publicDescription   String      @default("")
+  proposedJob         ProposedJob @relation(fields: [proposedJobId], references: [id], onDelete: Cascade)
+  proposedJobId       String
+  workers             Worker[]
+  plan                Plan        @relation(fields: [planId], references: [id], onDelete: Cascade)
+  planId              String
+  rides               Ride[]
+  responsibleWorker   Worker?     @relation("ResponsibleWorker", fields: [responsibleWorkerId], references: [id])
+  responsibleWorkerId String?
+
+  @@unique([proposedJobId, planId])
+}
+
+model Ride {
+  id          String    @id @default(uuid())
+  description String    @default("")
+  driver      Worker    @relation("Driver", fields: [driverId], references: [id])
+  driverId    String
+  car         Car       @relation(fields: [carId], references: [id])
+  carId       String
+  passengers  Worker[]
+  job         ActiveJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId       String
+}
+
+model Plan {
+  id               String         @id @default(uuid())
+  day              DateTime       @unique @db.Date
+  jobs             ActiveJob[]
+  summerJobEvent   SummerJobEvent @relation(fields: [summerJobEventId], references: [id], onDelete: Cascade)
+  summerJobEventId String
+}
+
+model Area {
+  id               String         @id @default(uuid())
+  name             String         @db.VarChar(64)
+  requiresCar      Boolean
+  jobs             ProposedJob[]
+  summerJobEvent   SummerJobEvent @relation(fields: [summerJobEventId], references: [id], onDelete: Cascade)
+  summerJobEventId String
+}
+
+model SummerJobEvent {
+  id                 String                    @id @default(uuid())
+  name               String                    @db.VarChar(64)
+  startDate          DateTime                  @db.Date
+  endDate            DateTime                  @db.Date
+  isActive           Boolean                   @default(false)
+  areas              Area[]
+  plans              Plan[]
+  workers            Worker[]
+  carOdometers       CarOdometer[]
+  workerAvailability WorkerAvailability[]
+  jobAvailability    ProposedJobAvailability[]
+}
+
+// Next-Auth config
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
