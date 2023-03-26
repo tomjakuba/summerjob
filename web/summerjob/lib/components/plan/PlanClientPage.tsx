@@ -5,7 +5,11 @@ import { Modal, ModalSize } from "lib/components/modal/Modal";
 import PageHeader from "lib/components/page-header/PageHeader";
 import { PlanFilters } from "lib/components/plan/PlanFilters";
 import { PlanTable } from "lib/components/plan/PlanTable";
-import { useAPIPlan, useAPIPlanDelete } from "lib/fetcher/plan";
+import {
+  useAPIPlan,
+  useAPIPlanDelete,
+  useAPIPlanGenerate,
+} from "lib/fetcher/plan";
 import { useAPIWorkersWithoutJob } from "lib/fetcher/worker";
 import { filterUniqueById, formatDateLong } from "lib/helpers/helpers";
 import { ActiveJobNoPlan } from "lib/types/active-job";
@@ -17,6 +21,7 @@ import ConfirmationModal from "../modal/ConfirmationModal";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
 import { Serialized } from "lib/types/serialize";
 import Link from "next/link";
+import SuccessProceedModal from "../modal/SuccessProceedModal";
 
 interface PlanClientPageProps {
   id: string;
@@ -61,6 +66,32 @@ export default function PlanClientPage({
     setIsJobModalOpen(false);
   };
 
+  //#region Generate plan
+
+  const [showGenerateConfirmation, setShowGenerateConfirmation] =
+    useState(false);
+
+  const {
+    trigger: triggerGenerate,
+    isMutating: isSendingGenerate,
+    error: errorGenerating,
+    reset: resetGenerateError,
+  } = useAPIPlanGenerate();
+
+  const generatePlan = () => {
+    setShowGenerateConfirmation(true);
+    triggerGenerate({ planId: planData!.id });
+  };
+
+  const onGeneratingErrorMessageClose = () => {
+    resetGenerateError();
+    setShowGenerateConfirmation(false);
+  };
+
+  //#endregion
+
+  //#region Delete plan
+
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const {
     trigger: triggerDelete,
@@ -83,6 +114,10 @@ export default function PlanClientPage({
   const onErrorMessageClose = () => {
     resetDeleteError();
   };
+
+  //#endregion
+
+  //#region Filter and search jobs
 
   const searchableJobs = useMemo(() => {
     const map = new Map<string, string>();
@@ -128,6 +163,8 @@ export default function PlanClientPage({
     return isInArea;
   }
 
+  //#endregion
+
   return (
     <>
       {planData === null && <ErrorPage404 message="Plán nenalezen." />}
@@ -146,7 +183,12 @@ export default function PlanClientPage({
               <i className="fas fa-briefcase"></i>
               <span>Přidat job</span>
             </button>
-            <button className="btn btn-primary" type="button">
+            <button
+              className="btn btn-primary"
+              type="button"
+              onClick={generatePlan}
+              disabled={isSendingGenerate}
+            >
               <i className="fas fa-cog"></i>
               <span>Vygenerovat plán</span>
             </button>
@@ -243,6 +285,27 @@ export default function PlanClientPage({
               <ErrorMessageModal
                 onClose={onErrorMessageClose}
                 message={"Nepovedlo se odstranit plán."}
+              />
+            )}
+            {showGenerateConfirmation && !errorGenerating && (
+              <Modal
+                title="Úspěch"
+                size={ModalSize.MEDIUM}
+                onClose={() => setShowGenerateConfirmation(false)}
+              >
+                <p>Plán byl zařazen do fronty na generování.</p>
+                <button
+                  className="btn pt-2 pb-2 btn-warning float-end"
+                  onClick={() => setShowGenerateConfirmation(false)}
+                >
+                  Pokračovat
+                </button>
+              </Modal>
+            )}
+            {errorGenerating && (
+              <ErrorMessageModal
+                onClose={onGeneratingErrorMessageClose}
+                message={"Nepovedlo se vygenerovat plán."}
               />
             )}
           </section>

@@ -2,7 +2,7 @@ import ErrorPage404 from "lib/components/404/404";
 import EditBox from "lib/components/forms/EditBox";
 import EditProposedJobForm from "lib/components/jobs/EditProposedJobForm";
 import { getAllergies } from "lib/data/allergies";
-import { cache_getActiveSummerJobEvent } from "lib/data/data-store";
+import { cache_getActiveSummerJobEvent } from "lib/data/cache";
 import { getProposedJobById } from "lib/data/proposed-jobs";
 import { serializeAllergies, translateAllergies } from "lib/types/allergy";
 import { serializeProposedJob } from "lib/types/proposed-job";

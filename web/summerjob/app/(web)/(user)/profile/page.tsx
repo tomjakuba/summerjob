@@ -2,7 +2,7 @@ import ErrorPage404 from "lib/components/404/404";
 import EditBox from "lib/components/forms/EditBox";
 import EditProfile from "lib/components/profile/EditProfile";
 import { getAllergies } from "lib/data/allergies";
-import { cache_getActiveSummerJobEvent } from "lib/data/data-store";
+import { cache_getActiveSummerJobEvent } from "lib/data/cache";
 import { getWorkerById, getWorkers } from "lib/data/workers";
 import { translateAllergies, serializeAllergies } from "lib/types/allergy";
 import { serializeWorker } from "lib/types/worker";

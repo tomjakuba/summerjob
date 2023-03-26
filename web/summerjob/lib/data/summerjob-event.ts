@@ -3,7 +3,7 @@ import {
   SummerJobEventComplete,
   SummerJobEventCreateData,
 } from "lib/types/summerjob-event";
-import { cache_setActiveSummerJobEvent } from "./data-store";
+import { cache_setActiveSummerJobEvent } from "./cache";
 
 export async function getSummerJobEventById(
   id: string

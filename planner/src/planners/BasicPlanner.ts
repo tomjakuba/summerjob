@@ -48,9 +48,9 @@ export class BasicPlanner implements Planner {
       planned.plannedJobs,
       this.decategorizeWorkers(planned.remainingWorkers)
     );
-    filledPlan.plannedJobs.forEach((element) => {
-      this.logPlannedJob(element);
-    });
+    // filledPlan.plannedJobs.forEach((element) => {
+    //   this.logPlannedJob(element);
+    // });
     console.log("Zbylo pracantů: %d", filledPlan.remainingWorkers.length);
     console.log(
       "Zbylo jobů: %d",
@@ -152,7 +152,7 @@ export class BasicPlanner implements Planner {
         );
         if (!worker) {
           // Workers can't be put in a shared ride and no driver is free, so we can't plan this job
-          console.log("BasicPlanner: No driver found");
+          console.log("BasicPlanner: No driver found for this job");
           return this.planJobRecursive(
             plannedJobs,
             workersWithoutJob,
