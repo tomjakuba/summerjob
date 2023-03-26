@@ -1,7 +1,7 @@
 import { Car, CarOdometer, Ride } from "lib/prisma/client";
 import prisma from "lib/prisma/connection";
 import { CarComplete, CarCreateData, CarUpdateData } from "lib/types/car";
-import { cache_getActiveSummerJobEventId } from "./data-store";
+import { cache_getActiveSummerJobEventId } from "./cache";
 import type { Worker } from "lib/prisma/client";
 import { NoActiveEventError } from "./internal-error";
 

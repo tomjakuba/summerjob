@@ -2,7 +2,7 @@ import { Plan } from "lib/prisma/client";
 import prisma from "lib/prisma/connection";
 import { ActiveJobNoPlan } from "lib/types/active-job";
 import { PlanComplete, PlanWithJobs } from "lib/types/plan";
-import { cache_getActiveSummerJobEventId } from "./data-store";
+import { cache_getActiveSummerJobEventId } from "./cache";
 import { InvalidDataError, NoActiveEventError } from "./internal-error";
 import { databaseWorkerToWorkerComplete } from "./workers";
 

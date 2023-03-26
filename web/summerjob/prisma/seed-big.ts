@@ -41,6 +41,8 @@ async function createWorkers(
   eventId: string,
   days: Date[]
 ) {
+  const HAS_CAR_PERCENTAGE = 0.2;
+  const WORKERS_COUNT = 100;
   const createWorker = () => {
     const sex = Math.random() > 0.5 ? "male" : "female";
     const firstName = faker.name.firstName(sex);
@@ -69,7 +71,7 @@ async function createWorkers(
           {
             name: faker.vehicle.vehicle() + ", " + faker.vehicle.vrm(),
             description: faker.color.human(),
-            seats: between(1, 3) * 2,
+            seats: between(4, 5),
             odometers: {
               create: [
                 {
@@ -84,31 +86,30 @@ async function createWorkers(
       },
     };
   };
-  for (let i = 0; i < 14; i++) {
+  for (let i = 0; i < WORKERS_COUNT * (1 - HAS_CAR_PERCENTAGE); i++) {
     const worker = createWorker();
-    if (i === 0 || Math.random() < 0.2) {
+    if (i === 0 || Math.random() < 0.15) {
       worker.isStrong = true;
     }
     await prisma.worker.create({
       data: worker,
     });
   }
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < WORKERS_COUNT * HAS_CAR_PERCENTAGE; i++) {
     const worker = withCar(createWorker());
     await prisma.worker.create({
       data: worker,
     });
   }
+
   if (allergies.length > 0) {
-    const allergyWorkers = await prisma.worker.findMany({
-      take: 5,
-    });
-    for (let i = 0; i < 5; i++) {
+    const allergyWorkers = await prisma.worker.findMany({});
+    for (let i = 0; i < WORKERS_COUNT; i++) {
       await prisma.worker.update({
         where: { id: allergyWorkers[i].id },
         data: {
           allergies: {
-            connect: choose(allergies, between(1, 3)).map((allergy) => ({
+            connect: choose(allergies, between(0, 3)).map((allergy) => ({
               id: allergy.id,
             })),
           },
@@ -132,15 +133,16 @@ async function createYearlyEvent() {
 }
 
 async function createAreas(eventId: string) {
+  const AREAS_COUNT = 7;
   const createArea = () => {
     return {
       name: faker.address.city(),
       summerJobEventId: eventId,
-      requiresCar: Math.random() > 0.5,
+      requiresCar: Math.random() < 0.8,
     };
   };
   await prisma.area.createMany({
-    data: [createArea(), createArea(), createArea()],
+    data: [...Array(AREAS_COUNT)].map(() => createArea()),
   });
   return await prisma.area.findMany();
 }
@@ -158,6 +160,9 @@ async function createProposedJobs(
     "Úprava zahrady",
     "Vymalování místnosti",
   ];
+  for (let i = 0; i < 45; i++) {
+    titles.push("Práce: " + faker.commerce.productName());
+  }
   const createProposedJob = (name: string) => {
     return {
       name: name,

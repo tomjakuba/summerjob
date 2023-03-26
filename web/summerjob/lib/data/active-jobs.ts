@@ -5,7 +5,7 @@ import {
   ActiveJobUpdateData,
 } from "lib/types/active-job";
 import type { Worker, Prisma } from "lib/prisma/client";
-import { cache_getActiveSummerJobEventId } from "./data-store";
+import { cache_getActiveSummerJobEventId } from "./cache";
 import { NoActiveEventError } from "./internal-error";
 import { databaseWorkerToWorkerComplete } from "./workers";
 
