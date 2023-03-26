@@ -1,16 +1,20 @@
 #!/usr/bin/env node
 
 import amqp from "amqplib";
+import dotenv from "dotenv";
 import { PrismaDataSource } from "./datasources/Prisma";
 import { BasicPlanner } from "./planners/BasicPlanner";
 import { Planner } from "./planners/Planner";
+
+dotenv.config();
 
 const datasource = new PrismaDataSource();
 const planner: Planner = new BasicPlanner(datasource);
 
 async function main() {
+  console.log("url is", process.env.AMQP_URL);
   const connection = await amqp.connect(
-    process.env.AMPQ_URL || "amqp://localhost"
+    process.env.AMQP_URL || "amqp://localhost"
   );
 
   const channel = await connection.createChannel();
