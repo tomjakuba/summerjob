@@ -1,5 +1,4 @@
-import { Allergy, Area } from "@prisma/client";
-import { Car, Worker } from "../../prisma/client";
+import { Allergy, Area, Car, Worker } from "../../prisma/client";
 import {
   DataSource,
   JobToBePlanned,
