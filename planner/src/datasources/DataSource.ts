@@ -15,6 +15,7 @@ export interface DataSource {
   getPlan(planId: string): Promise<PlanComplete | null>;
   getWorkersWithoutJob(plan: Plan): Promise<WorkerComplete[]>;
   getProposedJobs(eventId: string, day: Date): Promise<ProposedJobComplete[]>;
+  setPlannedJobs(planId: string, jobs: JobToBePlanned[]): void;
 }
 
 export type PlanComplete = Plan & {
@@ -55,4 +56,17 @@ export type ProposedJobComplete = ProposedJob & {
   allergens: Allergy[];
   activeJobs: ActiveJob[];
   availability: ProposedJobAvailability;
+};
+
+export type JobToBePlanned = {
+  proposedJobId: string;
+  privateDescription: string;
+  publicDescription: string;
+  workerIds: string[];
+  rides: {
+    driverId: string;
+    carId: string;
+    passengerIds: string[];
+  }[];
+  responsibleWorkerId: string;
 };

@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "seed": "ts-node --skip-project prisma/seed.ts",
+    "seed-big": "ts-node --skip-project prisma/seed-big.ts",
     "delete-db": "ts-node --skip-project prisma/drop-tables.ts"
   },
   "dependencies": {
