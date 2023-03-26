@@ -12,7 +12,6 @@ export default function RideListPrint({ job, otherJobs }: RideListPrintProps) {
     if (!job.proposedJob.area.requiresCar) {
       return <div className="ride">Tato oblast nevyžaduje dopravu.</div>;
     }
-    return <div className="ride">Zatím nejsou naplánovány jízdy.</div>;
   }
 
   const formatSingleRide = (ride: RideComplete, fromJobId?: string) => {

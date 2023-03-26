@@ -159,7 +159,6 @@ export function PlanJobRow({
                 {job.proposedJob.minWorkers}/{job.proposedJob.maxWorkers}/
                 {job.proposedJob.strongWorkers}
               </p>
-              <p>{formatAllergens(job)}</p>
               <p>
                 <strong>Zodpovědná osoba: </strong>
                 {responsibleWorkerName(job)}
