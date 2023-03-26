@@ -86,7 +86,7 @@ async function createWorkers(
   };
   for (let i = 0; i < 14; i++) {
     const worker = createWorker();
-    if (i === 0 || Math.random() < 10) {
+    if (i === 0 || Math.random() < 0.2) {
       worker.isStrong = true;
     }
     await prisma.worker.create({
