@@ -67,9 +67,22 @@ export async function getProposedJobs(): Promise<ProposedJobComplete[]> {
   return jobs.map(databaseProposedJobToProposedJobComplete);
 }
 
-export async function getUnplannedProposedJobs(
+/**
+ * Find all proposed jobs that are not already assigned to the given plan and are available on the plan's day.
+ * @param planId The ID of the plan to check against.
+ * @returns Proposed jobs that are not already assigned to the given plan and are available on the plan's day.
+ */
+export async function getProposedJobsAssignableTo(
   planId: string
 ): Promise<ProposedJobComplete[]> {
+  const planDay = await prisma.plan.findUnique({
+    where: {
+      id: planId,
+    },
+    select: {
+      day: true,
+    },
+  });
   const jobs = await prisma.proposedJob.findMany({
     where: {
       NOT: {
@@ -80,6 +93,13 @@ export async function getUnplannedProposedJobs(
         },
       },
       completed: false,
+      availability: {
+        some: {
+          days: {
+            has: planDay?.day,
+          },
+        },
+      },
     },
     include: {
       area: true,

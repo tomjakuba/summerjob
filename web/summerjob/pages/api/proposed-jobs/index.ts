@@ -3,7 +3,7 @@ import { WrappedError, ApiBadRequestError, ApiError } from "lib/data/api-error";
 import {
   createProposedJob,
   getProposedJobs,
-  getUnplannedProposedJobs,
+  getProposedJobsAssignableTo,
 } from "lib/data/proposed-jobs";
 import {
   ProposedJobCreateData,
@@ -18,10 +18,10 @@ async function get(
   req: NextApiRequest,
   res: NextApiResponse<ProposedJobsAPIGetResponse>
 ) {
-  const { notInPlan } = req.query;
+  const { assignableToPlan } = req.query;
   let jobs;
-  if (notInPlan && typeof notInPlan === "string") {
-    jobs = await getUnplannedProposedJobs(notInPlan);
+  if (assignableToPlan && typeof assignableToPlan === "string") {
+    jobs = await getProposedJobsAssignableTo(assignableToPlan);
   } else {
     jobs = await getProposedJobs();
   }
