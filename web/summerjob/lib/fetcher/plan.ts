@@ -47,3 +47,7 @@ export function useAPIPlansCreate(options?: any) {
 export function useAPIPlanDelete(id: string, options?: any) {
   return useDataDelete(`/api/plans/${id}`, options);
 }
+
+export function useAPIPlanGenerate(options?: any) {
+  return useDataCreate(`/api/planner`, options);
+}

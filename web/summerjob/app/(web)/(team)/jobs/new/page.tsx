@@ -3,7 +3,7 @@ import EditBox from "lib/components/forms/EditBox";
 import CreateProposedJobForm from "lib/components/jobs/CreateProposedJobForm";
 import { getAllergies } from "lib/data/allergies";
 import { getAreas } from "lib/data/areas";
-import { cache_getActiveSummerJobEvent } from "lib/data/data-store";
+import { cache_getActiveSummerJobEvent } from "lib/data/cache";
 import { translateAllergies, serializeAllergies } from "lib/types/allergy";
 import { serializeAreas } from "lib/types/area";
 

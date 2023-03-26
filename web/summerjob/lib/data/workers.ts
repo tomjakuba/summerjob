@@ -1,7 +1,7 @@
 import { WorkerAvailability, Worker } from "lib/prisma/client";
 import prisma from "lib/prisma/connection";
 import { WorkerComplete, WorkerUpdateData } from "lib/types/worker";
-import { cache_getActiveSummerJobEventId } from "./data-store";
+import { cache_getActiveSummerJobEventId } from "./cache";
 import { NoActiveEventError } from "./internal-error";
 
 export async function getWorkers(
