@@ -76,10 +76,13 @@ export default function PlanClientPage({
     isMutating: isSendingGenerate,
     error: errorGenerating,
     reset: resetGenerateError,
-  } = useAPIPlanGenerate();
+  } = useAPIPlanGenerate({
+    onSuccess: () => {
+      setShowGenerateConfirmation(true);
+    },
+  });
 
   const generatePlan = () => {
-    setShowGenerateConfirmation(true);
     triggerGenerate({ planId: planData!.id });
   };
 

@@ -25,7 +25,7 @@ export function useAPIProposedJobs(options?: any) {
 
 export function useAPIProposedJobsNotInPlan(planId: string) {
   return useData<ProposedJobsAPIGetResponse>(
-    `/api/proposed-jobs?notInPlan=${planId}`
+    `/api/proposed-jobs?assignableToPlan=${planId}`
   );
 }
 
