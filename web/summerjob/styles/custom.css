@@ -155,6 +155,7 @@ img.smj-nav-logo {
   position: absolute;
   inset: 0px auto auto 0px;
   margin: 0px;
+  max-height: 15rem;
 }
 
 .outline-none {
@@ -265,4 +266,8 @@ img.smj-nav-logo {
 
 .checkbox-white:not(:checked) {
   background-color: white;
+}
+
+.text-small {
+  font-size: 0.8rem;
 }

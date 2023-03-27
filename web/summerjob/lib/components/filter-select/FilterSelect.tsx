@@ -82,7 +82,7 @@ export function FilterSelect({
       </div>
 
       <ul
-        className="dropdown-menu smj-dropdown-menu w-100"
+        className="dropdown-menu smj-dropdown-menu w-100 overflow-auto"
         style={dropdownStyle}
       >
         {items.map((item) => {

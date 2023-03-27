@@ -6,6 +6,8 @@ import {
   ActiveJobCreateData,
   ActiveJobCreateSchema,
 } from "lib/types/active-job";
+import { ProposedJobComplete } from "lib/types/proposed-job";
+import { useMemo } from "react";
 import { useForm } from "react-hook-form";
 import ErrorPage from "../error-page/error";
 import { FilterSelect, FilterSelectItem } from "../filter-select/FilterSelect";
@@ -42,21 +44,28 @@ export default function AddJobToPlanForm({
     },
   });
 
-  if (error && !data) {
-    return <ErrorPage error={error} />;
-  }
+  const items = useMemo(() => {
+    if (!data) {
+      return [];
+    }
+    const sorted = new Array(...data);
+    sorted.sort((a, b) => {
+      if (a.pinned && !b.pinned) {
+        return -1;
+      }
+      if (!a.pinned && b.pinned) {
+        return 1;
+      }
+      return a.name.localeCompare(b.name);
+    });
 
-  let items: FilterSelectItem[] =
-    data?.map((job) => ({
+    return sorted.map((job) => ({
       id: job.id,
       name: job.name,
       searchable: job.name,
-      item: (
-        <span>
-          {job.name} ({job.area.name})
-        </span>
-      ),
-    })) || [];
+      item: <AddJobSelectItem job={job} />,
+    }));
+  }, [data]);
 
   const onSubmit = (data: ActiveJobCreateFormData) => {
     trigger(data);
@@ -72,6 +81,10 @@ export default function AddJobToPlanForm({
       setValue("publicDescription", job.description);
     }
   };
+
+  if (error && !data) {
+    return <ErrorPage error={error} />;
+  }
 
   return (
     <>
@@ -115,6 +128,22 @@ export default function AddJobToPlanForm({
           Přidat
         </button>
       </form>
+    </>
+  );
+}
+
+function AddJobSelectItem({ job }: { job: ProposedJobComplete }) {
+  return (
+    <>
+      <div className="text-wrap">
+        {job.name} ({job.area.name})
+        {job.pinned && (
+          <i className="ms-2 fas fa-thumbtack smj-action-pinned" />
+        )}
+      </div>
+      <div className="text-muted text-wrap text-small">
+        Naplánováno: {job.activeJobs.length}/{job.requiredDays}
+      </div>
     </>
   );
 }
