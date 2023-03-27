@@ -123,11 +123,21 @@ export class BasicPlanner implements Planner {
       console.log("BasicPlanner: No more workers without job");
       return { plannedJobs, remainingWorkers: workersWithoutJob };
     }
+
+    const beforeWorkersWithoutJob: CategorizedWorkers = {
+      drivers: [...workersWithoutJob.drivers],
+      strong: [...workersWithoutJob.strong],
+      others: [...workersWithoutJob.others],
+    };
+
     const proposedJob = proposedJobs[0];
     if (proposedJob.minWorkers > this.numWorkers(workersWithoutJob)) {
       console.log("BasicPlanner: Not enough workers for job");
-      // TODO spread workers over already planned jobs
-      return { plannedJobs, remainingWorkers: workersWithoutJob };
+      return this.planJobRecursive(
+        plannedJobs,
+        beforeWorkersWithoutJob,
+        proposedJobs.slice(1)
+      );
     }
 
     const needsDriver = proposedJob.area.requiresCar;
@@ -154,7 +164,7 @@ export class BasicPlanner implements Planner {
           console.log("BasicPlanner: No driver found for this job");
           return this.planJobRecursive(
             plannedJobs,
-            workersWithoutJob,
+            beforeWorkersWithoutJob,
             proposedJobs.slice(1)
           );
         }
@@ -174,7 +184,7 @@ export class BasicPlanner implements Planner {
             // However, since we still have a driver, we can try to plan the rest of the jobs
             return this.planJobRecursive(
               plannedJobs,
-              workersWithoutJob,
+              beforeWorkersWithoutJob,
               proposedJobs.slice(1)
             );
           }
@@ -191,7 +201,11 @@ export class BasicPlanner implements Planner {
       );
       if (!worker) {
         console.log("BasicPlanner: No strong worker found");
-        return { plannedJobs, remainingWorkers: workersWithoutJob };
+        return this.planJobRecursive(
+          plannedJobs,
+          beforeWorkersWithoutJob,
+          proposedJobs.slice(1)
+        );
       }
       workers.push(worker);
       workersWithoutJob = remainingWorkers;
@@ -203,7 +217,11 @@ export class BasicPlanner implements Planner {
       const worker = this.findWorker(workersWithoutJob, proposedJob.allergens);
       if (!worker.worker) {
         console.log("BasicPlanner: No worker found");
-        return { plannedJobs, remainingWorkers: workersWithoutJob };
+        return this.planJobRecursive(
+          plannedJobs,
+          beforeWorkersWithoutJob,
+          proposedJobs.slice(1)
+        );
       }
       workers.push(worker.worker);
       workersWithoutJob = worker.remainingWorkers;
