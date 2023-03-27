@@ -56,6 +56,7 @@ async function onMessageReceived(msg: string) {
     datasource.setPlannedJobs(message.planId, plans.jobs);
   } catch (e) {
     console.log(" [x] Failed to parse message: %s", msg);
+    console.error(e);
     return;
   }
 }

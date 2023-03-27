@@ -23,6 +23,10 @@ function between(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
+function chooseWithProbability<T>(array: T[], probability: number): T[] {
+  return array.filter((_, i) => Math.random() < probability);
+}
+
 async function createAllergies() {
   const allergies = [
     "ALLERGY_ANIMALS",
@@ -57,7 +61,7 @@ async function createWorkers(
       availability: {
         create: {
           eventId: eventId,
-          days: choose(days, between(2, days.length)),
+          days: chooseWithProbability(days, 0.9),
         },
       },
     };
@@ -109,7 +113,7 @@ async function createWorkers(
         where: { id: allergyWorkers[i].id },
         data: {
           allergies: {
-            connect: choose(allergies, between(0, 3)).map((allergy) => ({
+            connect: chooseWithProbability(allergies, 0.2).map((allergy) => ({
               id: allergy.id,
             })),
           },
@@ -185,7 +189,7 @@ async function createProposedJobs(
         availability: {
           create: {
             eventId: eventId,
-            days: choose(days, between(2, days.length)),
+            days: chooseWithProbability(days, 0.5),
           },
         },
         allergens: {
