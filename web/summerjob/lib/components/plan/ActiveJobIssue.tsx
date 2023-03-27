@@ -62,6 +62,13 @@ export function ActiveJobIssueBanner({
                   </div>
                 </div>
               )}
+              {issues.allergies && (
+                <div className="row">
+                  <div className="col">
+                    Někteří pracovníci mají konfliktní alergie.
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -92,6 +99,7 @@ function getIssues(job: ActiveJobNoPlan, ridesForOtherJobs: RidesForJob[]) {
     overloadedCars: overloadedCars(job),
     missingResponsible: missingResponsible(job),
     missingRides: missingRides(job, ridesForOtherJobs),
+    allergies: allergies(job),
   };
 }
 
@@ -134,4 +142,16 @@ function missingRides(job: ActiveJobNoPlan, ridesForOtherJobs: RidesForJob[]) {
     (worker) => !peopleWithRides.includes(worker.id)
   );
   return workersWithoutRides.length > 0;
+}
+
+function allergies(job: ActiveJobNoPlan) {
+  const jobAllergenIds = job.proposedJob.allergens.map((a) => a.id);
+  return (
+    job.workers.filter(
+      (worker) =>
+        worker.allergies
+          .map((a) => a.id)
+          .filter((allergyId) => jobAllergenIds.includes(allergyId)).length > 0
+    ).length > 0
+  );
 }
