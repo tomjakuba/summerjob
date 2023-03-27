@@ -45,7 +45,7 @@ async function createWorkers(
   eventId: string,
   days: Date[]
 ) {
-  const HAS_CAR_PERCENTAGE = 0.2;
+  const HAS_CAR_PERCENTAGE = 0.25;
   const WORKERS_COUNT = 100;
   const createWorker = () => {
     const sex = Math.random() > 0.5 ? "male" : "female";
@@ -164,7 +164,7 @@ async function createProposedJobs(
     "Úprava zahrady",
     "Vymalování místnosti",
   ];
-  for (let i = 0; i < 45; i++) {
+  for (let i = 0; i < 65; i++) {
     titles.push("Práce: " + faker.commerce.productName());
   }
   const createProposedJob = (name: string) => {
