@@ -397,7 +397,7 @@ export class BasicPlanner implements Planner {
             others: acc.others,
           };
         }
-        if (worker.isStrong) {
+        if (worker.isStrong && worker.cars.length === 0) {
           return {
             drivers: acc.drivers,
             strong: [...acc.strong, worker],
