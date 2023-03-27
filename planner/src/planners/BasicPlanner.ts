@@ -296,22 +296,18 @@ export class BasicPlanner implements Planner {
     workers: CategorizedWorkers,
     jobAllergens: Allergy[]
   ): FindWorkerResult {
-    type Acc = { driver: WorkerComplete | null; workers: WorkerComplete[] };
-    if (workers.drivers.length === 0) {
-      return { worker: null, remainingWorkers: workers };
-    }
-    let driver = workers.drivers.find(
+    const driver = workers.drivers.find(
       (w) => !this.isAllergicTo(w, jobAllergens)
     );
     if (!driver) {
       return { worker: null, remainingWorkers: workers };
     }
     return {
-      worker: workers.drivers[0],
+      worker: driver,
       remainingWorkers: {
         others: workers.others,
         strong: workers.strong,
-        drivers: workers.drivers.slice(1),
+        drivers: workers.drivers.filter((w) => w.id !== driver.id),
       },
     };
   }
