@@ -16,6 +16,4 @@ export async function requestPlanner(planId: string) {
   });
 
   await channel.sendToQueue(queue, Buffer.from(msg));
-
-  console.log(" [AMQP] Sent %s", msg);
 }

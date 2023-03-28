@@ -43,7 +43,7 @@ const sendData =
       }
       throw new Error("An error occurred while submitting the data.");
     }
-    if (res.status === 204) {
+    if (res.status === 204 || res.status === 202) {
       return;
     }
     return await res.json();

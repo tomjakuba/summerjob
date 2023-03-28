@@ -55,6 +55,17 @@ export const ActiveJobUpdateSchema = z
 
 export type ActiveJobUpdateData = z.infer<typeof ActiveJobUpdateSchema>;
 
+export const ActiveJobCreateMultipleSchema = z
+  .object({
+    jobs: z.array(ActiveJobCreateSchema.omit({ planId: true })),
+    planId: z.string(),
+  })
+  .strict();
+
+export type ActiveJobCreateMultipleData = z.infer<
+  typeof ActiveJobCreateMultipleSchema
+>;
+
 export function serializeActiveJob(
   job: ActiveJobComplete
 ): Serialized<ActiveJobComplete> {
