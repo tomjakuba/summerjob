@@ -68,5 +68,5 @@ export type JobToBePlanned = {
     carId: string;
     passengerIds: string[];
   }[];
-  responsibleWorkerId: string;
+  responsibleWorkerId?: string;
 };

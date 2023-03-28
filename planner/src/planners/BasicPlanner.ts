@@ -491,7 +491,9 @@ export class BasicPlanner implements Planner {
     return {
       proposedJobId: plannedJob.job.id,
       workerIds: plannedJob.workers.map((w) => w.id),
-      responsibleWorkerId: plannedJob.responsibleWorker.id,
+      responsibleWorkerId: plannedJob.responsibleWorker
+        ? plannedJob.responsibleWorker.id
+        : undefined,
       privateDescription: plannedJob.privateDescription || "",
       publicDescription:
         plannedJob.publicDescription || plannedJob.job.description,
