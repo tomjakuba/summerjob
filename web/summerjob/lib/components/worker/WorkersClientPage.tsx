@@ -71,7 +71,7 @@ export default function WorkersClientPage({
                 <hr />
                 <ul className="list-group list-group-flush ">
                   <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
-                    pracantů
+                    Pracantů
                     <span>{data?.length}</span>
                   </li>
                 </ul>
