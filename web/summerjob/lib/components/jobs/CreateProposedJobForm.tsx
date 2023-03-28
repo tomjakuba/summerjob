@@ -137,7 +137,7 @@ export default function CreateProposedJobForm({
               <div className="text-danger">Zadejte odhadovaný počet dnů</div>
             )}
             <label className="form-label fw-bold mt-4" htmlFor="minWorkers">
-              Počet pracovníků minimálně / maximálně / z toho silných
+              Počet pracantů minimálně / maximálně / z toho silných
             </label>
 
             <div className="d-flex w-50">
@@ -168,7 +168,7 @@ export default function CreateProposedJobForm({
             {(errors.minWorkers ||
               errors.maxWorkers ||
               errors.strongWorkers) && (
-              <div className="text-danger">Zadejte počty pracovníků</div>
+              <div className="text-danger">Zadejte počty pracantů</div>
             )}
             <label
               className="form-label d-block fw-bold mt-4"

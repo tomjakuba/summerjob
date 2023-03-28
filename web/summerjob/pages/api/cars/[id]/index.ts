@@ -16,7 +16,7 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
 
 async function del(req: NextApiRequest, res: NextApiResponse) {
   const id = req.query.id as string;
-  // FIXME Anonymize data if there are rides instead of ignoring the request
+  // FIXME: Anonymize data if there are rides instead of ignoring the request
   // --->
   const car = await getCarById(id);
   if (!car) {

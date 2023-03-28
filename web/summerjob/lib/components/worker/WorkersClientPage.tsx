@@ -37,11 +37,11 @@ export default function WorkersClientPage({
   return (
     <>
       <PageHeader title="Pracanti">
-        <button className="btn btn-warning" type="button">
+        <button className="btn btn-warning btn-with-icon" type="button">
           <i className="far fa-user"></i>
           <span>Přidat pracanta</span>
         </button>
-        <button className="btn btn-primary" type="button">
+        <button className="btn btn-primary btn-with-icon" type="button">
           <i className="fas fa-print"></i>
           <span>Tisknout</span>
         </button>
@@ -71,7 +71,7 @@ export default function WorkersClientPage({
                 <hr />
                 <ul className="list-group list-group-flush ">
                   <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
-                    Pracovníků
+                    pracantů
                     <span>{data?.length}</span>
                   </li>
                 </ul>

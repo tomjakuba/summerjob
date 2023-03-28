@@ -1,5 +1,5 @@
 import { Allergy } from "lib/prisma/client";
-// TODO support other languages
+// TODO: support other languages
 import { default as t } from "lib/localization/cs-cz";
 import { Serialized } from "./serialize";
 

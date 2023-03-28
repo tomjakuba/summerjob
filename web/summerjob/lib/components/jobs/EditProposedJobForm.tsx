@@ -131,7 +131,7 @@ export default function EditProposedJobForm({
               {...register("requiredDays", { valueAsNumber: true })}
             />
             <label className="form-label fw-bold mt-4" htmlFor="minWorkers">
-              Počet pracovníků minimálně / maximálně / z toho silných
+              Počet pracantů minimálně / maximálně / z toho silných
             </label>
 
             <div className="d-flex w-50">

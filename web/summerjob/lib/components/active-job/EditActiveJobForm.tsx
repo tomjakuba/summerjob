@@ -99,12 +99,12 @@ export default function EditActiveJobForm({
               className="form-label fw-bold mt-4"
               htmlFor="responsible-worker"
             >
-              Zodpovědný pracovník
+              Zodpovědný pracant
             </label>
             <input type={"hidden"} {...register("responsibleWorkerId")} />
             <FilterSelect
               items={job.workers.map(workerToSelectItem)}
-              placeholder="Vyberte pracovníka"
+              placeholder="Vyberte pracanta"
               onSelected={selectResponsibleWorker}
               {...(job.responsibleWorker && {
                 defaultSelected: workerToSelectItem(job.responsibleWorker),

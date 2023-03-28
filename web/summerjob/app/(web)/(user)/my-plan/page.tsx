@@ -7,7 +7,7 @@ import { serializeMyPlans } from "lib/types/my-plan";
 export const dynamic = "force-dynamic";
 
 export default async function MyPlanPage() {
-  // TODO replace with ID from session
+  // TODO: replace with ID from session
   const workers = await getWorkers();
   if (workers.length === 0) {
     return <ErrorPage404 message="Žádní pracanti nejsou zaregistrováni." />;

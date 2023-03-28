@@ -96,7 +96,7 @@ export function PlanJoblessRow({
             <thead>
               <tr>
                 <th>
-                  <strong>Pracovník</strong>
+                  <strong>pracant</strong>
                 </th>
                 <th>
                   <strong>Kontakt</strong>

@@ -16,7 +16,7 @@ export default function PageHeader({
             <h2>{title}</h2>
           </div>
           <div className="w-100 d-md-none"></div>
-          <div className="col-auto d-flex align-items-center flex-wrap justify-content-md-end plan-controlbar gap-3">
+          <div className="col-auto d-flex align-items-center flex-wrap justify-content-md-end header-controlbar gap-3">
             {children}
           </div>
         </div>
