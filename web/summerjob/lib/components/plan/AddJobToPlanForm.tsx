@@ -1,31 +1,37 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAPIActiveJobCreate } from "lib/fetcher/active-job";
+import {
+  useAPIActiveJobCreate,
+  useAPIActiveJobCreateMultiple,
+} from "lib/fetcher/active-job";
 import { useAPIProposedJobsNotInPlan } from "lib/fetcher/proposed-job";
 import {
   ActiveJobCreateData,
   ActiveJobCreateSchema,
 } from "lib/types/active-job";
 import { ProposedJobComplete } from "lib/types/proposed-job";
-import { useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { ReactNode, useMemo } from "react";
+import { Controller, useForm } from "react-hook-form";
+import Select, { FormatOptionLabelMeta } from "react-select";
+import { z } from "zod";
 import ErrorPage from "../error-page/error";
-import { FilterSelect, FilterSelectItem } from "../filter-select/FilterSelect";
 
 interface AddJobToPlanFormProps {
   planId: string;
   onComplete: () => void;
 }
 
-type ActiveJobCreateFormData = Omit<ActiveJobCreateData, "planId">;
-const ActiveJobCreateFormSchema = ActiveJobCreateSchema.omit({ planId: true });
+type ActiveJobCreateFormData = { jobs: Omit<ActiveJobCreateData, "planId">[] };
+const ActiveJobCreateFormSchema = z.object({
+  jobs: z.array(ActiveJobCreateSchema.omit({ planId: true })).min(1),
+});
 
 export default function AddJobToPlanForm({
   planId,
   onComplete,
 }: AddJobToPlanFormProps) {
-  const { data, error, isLoading } = useAPIProposedJobsNotInPlan(planId);
-  const { trigger, isMutating } = useAPIActiveJobCreate(planId, {
+  let { data, error, isLoading } = useAPIProposedJobsNotInPlan(planId);
+  const { trigger, isMutating } = useAPIActiveJobCreateMultiple(planId, {
     onSuccess: () => {
       onComplete();
     },
@@ -34,15 +40,10 @@ export default function AddJobToPlanForm({
   const {
     register,
     handleSubmit,
-    setValue,
     formState: { errors },
-    clearErrors,
+    control,
   } = useForm<ActiveJobCreateFormData>({
     resolver: zodResolver(ActiveJobCreateFormSchema),
-    defaultValues: {
-      privateDescription: "",
-      publicDescription: "",
-    },
   });
 
   const items = useMemo(() => {
@@ -60,28 +61,58 @@ export default function AddJobToPlanForm({
       return a.name.localeCompare(b.name);
     });
 
-    return sorted.map((job) => ({
+    return sorted.map<SelectItem>((job) => ({
       id: job.id,
       name: job.name,
       searchable: job.name,
+      publicDescription: job.description,
+      privateDescription: job.description,
       item: <AddJobSelectItem job={job} />,
     }));
   }, [data]);
 
-  const onSubmit = (data: ActiveJobCreateFormData) => {
-    trigger(data);
+  const itemToFormData = (item: SelectItem) => ({
+    proposedJobId: item.id,
+    publicDescription: item.publicDescription,
+    privateDescription: item.privateDescription,
+  });
+
+  const formDataToItem = (
+    formData: Omit<ActiveJobCreateData, "planId">
+  ): SelectItem => {
+    const job = data?.find((job) => job.id === formData.proposedJobId);
+    if (!job) {
+      return {
+        id: formData.proposedJobId,
+        name: "Unknown job",
+        searchable: "Unknown job",
+        publicDescription: "",
+        privateDescription: "",
+        item: <></>,
+      };
+    }
+    return {
+      id: job.id,
+      name: job.name,
+      searchable: job.name,
+      publicDescription: job.description,
+      privateDescription: job.description,
+      item: <AddJobSelectItem job={job} />,
+    };
   };
 
-  const onJobSelected = (item: FilterSelectItem) => {
-    const job = data?.find((job) => job.id === item.id);
-    if (!job) {
-      return;
+  const formatOptionLabel = (
+    option: SelectItem,
+    placement: FormatOptionLabelMeta<SelectItem>
+  ) => {
+    if (placement.context === "menu") {
+      return option.item;
     }
-    setValue("proposedJobId", job.id);
-    if (job.description) {
-      setValue("publicDescription", job.description);
-    }
-    clearErrors("proposedJobId");
+    return option.name;
+  };
+
+  const onSubmit = (data: ActiveJobCreateFormData) => {
+    trigger(data);
   };
 
   if (error && !data) {
@@ -92,39 +123,28 @@ export default function AddJobToPlanForm({
     <>
       <form onSubmit={handleSubmit(onSubmit)}>
         <label className="form-label fw-bold" htmlFor="job-filter">
-          Job:
+          Joby:
         </label>
-        <FilterSelect
-          items={items}
-          onSelected={onJobSelected}
-          placeholder={"Vyberte job..."}
-        ></FilterSelect>
-        <input type="hidden" {...register("proposedJobId")} />
-        {errors.proposedJobId && (
-          <div className="text-danger">Vyberte job!</div>
-        )}
+        <Controller
+          control={control}
+          name="jobs"
+          render={({ field: { onChange, value, ref } }) => (
+            <Select
+              ref={ref}
+              value={value?.map(formDataToItem)}
+              options={items}
+              onChange={(val) => onChange(val.map((v) => itemToFormData(v)))}
+              placeholder={"Vyberte joby..."}
+              formatOptionLabel={formatOptionLabel}
+              isMulti
+              getOptionValue={(option) => option.id}
+            />
+          )}
+        />
 
-        <label className="form-label fw-bold mt-4" htmlFor="public-description">
-          Veřejný popis:
-        </label>
-        <textarea
-          className="form-control border p-1"
-          id="public-description"
-          rows={3}
-          {...register("publicDescription")}
-        ></textarea>
-        <label
-          className="form-label fw-bold mt-4"
-          htmlFor="private-description"
-        >
-          Poznámka pro organizátory:
-        </label>
-        <textarea
-          className="form-control border p-1"
-          id="private-description"
-          rows={3}
-          {...register("privateDescription")}
-        ></textarea>
+        <input type="hidden" {...register("jobs")} />
+        {errors.jobs && <div className="text-danger">Vyberte job!</div>}
+
         <button
           className="btn btn-warning mt-4 float-end"
           type="submit"
@@ -152,3 +172,12 @@ function AddJobSelectItem({ job }: { job: ProposedJobComplete }) {
     </>
   );
 }
+
+type SelectItem = {
+  id: string;
+  name: string;
+  searchable: string;
+  item: ReactNode;
+  publicDescription: string;
+  privateDescription: string;
+};

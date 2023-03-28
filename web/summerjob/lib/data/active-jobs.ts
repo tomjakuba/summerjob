@@ -2,6 +2,7 @@ import prisma from "lib/prisma/connection";
 import {
   ActiveJobComplete,
   ActiveJobCreateData,
+  ActiveJobCreateMultipleData,
   ActiveJobUpdateData,
 } from "lib/types/active-job";
 import type { Worker, Prisma } from "lib/prisma/client";
@@ -297,6 +298,34 @@ export async function createActiveJob(job: ActiveJobCreateData) {
   });
 
   return activeJob;
+}
+
+export async function createActiveJobs(data: ActiveJobCreateMultipleData) {
+  const proposedJobIds = data.jobs.map((j) => j.proposedJobId);
+  const activeJobs = await prisma.$transaction(async (tx) => {
+    const existingActiveJobs = await tx.activeJob.findMany({
+      where: {
+        proposedJobId: {
+          in: proposedJobIds,
+        },
+        planId: data.planId,
+      },
+    });
+    if (existingActiveJobs.length > 0) {
+      throw new Error("Active jobs already exist in this plan");
+    }
+    const activeJobs = await tx.activeJob.createMany({
+      data: data.jobs.map((job) => ({
+        privateDescription: job.privateDescription,
+        publicDescription: job.publicDescription,
+        planId: data.planId,
+        proposedJobId: job.proposedJobId,
+      })),
+    });
+    return activeJobs;
+  });
+
+  return activeJobs;
 }
 
 export function deleteActiveJob(id: string) {

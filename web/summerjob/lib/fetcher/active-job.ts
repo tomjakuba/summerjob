@@ -16,6 +16,13 @@ export function useAPIActiveJobCreate(planId: string, options?: any) {
   );
 }
 
+export function useAPIActiveJobCreateMultiple(planId: string, options?: any) {
+  return useDataCreate<ActiveJobsAPIPostData>(
+    `/api/plans/${planId}/active-jobs`,
+    options
+  );
+}
+
 export function useAPIActiveJobUpdate(
   id: string,
   planId: string,

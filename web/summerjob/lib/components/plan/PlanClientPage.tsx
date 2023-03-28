@@ -276,7 +276,7 @@ export default function PlanClientPage({
             </div>
             {isJobModalOpen && (
               <Modal
-                title={"Přidat job do plánu"}
+                title={"Přidat joby do plánu"}
                 size={ModalSize.LARGE}
                 onClose={closeModal}
               >
