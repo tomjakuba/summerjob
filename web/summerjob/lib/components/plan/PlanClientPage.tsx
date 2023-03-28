@@ -255,6 +255,20 @@ export default function PlanClientPage({
                         Naplánované joby
                         <span>{planData && planData.jobs.length}</span>
                       </li>
+                      <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
+                        Celkem míst v jobech
+                        <span>
+                          {planData &&
+                            planData.jobs
+                              .map((j) => j.proposedJob.minWorkers)
+                              .reduce((a, b) => a + b, 0)}{" "}
+                          -{" "}
+                          {planData &&
+                            planData.jobs
+                              .map((j) => j.proposedJob.maxWorkers)
+                              .reduce((a, b) => a + b, 0)}
+                        </span>
+                      </li>
                     </ul>
                   </div>
                 </div>
