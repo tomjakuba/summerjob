@@ -63,19 +63,21 @@ function JobInfo({
           <p>{job.publicDescription}</p>
           <div>
             <i className="fas fa-user-group me-1"></i>
-            {job.workers
-              .map<React.ReactNode>((w) =>
-                w.id === job.responsibleWorkerId ? (
-                  <u key={`resp-worker-${w.id}`}>
-                    {w.firstName} {w.lastName}
-                  </u>
-                ) : (
-                  <span key={`worker-${w.id}`}>
-                    {w.firstName} {w.lastName}
-                  </span>
+            {job.workers.length == 0 && "Nikdo"}
+            {job.workers.length > 0 &&
+              job.workers
+                .map<React.ReactNode>((w) =>
+                  w.id === job.responsibleWorkerId ? (
+                    <u key={`resp-worker-${w.id}`}>
+                      {w.firstName} {w.lastName}
+                    </u>
+                  ) : (
+                    <span key={`worker-${w.id}`}>
+                      {w.firstName} {w.lastName}
+                    </span>
+                  )
                 )
-              )
-              .reduce((prev, curr) => [prev, ", ", curr])}
+                .reduce((prev, curr) => [prev, ", ", curr])}
           </div>
           <div>
             <i className="fas fa-house me-1"></i>

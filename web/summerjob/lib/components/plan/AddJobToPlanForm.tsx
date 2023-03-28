@@ -36,6 +36,7 @@ export default function AddJobToPlanForm({
     handleSubmit,
     setValue,
     formState: { errors },
+    clearErrors,
   } = useForm<ActiveJobCreateFormData>({
     resolver: zodResolver(ActiveJobCreateFormSchema),
     defaultValues: {
@@ -80,6 +81,7 @@ export default function AddJobToPlanForm({
     if (job.description) {
       setValue("publicDescription", job.description);
     }
+    clearErrors("proposedJobId");
   };
 
   if (error && !data) {
@@ -98,6 +100,9 @@ export default function AddJobToPlanForm({
           placeholder={"Vyberte job..."}
         ></FilterSelect>
         <input type="hidden" {...register("proposedJobId")} />
+        {errors.proposedJobId && (
+          <div className="text-danger">Vyberte job!</div>
+        )}
 
         <label className="form-label fw-bold mt-4" htmlFor="public-description">
           Veřejný popis:

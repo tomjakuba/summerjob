@@ -10,7 +10,7 @@ import { serializeWorker } from "lib/types/worker";
 export const dynamic = "force-dynamic";
 
 export default async function MyProfilePage() {
-  // TODO replace with ID from session
+  // TODO: replace with ID from session
   const workers = await getWorkers();
   if (workers.length === 0) {
     return <ErrorPage404 message="Žádní pracanti nejsou zaregistrováni." />;

@@ -54,7 +54,11 @@ export default function PlansClientPage({
   return (
     <>
       <PageHeader title="Seznam plánů" isFluid={false}>
-        <button className="btn btn-warning" type="button" onClick={openModal}>
+        <button
+          className="btn btn-warning btn-with-icon"
+          type="button"
+          onClick={openModal}
+        >
           <i className="far fa-calendar-plus"></i>
           <span>Nový plán</span>
         </button>

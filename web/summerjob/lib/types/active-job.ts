@@ -32,7 +32,7 @@ export type ActiveJobWithProposed = ActiveJob & {
 
 export const ActiveJobCreateSchema = z
   .object({
-    proposedJobId: z.string(),
+    proposedJobId: z.string().min(1),
     privateDescription: z.string(),
     publicDescription: z.string(),
     planId: z.string(),

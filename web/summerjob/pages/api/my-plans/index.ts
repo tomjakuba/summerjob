@@ -14,7 +14,7 @@ async function get(
     res.status(500).end();
     return;
   }
-  // TODO replace with ID from session
+  // TODO: replace with ID from session
   const workers = await getWorkers();
   if (workers.length === 0) {
     res.status(500).end();

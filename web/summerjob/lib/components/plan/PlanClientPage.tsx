@@ -179,7 +179,7 @@ export default function PlanClientPage({
             }
           >
             <button
-              className="btn btn-warning"
+              className="btn btn-warning btn-with-icon"
               type="button"
               onClick={openModal}
             >
@@ -187,7 +187,7 @@ export default function PlanClientPage({
               <span>Přidat job</span>
             </button>
             <button
-              className="btn btn-primary"
+              className="btn btn-primary btn-with-icon"
               type="button"
               onClick={generatePlan}
               disabled={isSendingGenerate}
@@ -196,13 +196,13 @@ export default function PlanClientPage({
               <span>Vygenerovat plán</span>
             </button>
             <Link href={`/print-plan/${planData?.id}`}>
-              <button className="btn btn-primary" type="button">
+              <button className="btn btn-primary btn-with-icon" type="button">
                 <i className="fas fa-print"></i>
                 <span>Tisknout</span>
               </button>
             </Link>
             <button
-              className="btn btn-danger"
+              className="btn btn-danger btn-with-icon"
               type="button"
               onClick={confirmDelete}
             >
@@ -240,7 +240,7 @@ export default function PlanClientPage({
                     <hr />
                     <ul className="list-group list-group-flush ">
                       <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
-                        Nasazených pracovníků
+                        Nasazených pracantů
                         <span>
                           {planData?.jobs.flatMap((x) => x.workers).length}
                         </span>

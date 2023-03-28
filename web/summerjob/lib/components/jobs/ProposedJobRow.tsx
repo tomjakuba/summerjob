@@ -75,7 +75,7 @@ export default function ProposedJobRow({
         <strong>Popis</strong>
         <p>{job.description}</p>
         <p>
-          <strong>Počet pracovníků: </strong>
+          <strong>Počet pracantů: </strong>
           {job.minWorkers} - {job.maxWorkers} ({job.strongWorkers} siláků)
         </p>
         <p>

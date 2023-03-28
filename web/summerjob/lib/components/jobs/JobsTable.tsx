@@ -15,7 +15,7 @@ const _columns: SortableColumn[] = [
   { id: "address", name: "Adresa", sortable: false },
   { id: "daysPlanned", name: "Naplánované dny", sortable: true },
   { id: "daysLeft", name: "Dostupné dny", sortable: true },
-  { id: "workers", name: "Počet pracovníků", sortable: true },
+  { id: "workers", name: "Pracantů", sortable: true },
   { id: "actions", name: "Akce", sortable: false },
 ];
 
