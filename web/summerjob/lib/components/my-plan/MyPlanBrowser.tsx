@@ -85,7 +85,7 @@ export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
                   <strong>Sprcha k dispozici: </strong>
                   {selectedPlan.job.hasShower ? "Ano" : "Ne"}
                 </p>
-                <p>
+                <div>
                   <strong>Doprava</strong>
                   {!selectedPlan.job.ride && <div className="ms-2">Pěšky</div>}
                   {selectedPlan.job.ride && (
@@ -111,7 +111,7 @@ export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
                       </div>
                     </>
                   )}
-                </p>
+                </div>
               </>
             )}
           </EditBox>
