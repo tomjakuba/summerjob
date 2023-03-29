@@ -1,8 +1,14 @@
+import { formatDateLong } from "lib/helpers/helpers";
 import { ChangeEvent } from "react";
 
 interface JobsFiltersArea {
   id: string;
   name: string;
+}
+
+interface JobsFiltersDay {
+  id: string;
+  day: Date;
 }
 
 interface JobsFiltersProps {
@@ -11,6 +17,9 @@ interface JobsFiltersProps {
   areas: JobsFiltersArea[];
   selectedArea: JobsFiltersArea;
   onAreaSelected: (id: string) => void;
+  days: JobsFiltersDay[];
+  selectedDay: JobsFiltersDay;
+  onDaySelected: (day: Date) => void;
 }
 
 export function JobsFilters({
@@ -19,11 +28,18 @@ export function JobsFilters({
   areas,
   selectedArea,
   onAreaSelected,
+  days,
+  selectedDay,
+  onDaySelected,
 }: JobsFiltersProps) {
   const areaSelectChanged = (e: ChangeEvent<HTMLSelectElement>) => {
     onAreaSelected(e.target.value);
   };
+  const daySelectChanged = (e: ChangeEvent<HTMLSelectElement>) => {
+    onDaySelected(new Date(e.target.value));
+  };
   const isDefaultAreaSelected = selectedArea.id === areas[0].id;
+  const isDefaultDaySelected = selectedDay === days[0];
 
   return (
     <>
@@ -52,6 +68,28 @@ export function JobsFilters({
                 areas.map((area) => (
                   <option value={area.id} key={area.id}>
                     {area.name}
+                  </option>
+                ))}
+            </select>
+          </div>
+        </div>
+        <div className="col-auto mb-3">
+          <div className="d-inline-block">
+            <select
+              name="area"
+              id="area"
+              className={`form-select p-2 bg-white smj-filter-input ${
+                isDefaultDaySelected ? "smj-default-option" : ""
+              }`}
+              value={selectedDay.id}
+              onChange={daySelectChanged}
+            >
+              {days &&
+                days.map((day) => (
+                  <option value={day.id} key={day.id}>
+                    {day.id === "all"
+                      ? "Vyberte den"
+                      : formatDateLong(day.day, true)}
                   </option>
                 ))}
             </select>
