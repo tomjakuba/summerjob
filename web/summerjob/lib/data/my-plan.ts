@@ -27,6 +27,7 @@ export function getMyPlan(plan: PlanComplete, workerId: string): MyPlan {
     car: ride.car.name,
     isDriver: ride.driver.id === workerId,
     driverName: `${ride.driver.firstName} ${ride.driver.lastName}`,
+    driverPhone: ride.driver.phone,
     endsAtMyJob: ride.job.id === myJob.id,
     endJobName: ride.job.proposedJob.name,
   });

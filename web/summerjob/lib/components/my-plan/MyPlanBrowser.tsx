@@ -87,7 +87,7 @@ export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
                 </p>
                 <p>
                   <strong>Doprava</strong>
-                  {!selectedPlan.job.ride && "Žádná"}
+                  {!selectedPlan.job.ride && <div className="ms-2">Pěšky</div>}
                   {selectedPlan.job.ride && (
                     <>
                       <div className="ms-2">
@@ -98,6 +98,8 @@ export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
                         <div>
                           <strong>Řidič: </strong>
                           {selectedPlan.job.ride.driverName}
+                          {", "}
+                          {selectedPlan.job.ride.driverPhone}
                         </div>
                         {!selectedPlan.job.ride.endsAtMyJob && (
                           <>
