@@ -1,10 +1,11 @@
-import { Allergy, Ride } from "lib/prisma/client";
+import { Allergy } from "lib/prisma/client";
 import { Serialized } from "./serialize";
 
 export type MyRide = {
   car: string;
   isDriver: boolean;
   driverName: string;
+  driverPhone: string;
   endsAtMyJob: boolean;
   endJobName: string;
 };
