@@ -46,6 +46,9 @@ export default function EditActiveJobForm({
   });
 
   const onSubmit = (data: ActiveJobUpdateData) => {
+    if (data.responsibleWorkerId === "") {
+      delete data.responsibleWorkerId;
+    }
     trigger(data, {
       onSuccess: () => {
         setSaved(true);
@@ -95,6 +98,15 @@ export default function EditActiveJobForm({
               rows={3}
               {...register("privateDescription")}
             ></textarea>
+            <div>
+              <small className="text-muted mt-2">
+                Popis a poznámka pro organizátory se vztahují jen k aktuálně
+                naplánovanému jobu. Pokud chcete změnit popisy celého
+                navrhovaného jobu, klikněte na tlačítko{" "}
+              </small>
+              <pre className="d-inline m-2">Upravit další parametry jobu</pre>
+              <small className="text-muted mt-2">níže.</small>
+            </div>
             <label
               className="form-label fw-bold mt-4"
               htmlFor="responsible-worker"
@@ -118,7 +130,6 @@ export default function EditActiveJobForm({
             ) : (
               <p>Žádné jízdy</p>
             )}
-
             <div className="list-group mt-4 w-50">
               <Link
                 className="list-group-item d-flex justify-content-between align-items-center"
@@ -130,7 +141,6 @@ export default function EditActiveJobForm({
                 </span>
               </Link>
             </div>
-
             <div className="d-flex justify-content-between gap-3">
               <button
                 className="btn btn-secondary mt-4"

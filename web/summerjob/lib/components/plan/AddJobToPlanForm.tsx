@@ -61,14 +61,7 @@ export default function AddJobToPlanForm({
       return a.name.localeCompare(b.name);
     });
 
-    return sorted.map<SelectItem>((job) => ({
-      id: job.id,
-      name: job.name,
-      searchable: job.name,
-      publicDescription: job.description,
-      privateDescription: job.description,
-      item: <AddJobSelectItem job={job} />,
-    }));
+    return sorted.map<SelectItem>(jobToSelectItem);
   }, [data]);
 
   const itemToFormData = (item: SelectItem) => ({
@@ -91,14 +84,7 @@ export default function AddJobToPlanForm({
         item: <></>,
       };
     }
-    return {
-      id: job.id,
-      name: job.name,
-      searchable: job.name,
-      publicDescription: job.description,
-      privateDescription: job.description,
-      item: <AddJobSelectItem job={job} />,
-    };
+    return jobToSelectItem(job);
   };
 
   const formatOptionLabel = (
@@ -171,6 +157,17 @@ function AddJobSelectItem({ job }: { job: ProposedJobComplete }) {
       </div>
     </>
   );
+}
+
+function jobToSelectItem(job: ProposedJobComplete): SelectItem {
+  return {
+    id: job.id,
+    name: job.name,
+    searchable: job.name + job.privateDescription + job.publicDescription,
+    publicDescription: job.publicDescription,
+    privateDescription: job.privateDescription,
+    item: <AddJobSelectItem job={job} />,
+  };
 }
 
 type SelectItem = {

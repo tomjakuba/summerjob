@@ -73,7 +73,9 @@ export default function ProposedJobRow({
     >
       <div className="ms-2">
         <strong>Popis</strong>
-        <p>{job.description}</p>
+        <p>{job.publicDescription}</p>
+        <strong>Poznámka pro organizátory</strong>
+        <p>{job.privateDescription}</p>
         <p>
           <strong>Počet pracantů: </strong>
           {job.minWorkers} - {job.maxWorkers} ({job.strongWorkers} siláků)

@@ -107,7 +107,8 @@ function getFulltextData(jobs?: ProposedJobComplete[]) {
         job.area.name +
         job.address +
         job.contact +
-        job.description
+        job.publicDescription +
+        job.privateDescription
       ).toLocaleLowerCase()
     );
   });

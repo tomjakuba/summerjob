@@ -71,24 +71,25 @@ model Allergy {
 }
 
 model ProposedJob {
-  id            String                    @id @default(uuid())
-  name          String
-  description   String                    @default("")
-  requiredDays  Int
-  completed     Boolean                   @default(false)
-  pinned        Boolean                   @default(false)
-  minWorkers    Int
-  maxWorkers    Int
-  strongWorkers Int
-  address       String
-  contact       String
-  hasFood       Boolean                   @default(false)
-  hasShower     Boolean                   @default(false)
-  area          Area                      @relation(fields: [areaId], references: [id], onDelete: Cascade)
-  areaId        String
-  activeJobs    ActiveJob[]
-  allergens     Allergy[]
-  availability  ProposedJobAvailability[]
+  id                 String                    @id @default(uuid())
+  name               String
+  publicDescription  String                    @default("")
+  privateDescription String                    @default("")
+  requiredDays       Int
+  completed          Boolean                   @default(false)
+  pinned             Boolean                   @default(false)
+  minWorkers         Int
+  maxWorkers         Int
+  strongWorkers      Int
+  address            String
+  contact            String
+  hasFood            Boolean                   @default(false)
+  hasShower          Boolean                   @default(false)
+  area               Area                      @relation(fields: [areaId], references: [id], onDelete: Cascade)
+  areaId             String
+  activeJobs         ActiveJob[]
+  allergens          Allergy[]
+  availability       ProposedJobAvailability[]
 }
 
 model ProposedJobAvailability {

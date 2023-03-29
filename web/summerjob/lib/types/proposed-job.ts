@@ -28,7 +28,8 @@ export const ProposedJobCreateSchema = z
   .object({
     areaId: z.string().min(1),
     allergens: z.array(z.string()),
-    description: z.string(),
+    privateDescription: z.string(),
+    publicDescription: z.string(),
     name: z.string().min(1),
     address: z.string().min(1),
     contact: z.string().min(1),
