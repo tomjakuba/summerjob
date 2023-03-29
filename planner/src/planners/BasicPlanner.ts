@@ -32,17 +32,7 @@ export class BasicPlanner implements Planner {
       (j) => !plannedProposedJobIds.includes(j.id)
     );
     const categorizedWorkers = this.categorizeWorkers(workersWithoutJob);
-    // let planned = this.planJobRecursive(
-    //   plan.jobs.map((job) => ({
-    //     ...job,
-    //     job: job.proposedJob,
-    //     responsibleWorker: job.responsibleWorker || job.workers[0],
-    //     privateDescription: job.privateDescription || "",
-    //     publicDescription: job.publicDescription || "",
-    //   })),
-    //   categorizedWorkers,
-    //   new Array(...proposedJobs)
-    // );
+
     const jobsInPlan: PlannedJob[] = plan.jobs.map((job) => ({
       job: job.proposedJob,
       responsibleWorker: job.responsibleWorker || undefined,
@@ -56,38 +46,120 @@ export class BasicPlanner implements Planner {
       })),
     }));
 
-    const result = this.planJobsRecursive(
-      jobsInPlan.map((job) => ({ attemptsLeft: 2, plannedJob: job })),
+    const minPlanned = this.planJobsRecursive(
+      jobsInPlan.map((job) => ({ attemptsLeft: 1, plannedJob: job })),
       categorizedWorkers
     );
 
-    const filledPlan = this.planFillJobs(
-      result.plannedJobs,
-      this.decategorizeWorkers(result.remainingWorkers)
+    const filledWithRides = this.addExtraDrivers(
+      minPlanned.plannedJobs,
+      minPlanned.remainingWorkers
     );
-    result.plannedJobs.forEach((element) => {
-      this.logPlannedJob(element);
-    });
-    console.log("Zbylo pracantů: %d", filledPlan.remainingWorkers.length);
-    // console.log(
-    //   "Zbylo jobů: %d",
-    //   proposedJobsAll.length - filledPlan.plannedJobs.length
-    // );
+
+    const filledPlan = this.planFillJobs(
+      filledWithRides.plannedJobs,
+      this.decategorizeWorkers(filledWithRides.remainingWorkers)
+    );
+    // result.plannedJobs.forEach((element) => {
+    //   this.logPlannedJob(element);
+    // });
 
     return {
       success: true,
       jobs: filledPlan.plannedJobs.map(this.plannedJobToDatabaseJob),
     };
-    // return {
-    //   success: true,
-    //   jobs: [],
-    // };
   }
 
   /**
-   * After planning, put remaining workers into planned jobs if they have seats in rides
-   * @param plannedJobs Planned jobs
-   * @param workersWithoutJob Workers without job
+   * Adds extra drivers to jobs with the most free capacity. Does not add passengers.
+   * @param plannedJobs Currently planned jobs to minimum workers.
+   * @param workersWithoutJob Workers without job.
+   * @returns Planned jobs with extra drivers.
+   */
+  addExtraDrivers(
+    plannedJobs: PlannedJob[],
+    workersWithoutJob: CategorizedWorkers
+  ): RecPlanningResult {
+    if (workersWithoutJob.drivers.length === 0) {
+      return { plannedJobs, remainingWorkers: workersWithoutJob };
+    }
+    const freeSlotsInJob = (job: PlannedJob) =>
+      job.job.maxWorkers - job.workers.length;
+    plannedJobs.sort((a, b) => {
+      return freeSlotsInJob(b) - freeSlotsInJob(a);
+    });
+
+    for (const job of plannedJobs) {
+      if (workersWithoutJob.drivers.length === 0) {
+        break;
+      }
+      if (!job.job.area.requiresCar) {
+        continue;
+      }
+      if (freeSlotsInJob(job) <= 0) {
+        continue;
+      }
+      const driverRequest = this.findDriver(
+        workersWithoutJob,
+        job.job.allergens
+      );
+      if (!driverRequest.worker) {
+        continue;
+      }
+
+      workersWithoutJob = driverRequest.remainingWorkers;
+      const newRide: RideWithPassengers = {
+        driver: driverRequest.worker,
+        car: driverRequest.worker.cars[0],
+        passengers: [],
+      };
+      // If there are passengers on this job that are currently in a shared ride, add them to the new ride instead
+      const allPassengersIds = job.rides
+        .flatMap((ride) => [ride.driver, ...ride.passengers])
+        .map((worker) => worker.id);
+      const workersWithSharedRide = job.workers.filter(
+        (worker) => !allPassengersIds.includes(worker.id)
+      );
+      if (workersWithSharedRide.length === 0) {
+        // Everyone is already in a local ride, no need to change anything
+        job.workers.push(driverRequest.worker);
+        job.rides.push(newRide);
+        continue;
+      }
+      // Remove workers from shared ride and add them to this new ride instead
+      for (const worker of workersWithSharedRide) {
+        console.log("Removing worker from shared ride", worker.lastName);
+
+        let rideFound = false;
+        for (const job of plannedJobs) {
+          if (rideFound) {
+            break;
+          }
+          for (const ride of job.rides) {
+            const index = ride.passengers.findIndex(
+              (passenger) => passenger.id === worker.id
+            );
+            if (index >= 0) {
+              ride.passengers.splice(index, 1);
+              rideFound = true;
+              break;
+            }
+          }
+        }
+        newRide.passengers.push(worker);
+      }
+      job.workers.push(driverRequest.worker);
+      job.rides.push(newRide);
+    }
+
+    return { plannedJobs, remainingWorkers: workersWithoutJob };
+  }
+
+  /**
+   * After basic planning, puts remaining workers into planned jobs if there are free seats in rides.
+   * @param plannedJobs Planned jobs.
+   * @param workersWithoutJob Workers without job.
+   * @returns Result of planning.
    */
   planFillJobs(
     plannedJobs: PlannedJob[],
@@ -98,7 +170,7 @@ export class BasicPlanner implements Planner {
         break;
       }
       let workersNeeded = plannedJob.job.maxWorkers - plannedJob.workers.length;
-      if (plannedJob.rides.length === 0) {
+      if (plannedJob.rides.length === 0 && plannedJob.job.area.requiresCar) {
         continue;
       }
       if (workersNeeded <= 0) {
@@ -106,32 +178,58 @@ export class BasicPlanner implements Planner {
       }
       // Fill workers into existing rides
       for (const ride of plannedJob.rides) {
-        const seats = ride.car.seats - ride.passengers.length - 1;
+        let seats = ride.car.seats - ride.passengers.length - 1;
         if (seats <= 0) {
           continue;
         }
         if (workersNeeded <= 0) {
           break;
         }
-        const availableWorker = workersWithoutJob.find(
-          (w) => !this.isAllergicTo(w, plannedJob.job.allergens)
-        );
-        // If every worker is allergic to this job, we can't fill it
-        if (!availableWorker) {
-          break;
+        while (workersNeeded > 0 && seats > 0) {
+          const availableWorker = workersWithoutJob.find(
+            (w) => !this.isAllergicTo(w, plannedJob.job.allergens)
+          );
+          // If every worker is allergic to this job, we can't fill it
+          if (!availableWorker) {
+            break;
+          }
+          workersWithoutJob = workersWithoutJob.filter(
+            (w) => w.id !== availableWorker.id
+          );
+          ride.passengers.push(availableWorker);
+          plannedJob.workers.push(availableWorker);
+          workersNeeded--;
+          seats--;
         }
-        workersWithoutJob = workersWithoutJob.filter(
-          (w) => w.id !== availableWorker.id
-        );
-        ride.passengers.push(availableWorker);
-        plannedJob.workers.push(availableWorker);
-        workersNeeded--;
+      }
+
+      if (!plannedJob.job.area.requiresCar) {
+        while (workersNeeded > 0) {
+          const availableWorker = workersWithoutJob.find(
+            (w) => !this.isAllergicTo(w, plannedJob.job.allergens)
+          );
+          // If every worker is allergic to this job, we can't fill it
+          if (!availableWorker) {
+            break;
+          }
+          workersWithoutJob = workersWithoutJob.filter(
+            (w) => w.id !== availableWorker.id
+          );
+          plannedJob.workers.push(availableWorker);
+          workersNeeded--;
+        }
       }
     }
 
     return { plannedJobs, remainingWorkers: workersWithoutJob };
   }
 
+  /**
+   * Plans workers and rides to jobs with respect to strong workers and allergies. Planned jobs are only filled to minimal number of workers.
+   * @param jobsToPlan List of jobs to plan, including existing workers and rides. `attemptsLeft` should be the same for all jobs.
+   * @param workersWithoutJob All workers currently without a job.
+   * @returns Planned jobs and remaining workers without job.
+   */
   planJobsRecursive(
     jobsToPlan: JobPlanningAttempt[],
     workersWithoutJob: CategorizedWorkers
@@ -329,141 +427,10 @@ export class BasicPlanner implements Planner {
   ): WorkerComplete[] {
     const workersInRides = rides
       .map((ride) => [ride.driver, ...ride.passengers])
-      .flat();
-    return workers.filter((w) => !workersInRides.includes(w));
+      .flat()
+      .map((w) => w.id);
+    return workers.filter((w) => !workersInRides.includes(w.id));
   }
-
-  // planJobRecursive(
-  //   plannedJobs: PlannedJob[],
-  //   workersWithoutJob: CategorizedWorkers,
-  //   proposedJobs: ProposedJobComplete[]
-  // ): RecPlanningResult {
-  //   if (proposedJobs.length === 0) {
-  //     console.log("BasicPlanner: No more proposed jobs");
-  //     return { plannedJobs, remainingWorkers: workersWithoutJob };
-  //   }
-  //   if (this.numWorkers(workersWithoutJob) === 0) {
-  //     console.log("BasicPlanner: No more workers without job");
-  //     return { plannedJobs, remainingWorkers: workersWithoutJob };
-  //   }
-
-  //   const beforeWorkersWithoutJob: CategorizedWorkers = {
-  //     drivers: [...workersWithoutJob.drivers],
-  //     strong: [...workersWithoutJob.strong],
-  //     others: [...workersWithoutJob.others],
-  //   };
-
-  //   const proposedJob = proposedJobs[0];
-  //   if (proposedJob.minWorkers > this.numWorkers(workersWithoutJob)) {
-  //     console.log("BasicPlanner: Not enough workers for job");
-  //     return this.planJobRecursive(
-  //       plannedJobs,
-  //       beforeWorkersWithoutJob,
-  //       proposedJobs.slice(1)
-  //     );
-  //   }
-
-  //   const needsDriver = proposedJob.area.requiresCar;
-  //   const drivers: WorkerComplete[] = [];
-  //   const sharedRides: JobRide[] = [];
-  //   const workers: WorkerComplete[] = [];
-  //   // Find a driver if needed
-  //   if (needsDriver) {
-  //     // Find if we can put all workers in a shared ride with another job
-  //     const sharedRide = this.findSharedRides(
-  //       proposedJob.area,
-  //       proposedJob.minWorkers,
-  //       plannedJobs
-  //     );
-  //     if (sharedRide.success) {
-  //       sharedRides.push(...sharedRide.availableRides);
-  //     } else {
-  //       const { worker, remainingWorkers } = this.findDriver(
-  //         workersWithoutJob,
-  //         proposedJob.allergens
-  //       );
-  //       if (!worker) {
-  //         // Workers can't be put in a shared ride and no driver is free, so we can't plan this job
-  //         console.log("BasicPlanner: No driver found for this job");
-  //         return this.planJobRecursive(
-  //           plannedJobs,
-  //           beforeWorkersWithoutJob,
-  //           proposedJobs.slice(1)
-  //         );
-  //       }
-
-  //       if (worker.cars[0].seats < proposedJob.minWorkers) {
-  //         // Driver has not enough seats, so we attempt to find a shared ride for the rest
-  //         const sharedRideForOthers = this.findSharedRides(
-  //           proposedJob.area,
-  //           proposedJob.minWorkers - worker.cars[0].seats - 1,
-  //           plannedJobs
-  //         );
-  //         if (sharedRideForOthers.success) {
-  //           sharedRides.push(...sharedRideForOthers.availableRides);
-  //         } else {
-  //           // No shared ride found, so we can't plan this job
-  //           console.log("BasicPlanner: Not enough rides for job");
-  //           // However, since we still have a driver, we can try to plan the rest of the jobs
-  //           return this.planJobRecursive(
-  //             plannedJobs,
-  //             beforeWorkersWithoutJob,
-  //             proposedJobs.slice(1)
-  //           );
-  //         }
-  //       }
-  //       drivers.push(worker);
-  //       workersWithoutJob = remainingWorkers;
-  //     }
-  //   }
-  //   // Find strong workers
-  //   for (let i = 0; i < proposedJob.strongWorkers; i++) {
-  //     const { worker, remainingWorkers } = this.findStrongWorker(
-  //       workersWithoutJob,
-  //       proposedJob.allergens
-  //     );
-  //     if (!worker) {
-  //       console.log("BasicPlanner: No strong worker found");
-  //       return this.planJobRecursive(
-  //         plannedJobs,
-  //         beforeWorkersWithoutJob,
-  //         proposedJobs.slice(1)
-  //       );
-  //     }
-  //     workers.push(worker);
-  //     workersWithoutJob = remainingWorkers;
-  //   }
-
-  //   // Fill with other workers
-  //   const remainingWorkers = proposedJob.minWorkers - workers.length;
-  //   for (let i = 0; i < remainingWorkers; i++) {
-  //     const worker = this.findWorker(workersWithoutJob, proposedJob.allergens);
-  //     if (!worker.worker) {
-  //       console.log("BasicPlanner: No worker found");
-  //       return this.planJobRecursive(
-  //         plannedJobs,
-  //         beforeWorkersWithoutJob,
-  //         proposedJobs.slice(1)
-  //       );
-  //     }
-  //     workers.push(worker.worker);
-  //     workersWithoutJob = worker.remainingWorkers;
-  //   }
-  //   const plannedJobResult = this.createJob(
-  //     proposedJob,
-  //     workers,
-  //     drivers,
-  //     sharedRides,
-  //     plannedJobs
-  //   );
-  //   plannedJobs = plannedJobResult;
-
-  //   return this.planJobRecursive(
-  //     plannedJobs,
-  //     workersWithoutJob,
-  //     proposedJobs.slice(1)
-  //   );
-  // }
 
   findSharedRides(
     area: Area,
@@ -659,55 +626,6 @@ export class BasicPlanner implements Planner {
     return (
       workers.drivers.length + workers.strong.length + workers.others.length
     );
-  }
-
-  /**
-   * Creates a new planned job, and updates rides in other jobs if necessary
-   * @param workers Workers for the job, excluding drivers
-   * @param drivers Drivers for the job
-   * @param job Proposed job
-   * @returns List of planned jobs with updated rides if necessary
-   */
-  createJob(
-    job: ProposedJobNoActive,
-    workers: WorkerComplete[],
-    drivers: WorkerComplete[],
-    sharedRides: JobRide[],
-    plannedJobs: PlannedJob[]
-  ): PlannedJob[] {
-    // Create rides for the job and put as many passengers as possible in the cars
-    const rides: RideWithPassengers[] = [];
-    let workersWithoutRide = workers.slice(0);
-    for (const driver of drivers) {
-      const seats = driver.cars[0].seats - 1;
-      const passengers = workersWithoutRide.slice(0, seats);
-      workersWithoutRide = workersWithoutRide.slice(seats);
-      const ride: RideWithPassengers = {
-        driver: driver,
-        car: driver.cars[0],
-        passengers: passengers,
-      };
-      rides.push(ride);
-    }
-
-    // Put the remaining workers in shared rides
-    for (const sharedRideInfo of sharedRides) {
-      const sharedRide = sharedRideInfo.ride;
-      const seats = sharedRide.car.seats - sharedRide.passengers.length - 1;
-      const passengers = workersWithoutRide.slice(0, seats);
-      workersWithoutRide = workersWithoutRide.slice(seats);
-      const originalRide = plannedJobs
-        .find((j) => j.job.id === sharedRideInfo.proposedJobId)!
-        .rides.find((r) => r.driver.id === sharedRide.driver.id)!;
-      originalRide.passengers = [...originalRide.passengers, ...passengers];
-    }
-    plannedJobs.push({
-      job: job,
-      workers: [...drivers, ...workers],
-      responsibleWorker: drivers.length > 0 ? drivers[0] : workers[0],
-      rides: rides,
-    });
-    return plannedJobs;
   }
 
   plannedJobToDatabaseJob(plannedJob: PlannedJob): JobToBePlanned {
