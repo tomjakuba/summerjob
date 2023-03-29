@@ -83,14 +83,29 @@ export default function CreateProposedJobForm({
             {errors.name && (
               <div className="text-danger">Zadejte název jobu</div>
             )}
-            <label className="form-label fw-bold mt-4" htmlFor="description">
+            <label
+              className="form-label fw-bold mt-4"
+              htmlFor="publicDescription"
+            >
               Popis navrhované práce
             </label>
             <textarea
               className="form-control border p-1 ps-2"
-              id="description"
+              id="publicDescription"
               rows={3}
-              {...register("description")}
+              {...register("publicDescription")}
+            ></textarea>
+            <label
+              className="form-label fw-bold mt-4"
+              htmlFor="privateDescription"
+            >
+              Poznámka pro organizátory
+            </label>
+            <textarea
+              className="form-control border p-1 ps-2"
+              id="privateDescription"
+              rows={3}
+              {...register("privateDescription")}
             ></textarea>
             <label className="form-label fw-bold mt-4" htmlFor="area">
               Oblast jobu

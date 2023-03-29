@@ -161,7 +161,8 @@ async function createProposedJobs(
   const createProposedJob = (name: string) => {
     return {
       name: name,
-      description: faker.lorem.paragraph(),
+      publicDescription: faker.lorem.paragraph(),
+      privateDescription: faker.lorem.paragraph(),
       areaId: choose(areaIds, 1)[0],
       requiredDays: between(1, 3),
       minWorkers: between(2, 3),

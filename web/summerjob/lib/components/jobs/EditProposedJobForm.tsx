@@ -52,7 +52,8 @@ export default function EditProposedJobForm({
     resolver: zodResolver(schema),
     defaultValues: {
       name: job.name,
-      description: job.description,
+      publicDescription: job.publicDescription,
+      privateDescription: job.privateDescription,
       allergens: job.allergens.map((allergy) => allergy.id),
       address: job.address,
       contact: job.contact,
@@ -97,14 +98,29 @@ export default function EditProposedJobForm({
               id="name"
               {...register("name")}
             />
-            <label className="form-label fw-bold mt-4" htmlFor="description">
+            <label
+              className="form-label fw-bold mt-4"
+              htmlFor="publicDescription"
+            >
               Popis navrhované práce
             </label>
             <textarea
               className="form-control border p-1 ps-2"
-              id="description"
+              id="publicDescription"
               rows={3}
-              {...register("description")}
+              {...register("publicDescription")}
+            ></textarea>
+            <label
+              className="form-label fw-bold mt-4"
+              htmlFor="privateDescription"
+            >
+              Poznámka pro organizátory
+            </label>
+            <textarea
+              className="form-control border p-1 ps-2"
+              id="privateDescription"
+              rows={3}
+              {...register("privateDescription")}
             ></textarea>
             <label className="form-label fw-bold mt-4" htmlFor="address">
               Adresa

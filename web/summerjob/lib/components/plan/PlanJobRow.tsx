@@ -136,10 +136,10 @@ export function PlanJobRow({
               ridesForOtherJobs={ridesForOtherJobs}
             />
             <div className="ms-2">
-              <strong>Poznámka pro organizátory</strong>
-              <p>{job.privateDescription}</p>
               <strong>Popis</strong>
               <p>{job.publicDescription}</p>
+              <strong>Poznámka pro organizátory</strong>
+              <p>{job.privateDescription}</p>
 
               <div className="d-flex gap-1">
                 <strong>Doprava</strong>
