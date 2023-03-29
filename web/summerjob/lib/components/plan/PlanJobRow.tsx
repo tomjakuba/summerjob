@@ -154,7 +154,7 @@ export function PlanJobRow({
               <br />
               <strong>Alergeny</strong>
               <p>{formatAllergens(job)}</p>
-              <strong>pracantů (min/max/silných)</strong>
+              <strong>Pracantů (min/max/silných)</strong>
               <p>
                 {job.proposedJob.minWorkers}/{job.proposedJob.maxWorkers}/
                 {job.proposedJob.strongWorkers}
@@ -169,7 +169,7 @@ export function PlanJobRow({
                 <thead>
                   <tr>
                     <th>
-                      <strong>pracant</strong>
+                      <strong>Pracant</strong>
                     </th>
                     <th>
                       <strong>Kontakt</strong>
