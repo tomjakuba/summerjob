@@ -9,15 +9,20 @@ import {
 import { useMemo, useState } from "react";
 import { JobsFilters } from "lib/components/jobs/JobsFilters";
 import { useAPIProposedJobs } from "lib/fetcher/proposed-job";
-import { filterUniqueById } from "lib/helpers/helpers";
+import { datesBetween, filterUniqueById } from "lib/helpers/helpers";
 import Link from "next/link";
+import { Serialized } from "lib/types/serialize";
 
 interface ProposedJobsClientPage {
-  initialData: string;
+  initialData: Serialized<ProposedJobComplete[]>;
+  startDate: string;
+  endDate: string;
 }
 
 export default function ProposedJobsClientPage({
   initialData,
+  startDate,
+  endDate,
 }: ProposedJobsClientPage) {
   const deserializedData = deserializeProposedJobs(initialData);
   const { data, error, mutate } = useAPIProposedJobs({
@@ -25,12 +30,27 @@ export default function ProposedJobsClientPage({
   });
   const reload = () => mutate();
 
+  //#region Filtering areas
   const areas = getAvailableAreas(data);
   const [selectedArea, setSelectedArea] = useState(areas[0]);
 
   const onAreaSelected = (id: string) => {
     setSelectedArea(areas.find((a) => a.id === id) || areas[0]);
   };
+  //#endregion
+
+  //#region Filtering days
+  const firstDay = new Date(startDate);
+  const lastDay = new Date(endDate);
+  const days = getDays(firstDay, lastDay);
+  const [selectedDay, setSelectedDay] = useState(days[0]);
+
+  const onDaySelected = (day: Date) => {
+    setSelectedDay(
+      days.find((d) => d.day.getTime() === day.getTime()) || days[0]
+    );
+  };
+  //#endregion
 
   const [filter, setFilter] = useState("");
 
@@ -41,7 +61,12 @@ export default function ProposedJobsClientPage({
       selectedArea.id === areas[0].id || job.area.id === selectedArea.id;
     const fulltext =
       fulltextData.get(job.id)?.includes(filter.toLowerCase()) ?? false;
-    return area && fulltext;
+    const day =
+      selectedDay.id === days[0].id ||
+      job.availability.days
+        .map((d) => d.getTime())
+        .includes(selectedDay.day.getTime());
+    return area && fulltext && day;
   }
 
   if (error) {
@@ -69,6 +94,9 @@ export default function ProposedJobsClientPage({
                 areas={areas}
                 selectedArea={selectedArea}
                 onAreaSelected={onAreaSelected}
+                days={days}
+                selectedDay={selectedDay}
+                onDaySelected={onDaySelected}
               />
             </div>
           </div>
@@ -95,6 +123,16 @@ function getAvailableAreas(jobs?: ProposedJobComplete[]) {
   areas.sort((a, b) => a.name.localeCompare(b.name));
   areas.unshift(ALL_AREAS);
   return areas;
+}
+
+function getDays(firstDay: Date, lastDay: Date) {
+  const ALL_DAYS = { id: "all", day: new Date() };
+  const days = datesBetween(firstDay, lastDay).map((date) => ({
+    id: date.toJSON(),
+    day: date,
+  }));
+  days.unshift(ALL_DAYS);
+  return days;
 }
 
 function getFulltextData(jobs?: ProposedJobComplete[]) {

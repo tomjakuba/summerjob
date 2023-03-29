@@ -1,3 +1,4 @@
+"use client";
 import {
   useAPIProposedJobDelete,
   useAPIProposedJobUpdate,
@@ -10,7 +11,7 @@ import {
 import { translateAllergies } from "lib/types/allergy";
 import { ProposedJobComplete } from "lib/types/proposed-job";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import DeleteIcon from "../forms/DeleteIcon";
 import ConfirmationModal from "../modal/ConfirmationModal";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
@@ -60,6 +61,12 @@ export default function ProposedJobRow({
     resetDeleteError();
   };
 
+  const availableDays = useMemo(() => {
+    const days = [...job.availability.days];
+    days.sort((a, b) => a.getTime() - b.getTime());
+    return days.map(formatDateShort).map(capitalizeFirstLetter).join(", ");
+  }, [job.availability.days]);
+
   return (
     <ExpandableRow
       data={formatJobRow(
@@ -94,10 +101,7 @@ export default function ProposedJobRow({
         </p>
         <p>
           <strong>Dostupné: </strong>
-          {job.availability.days
-            .map(formatDateShort)
-            .map(capitalizeFirstLetter)
-            .join(", ")}
+          {availableDays}
         </p>
         <p>
           <strong>Naplánované dny: </strong>
