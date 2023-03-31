@@ -15,13 +15,12 @@ import { filterUniqueById, formatDateLong } from "lib/helpers/helpers";
 import { ActiveJobNoPlan } from "lib/types/active-job";
 import { deserializePlan, PlanComplete } from "lib/types/plan";
 import { deserializeWorkers, WorkerComplete } from "lib/types/worker";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import ErrorPage404 from "../404/404";
 import ConfirmationModal from "../modal/ConfirmationModal";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
 import { Serialized } from "lib/types/serialize";
 import Link from "next/link";
-import SuccessProceedModal from "../modal/SuccessProceedModal";
 
 interface PlanClientPageProps {
   id: string;
@@ -50,6 +49,8 @@ export default function PlanClientPage({
     useAPIWorkersWithoutJob(id, {
       fallbackData: initialDataJoblessParsed,
     });
+
+  const reloadPlan = useCallback(() => mutate(), [mutate]);
 
   const workersWithoutJob = useMemo(() => {
     if (!workersWithoutJobData) return [];
@@ -142,7 +143,10 @@ export default function PlanClientPage({
     return map;
   }, [planData?.jobs]);
 
-  const areas = getAvailableAreas(planData ?? undefined);
+  const areas = useMemo(
+    () => getAvailableAreas(planData ?? undefined),
+    [planData]
+  );
   const [selectedArea, setSelectedArea] = useState(areas[0]);
 
   const onAreaSelected = (id: string) => {
@@ -151,22 +155,25 @@ export default function PlanClientPage({
 
   const [filter, setFilter] = useState("");
 
+  const shouldShowJob = useCallback(
+    (job: ActiveJobNoPlan) => {
+      const isInArea =
+        selectedArea.id === areas[0].id ||
+        job.proposedJob.area.id === selectedArea.id;
+      const text = searchableJobs.get(job.id);
+      if (text) {
+        return isInArea && text.includes(filter.toLowerCase());
+      }
+      return isInArea;
+    },
+    [selectedArea, areas, searchableJobs, filter]
+  );
+
+  //#endregion
+
   if (error && !planData) {
     return <ErrorPage error={error} />;
   }
-
-  function shouldShowJob(job: ActiveJobNoPlan) {
-    const isInArea =
-      selectedArea.id === areas[0].id ||
-      job.proposedJob.area.id === selectedArea.id;
-    const text = searchableJobs.get(job.id);
-    if (text) {
-      return isInArea && text.includes(filter.toLowerCase());
-    }
-    return isInArea;
-  }
-
-  //#endregion
 
   return (
     <>
@@ -231,7 +238,7 @@ export default function PlanClientPage({
                     shouldShowJob={shouldShowJob}
                     joblessWorkers={workersWithoutJob || []}
                     reloadJoblessWorkers={reloadJoblessWorkers}
-                    reloadPlan={mutate}
+                    reloadPlan={reloadPlan}
                   />
                 </div>
                 <div className="col-sm-12 col-lg-2">

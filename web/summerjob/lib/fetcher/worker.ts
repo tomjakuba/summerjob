@@ -4,6 +4,7 @@ import type {
   WorkerAPIGetResponse,
   WorkerAPIPatchData,
 } from "pages/api/workers/[id]";
+import { useEffect, useMemo } from "react";
 import { useData, useDataPartialUpdate } from "./fetcher";
 
 export function useAPIWorkerUpdate(workerId: string, options?: any) {
@@ -23,10 +24,15 @@ export function useAPIWorkersWithoutJob(planId: string, options?: any) {
     `/api/workers?withoutJob=true&planId=${planId}`,
     opts
   );
-  if (res.data) {
-    return { ...res, data: res.data.map(deserializeWorkerAvailability) };
-  }
-  return res;
+
+  return useMemo(() => {
+    return {
+      isLoading: res.isLoading,
+      error: res.error,
+      mutate: res.mutate,
+      data: res.data ? res.data.map(deserializeWorkerAvailability) : res.data,
+    };
+  }, [res.mutate, res.data, res.isLoading, res.error]);
 }
 
 export function useAPIWorker(id: string) {
