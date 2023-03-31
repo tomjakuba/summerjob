@@ -42,7 +42,7 @@ export default function WorkersClientPage({
           <i className="far fa-user"></i>
           <span>Přidat pracanta</span>
         </button>
-        <Link href={`/print-workers`}>
+        <Link href={`/print-workers`} prefetch={false}>
           <button className="btn btn-primary btn-with-icon" type="button">
             <i className="fas fa-print"></i>
             <span>Tisknout</span>
