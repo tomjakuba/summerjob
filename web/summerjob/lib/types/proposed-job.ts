@@ -49,6 +49,7 @@ export const ProposedJobUpdateSchema = ProposedJobCreateSchema.merge(
   z.object({
     completed: z.boolean(),
     pinned: z.boolean(),
+    hidden: z.boolean(),
   })
 )
   .strict()
