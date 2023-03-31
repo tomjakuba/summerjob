@@ -1,6 +1,7 @@
 import { ProposedJobComplete } from "lib/types/proposed-job";
 import { useMemo, useState } from "react";
 import { MessageRow } from "../table/MessageRow";
+import RowCategory from "../table/RowCategory";
 import {
   SortableColumn,
   SortableTable,
@@ -44,9 +45,13 @@ export function JobsTable({ data, shouldShowJob, reload }: JobsTableProps) {
     () => [
       ...sortJobs(pinnedJobs, sortOrder),
       ...sortJobs(waitingJobs, sortOrder),
-      ...sortJobs(completedJobs, sortOrder),
     ],
-    [sortOrder, waitingJobs, completedJobs, pinnedJobs]
+    [sortOrder, waitingJobs, pinnedJobs]
+  );
+
+  const sortedCompleted = useMemo(
+    () => sortJobs(completedJobs, sortOrder),
+    [sortOrder, completedJobs]
   );
 
   const reloadJobs = () => {
@@ -69,6 +74,26 @@ export function JobsTable({ data, shouldShowJob, reload }: JobsTableProps) {
               <ProposedJobRow key={job.id} job={job} reloadJobs={reloadJobs} />
             )
         )}
+      <RowCategory
+        title="Dokončené"
+        numCols={_columns.length}
+        secondaryTitle={
+          "Joby označené jako dokončené se nebudou zobrazovat při plánování"
+        }
+        className="bg-category-done"
+      >
+        {data &&
+          sortedCompleted.map(
+            (job) =>
+              shouldShowJob(job) && (
+                <ProposedJobRow
+                  key={job.id}
+                  job={job}
+                  reloadJobs={reloadJobs}
+                />
+              )
+          )}
+      </RowCategory>
     </SortableTable>
   );
 }

@@ -39,7 +39,7 @@ export function JobsFilters({
     onDaySelected(new Date(e.target.value));
   };
   const isDefaultAreaSelected = selectedArea.id === areas[0].id;
-  const isDefaultDaySelected = selectedDay === days[0];
+  const isDefaultDaySelected = selectedDay.id === days[0].id;
 
   return (
     <>
@@ -76,8 +76,8 @@ export function JobsFilters({
         <div className="col-auto mb-3">
           <div className="d-inline-block">
             <select
-              name="area"
-              id="area"
+              name="day"
+              id="day"
               className={`form-select p-2 bg-white smj-filter-input ${
                 isDefaultDaySelected ? "smj-default-option" : ""
               }`}
