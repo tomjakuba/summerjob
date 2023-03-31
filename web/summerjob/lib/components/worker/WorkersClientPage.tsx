@@ -4,6 +4,7 @@ import PageHeader from "lib/components/page-header/PageHeader";
 import { useAPIWorkers } from "lib/fetcher/worker";
 import { Serialized } from "lib/types/serialize";
 import { deserializeWorkers, WorkerComplete } from "lib/types/worker";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { WorkersFilters } from "./WorkersFilters";
 import WorkersTable from "./WorkersTable";
@@ -41,10 +42,12 @@ export default function WorkersClientPage({
           <i className="far fa-user"></i>
           <span>Přidat pracanta</span>
         </button>
-        <button className="btn btn-primary btn-with-icon" type="button">
-          <i className="fas fa-print"></i>
-          <span>Tisknout</span>
-        </button>
+        <Link href={`/print-workers`}>
+          <button className="btn btn-primary btn-with-icon" type="button">
+            <i className="fas fa-print"></i>
+            <span>Tisknout</span>
+          </button>
+        </Link>
       </PageHeader>
 
       <section>
