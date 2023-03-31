@@ -69,7 +69,7 @@ export default function ProposedJobsClientPage({
     return area && fulltext && day;
   }
 
-  if (error) {
+  if (error && !data) {
     return <ErrorPage error={error} />;
   }
 

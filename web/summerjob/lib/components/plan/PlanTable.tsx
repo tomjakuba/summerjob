@@ -6,7 +6,7 @@ import {
   SortableTable,
   SortOrder,
 } from "../table/SortableTable";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { WorkerComplete, WorkerWithAllergies } from "lib/types/worker";
 import { SWRMutationResponse } from "swr/mutation";
 import { Key } from "swr";
@@ -50,12 +50,12 @@ export function PlanTable({
     return plan ? sortJobsInPlan(plan, sortOrder) : [];
   }, [sortOrder, plan]);
 
-  const onWorkerDragStart = (worker: Worker, sourceId: string) => {
+  const onWorkerDragStart = useCallback((worker: Worker, sourceId: string) => {
     return (e: React.DragEvent<HTMLTableRowElement>) => {
       e.dataTransfer.setData("worker-id", worker.id);
       e.dataTransfer.setData("source-id", sourceId);
     };
-  };
+  }, []);
 
   const rides = useMemo(() => {
     return (
@@ -69,10 +69,10 @@ export function PlanTable({
     );
   }, [plan]);
 
-  const reload = () => {
+  const reload = useCallback(() => {
     reloadPlan();
     reloadJoblessWorkers();
-  };
+  }, [reloadPlan, reloadJoblessWorkers]);
 
   return (
     <SortableTable
