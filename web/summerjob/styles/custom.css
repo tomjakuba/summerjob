@@ -123,13 +123,18 @@ img.smj-nav-logo {
   box-shadow: 1px 1px 6px;
 }
 
-.smj-expandable-row {
-  background-color: #f4f1b6;
+.smj-expandable-row,
+.smj-category-row {
   transition: all 0.1s ease-out;
   cursor: pointer;
 }
 
-.smj-expandable-row > td:first-child > i {
+.smj-expandable-row {
+  background-color: #f4f1b6;
+}
+
+.smj-expandable-row > td:first-child > i,
+.smj-category-row > td:first-child > i {
   margin-right: 10px;
 }
 
@@ -241,10 +246,6 @@ img.smj-nav-logo {
   animation: 1s linear infinite spinner-border;
 }
 
-.smj-completed-job-row {
-  background-color: #d4edda;
-}
-
 .smj-pinned-job-row {
   background-color: #fadaaa;
 }
@@ -270,4 +271,23 @@ img.smj-nav-logo {
 
 .text-small {
   font-size: 0.8rem;
+}
+
+.bg-category-done {
+  background-color: #d4edda;
+}
+
+.smj-completed-job-row td:first-of-type::before {
+  background-color: #d4edda;
+  content: "";
+  height: 2.5rem;
+  width: 0.5rem;
+  display: block;
+  margin-right: 0.5rem;
+}
+
+.smj-completed-job-row td:first-of-type {
+  padding: 0rem;
+  display: flex;
+  align-items: center;
 }

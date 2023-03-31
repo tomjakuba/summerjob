@@ -8,10 +8,10 @@ interface RowProps {
   onDrop?: (e: React.DragEvent<HTMLTableRowElement>) => void;
 }
 
-const Arrow = () => (
+export const Arrow = () => (
   <i className="fas fa-angle-right" style={{ width: "0.5rem" }}></i>
 );
-const ExpandedArrow = () => (
+export const ExpandedArrow = () => (
   <i className="fas fa-angle-down" style={{ width: "0.5rem" }}></i>
 );
 
