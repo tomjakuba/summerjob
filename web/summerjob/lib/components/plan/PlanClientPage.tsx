@@ -202,7 +202,7 @@ export default function PlanClientPage({
               <i className="fas fa-cog"></i>
               <span>Vygenerovat plán</span>
             </button>
-            <Link href={`/print-plan/${planData?.id}`}>
+            <Link href={`/print-plan/${planData?.id}`} prefetch={false}>
               <button className="btn btn-primary btn-with-icon" type="button">
                 <i className="fas fa-print"></i>
                 <span>Tisknout</span>
