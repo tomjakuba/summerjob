@@ -23,29 +23,7 @@ export default function WorkersTable({ workers }: WorkersTableProps) {
             <MessageRow message="Žádní pracanti" colspan={_columns.length} />
           )}
           {workers.map((worker) => (
-            <SimpleRow
-              key={worker.id}
-              data={[
-                worker.firstName,
-                worker.lastName,
-                worker.phone,
-                worker.email,
-                worker.isStrong ? "Ano" : "Ne",
-                worker.cars.length > 0 ? "Ano" : "Ne",
-                <span
-                  key={`actions-${worker.id}`}
-                  className="d-flex align-items-center gap-3"
-                >
-                  <Link
-                    href={`/workers/${worker.id}`}
-                    onClick={(e) => e.stopPropagation()}
-                    className="smj-action-edit"
-                  >
-                    <i className="fas fa-edit" title="Upravit"></i>
-                  </Link>
-                </span>,
-              ]}
-            />
+            <SimpleRow key={worker.id} data={formatWorkerRow(worker)} />
           ))}
         </tbody>
       </table>
@@ -53,12 +31,38 @@ export default function WorkersTable({ workers }: WorkersTableProps) {
   );
 }
 
+function formatWorkerRow(worker: WorkerComplete) {
+  return [
+    worker.firstName,
+    worker.lastName,
+    worker.phone,
+    worker.email,
+    <>
+      {worker.cars.length > 0 && (
+        <i className="fas fa-car me-2" title={"Má auto"} />
+      )}
+      {worker.isStrong && <i className="fas fa-dumbbell" title={"Silák"} />}
+    </>,
+    <span
+      key={`actions-${worker.id}`}
+      className="d-flex align-items-center gap-3"
+    >
+      <Link
+        href={`/workers/${worker.id}`}
+        onClick={(e) => e.stopPropagation()}
+        className="smj-action-edit"
+      >
+        <i className="fas fa-edit" title="Upravit"></i>
+      </Link>
+    </span>,
+  ];
+}
+
 const _columns = [
   "Jméno",
   "Příjmení",
   "Telefonní číslo",
   "E-mail",
-  "Silák",
-  "Má auto",
+  "Vlastnosti",
   "Akce",
 ];
