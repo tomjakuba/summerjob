@@ -25,12 +25,12 @@ export default async function PrintWorkersPage() {
           <table className="table-print">
             <thead className="workers-thead">
               <tr>
-                <th>Jméno</th>
-                <th>Příjmení</th>
+                <th className="w-15">Jméno</th>
+                <th className="w-18">Příjmení</th>
                 <th className="w-12">Telefonní číslo</th>
                 <th>E-mail</th>
                 <th className="w-7">Vlastnosti</th>
-                <th className="w-20">Poznámka</th>
+                <th>Poznámka</th>
               </tr>
             </thead>
             <tbody className="">
