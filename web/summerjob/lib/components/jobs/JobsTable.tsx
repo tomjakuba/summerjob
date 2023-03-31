@@ -34,11 +34,29 @@ export function JobsTable({ data, shouldShowJob, reload }: JobsTableProps) {
   const onSortRequested = (direction: SortOrder) => {
     setSortOrder(direction);
   };
-  const [waitingJobs, completedJobs, pinnedJobs] = useMemo(() => {
-    const completed = data.filter((job) => job.completed);
-    const pinned = data.filter((job) => !job.completed && job.pinned);
-    const regular = data.filter((job) => !job.completed && !job.pinned);
-    return [regular, completed, pinned];
+  const [hiddenJobs, waitingJobs, completedJobs, pinnedJobs] = useMemo(() => {
+    const { hidden, completed, pinned, regular } = data.reduce(
+      (acc, job) => {
+        if (job.hidden) {
+          acc.hidden.push(job);
+        } else if (job.completed) {
+          acc.completed.push(job);
+        } else if (job.pinned) {
+          acc.pinned.push(job);
+        } else {
+          acc.regular.push(job);
+        }
+        return acc;
+      },
+      { hidden: [], completed: [], pinned: [], regular: [] } as {
+        hidden: Array<ProposedJobComplete>;
+        completed: Array<ProposedJobComplete>;
+        pinned: Array<ProposedJobComplete>;
+        regular: Array<ProposedJobComplete>;
+      }
+    );
+
+    return [hidden, regular, completed, pinned];
   }, [data]);
 
   const sortedData = useMemo(
@@ -52,6 +70,11 @@ export function JobsTable({ data, shouldShowJob, reload }: JobsTableProps) {
   const sortedCompleted = useMemo(
     () => sortJobs(completedJobs, sortOrder),
     [sortOrder, completedJobs]
+  );
+
+  const sortedHidden = useMemo(
+    () => sortJobs(hiddenJobs, sortOrder),
+    [sortOrder, hiddenJobs]
   );
 
   const reloadJobs = () => {
@@ -84,6 +107,26 @@ export function JobsTable({ data, shouldShowJob, reload }: JobsTableProps) {
       >
         {data &&
           sortedCompleted.map(
+            (job) =>
+              shouldShowJob(job) && (
+                <ProposedJobRow
+                  key={job.id}
+                  job={job}
+                  reloadJobs={reloadJobs}
+                />
+              )
+          )}
+      </RowCategory>
+      <RowCategory
+        title="Skryté"
+        numCols={_columns.length}
+        secondaryTitle={
+          "Joby označené jako skryté se nebudou zobrazovat při plánování"
+        }
+        className="bg-category-hidden"
+      >
+        {data &&
+          sortedHidden.map(
             (job) =>
               shouldShowJob(job) && (
                 <ProposedJobRow

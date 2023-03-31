@@ -79,6 +79,7 @@ model ProposedJob {
   requiredDays       Int
   completed          Boolean                   @default(false)
   pinned             Boolean                   @default(false)
+  hidden             Boolean                   @default(false)
   minWorkers         Int
   maxWorkers         Int
   strongWorkers      Int

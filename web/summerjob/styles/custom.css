@@ -242,6 +242,22 @@ img.smj-nav-logo {
   color: #2651c9;
 }
 
+.smj-action-hide {
+  color: #494949;
+}
+
+.smj-action-hide:hover {
+  color: #adadad;
+}
+
+.smj-action-hidden {
+  color: #adadad;
+}
+
+.smj-action-hidden:hover {
+  color: #494949;
+}
+
 .spinning {
   animation: 1s linear infinite spinner-border;
 }
@@ -287,6 +303,25 @@ img.smj-nav-logo {
 }
 
 .smj-completed-job-row td:first-of-type {
+  padding: 0rem;
+  display: flex;
+  align-items: center;
+}
+
+.bg-category-hidden {
+  background-color: #dddddd;
+}
+
+.smj-hidden-job-row td:first-of-type::before {
+  background-color: #dddddd;
+  content: "";
+  height: 2.5rem;
+  width: 0.5rem;
+  display: block;
+  margin-right: 0.5rem;
+}
+
+.smj-hidden-job-row td:first-of-type {
   padding: 0rem;
   display: flex;
   align-items: center;

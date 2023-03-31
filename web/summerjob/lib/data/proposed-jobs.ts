@@ -93,6 +93,7 @@ export async function getProposedJobsAssignableTo(
         },
       },
       completed: false,
+      hidden: false,
       availability: {
         some: {
           days: {

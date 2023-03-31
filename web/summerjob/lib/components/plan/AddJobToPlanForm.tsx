@@ -123,7 +123,7 @@ export default function AddJobToPlanForm({
               placeholder={"Vyberte joby..."}
               formatOptionLabel={formatOptionLabel}
               isMulti
-              getOptionValue={(option) => option.id}
+              getOptionValue={(option) => option.searchable}
             />
           )}
         />
@@ -163,7 +163,12 @@ function jobToSelectItem(job: ProposedJobComplete): SelectItem {
   return {
     id: job.id,
     name: job.name,
-    searchable: job.name + job.privateDescription + job.publicDescription,
+    searchable: (
+      job.name +
+      job.area.name +
+      job.privateDescription +
+      job.publicDescription
+    ).toLocaleLowerCase(),
     publicDescription: job.publicDescription,
     privateDescription: job.privateDescription,
     item: <AddJobSelectItem job={job} />,

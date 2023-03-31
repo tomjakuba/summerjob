@@ -38,6 +38,10 @@ export default function ProposedJobRow({
     triggerUpdate({ completed });
   };
 
+  const setJobHidden = (hidden: boolean) => {
+    triggerUpdate({ hidden });
+  };
+
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const {
     trigger: triggerDelete,
@@ -73,6 +77,7 @@ export default function ProposedJobRow({
         job,
         setJobPinned,
         setJobCompleted,
+        setJobHidden,
         confirmDelete,
         isBeingDeleted
       )}
@@ -136,6 +141,9 @@ export default function ProposedJobRow({
 }
 
 function rowColorClass(job: ProposedJobComplete) {
+  if (job.hidden) {
+    return "smj-hidden-job-row";
+  }
   if (job.completed) {
     return "smj-completed-job-row";
   }
@@ -149,6 +157,7 @@ function formatJobRow(
   job: ProposedJobComplete,
   setPinned: (pinned: boolean) => void,
   setCompleted: (completed: boolean) => void,
+  setHidden: (hidden: boolean) => void,
   deleteJob: () => void,
   isBeingDeleted: boolean
 ) {
@@ -167,6 +176,7 @@ function formatJobRow(
     <span key={job.id} className="d-flex align-items-center gap-3">
       {markJobAsCompletedIcon(job, setCompleted)}
       {pinJobIcon(job, setPinned)}
+      {hideJobIcon(job, setHidden)}
       <Link
         href={`/jobs/${job.id}`}
         onClick={(e) => e.stopPropagation()}
@@ -214,6 +224,25 @@ function pinJobIcon(
       onClick={(e) => {
         e.stopPropagation();
         setPinned(!job.pinned);
+      }}
+    ></i>
+  );
+}
+
+function hideJobIcon(
+  job: ProposedJobComplete,
+  setHidden: (hidden: boolean) => void
+) {
+  const color = job.hidden ? "smj-action-hidden" : "smj-action-hide";
+  const title = job.hidden ? "Zobrazit" : "Skrýt";
+  const icon = job.hidden ? "fa-eye" : "fa-eye-slash";
+  return (
+    <i
+      className={`fas ${icon} ${color}`}
+      title={title}
+      onClick={(e) => {
+        e.stopPropagation();
+        setHidden(!job.hidden);
       }}
     ></i>
   );
