@@ -4,6 +4,8 @@ import Image from "next/image";
 import logoImage from "public/logo-smj-yellow.png";
 import "/styles/print.css";
 
+export const dynamic = "force-dynamic";
+
 export default async function PrintWorkersPage() {
   const workers = await getWorkers();
   return (
