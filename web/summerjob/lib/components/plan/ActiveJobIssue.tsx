@@ -5,16 +5,18 @@ import { useMemo } from "react";
 
 interface ActiveJobIssueProps {
   job: ActiveJobNoPlan;
+  day: Date;
   ridesForOtherJobs: RidesForJob[];
 }
 
 export function ActiveJobIssueBanner({
   job,
+  day,
   ridesForOtherJobs,
 }: ActiveJobIssueProps) {
   const issues = useMemo(
-    () => getIssues(job, ridesForOtherJobs),
-    [job, ridesForOtherJobs]
+    () => getIssues(job, ridesForOtherJobs, day),
+    [job, ridesForOtherJobs, day]
   );
   const hasIssues = Object.values(issues).some((i) => i);
   return (
@@ -69,6 +71,11 @@ export function ActiveJobIssueBanner({
                   </div>
                 </div>
               )}
+              {issues.adorations && (
+                <div className="row">
+                  <div className="col">V této oblasti není možné adorovat.</div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -79,11 +86,12 @@ export function ActiveJobIssueBanner({
 
 export function ActiveJobIssueIcon({
   job,
+  day,
   ridesForOtherJobs,
 }: ActiveJobIssueProps) {
   const issues = useMemo(
-    () => getIssues(job, ridesForOtherJobs),
-    [job, ridesForOtherJobs]
+    () => getIssues(job, ridesForOtherJobs, day),
+    [job, ridesForOtherJobs, day]
   );
   const hasIssues = Object.values(issues).some((i) => i);
   return (
@@ -91,7 +99,11 @@ export function ActiveJobIssueIcon({
   );
 }
 
-function getIssues(job: ActiveJobNoPlan, ridesForOtherJobs: RidesForJob[]) {
+function getIssues(
+  job: ActiveJobNoPlan,
+  ridesForOtherJobs: RidesForJob[],
+  day: Date
+) {
   return {
     tooManyWorkers: tooManyWorkers(job),
     tooFewWorkers: tooFewWorkers(job),
@@ -100,6 +112,7 @@ function getIssues(job: ActiveJobNoPlan, ridesForOtherJobs: RidesForJob[]) {
     missingResponsible: missingResponsible(job),
     missingRides: missingRides(job, ridesForOtherJobs),
     allergies: allergies(job),
+    adorations: adorations(job, day),
   };
 }
 
@@ -117,10 +130,7 @@ function notEnoughStrongWorkers(job: ActiveJobNoPlan) {
 }
 
 function overloadedCars(job: ActiveJobNoPlan) {
-  const rides = job.rides.filter(
-    (ride) => ride.car.seats < ride.passengers.length + 1
-  );
-  return rides.length > 0;
+  return job.rides.some((ride) => ride.car.seats < ride.passengers.length + 1);
 }
 
 function missingResponsible(job: ActiveJobNoPlan) {
@@ -138,20 +148,33 @@ function missingRides(job: ActiveJobNoPlan, ridesForOtherJobs: RidesForJob[]) {
     .map((passenger) => passenger.id);
   const drivers = job.rides.map((ride) => ride.driver.id);
   const peopleWithRides = [...passengers, ...drivers];
-  const workersWithoutRides = job.workers.filter(
+  const workersWithoutRides = job.workers.some(
     (worker) => !peopleWithRides.includes(worker.id)
   );
-  return workersWithoutRides.length > 0;
+  return workersWithoutRides;
 }
 
 function allergies(job: ActiveJobNoPlan) {
   const jobAllergenIds = job.proposedJob.allergens.map((a) => a.id);
-  return (
-    job.workers.filter(
-      (worker) =>
-        worker.allergies
-          .map((a) => a.id)
-          .filter((allergyId) => jobAllergenIds.includes(allergyId)).length > 0
-    ).length > 0
+  return job.workers.some((worker) =>
+    worker.allergies
+      .map((a) => a.id)
+      .some((allergyId) => jobAllergenIds.includes(allergyId))
   );
+}
+
+function adorations(job: ActiveJobNoPlan, day: Date) {
+  if (job.proposedJob.area.supportsAdoration) {
+    return false;
+  }
+  for (const worker of job.workers) {
+    if (
+      worker.availability.adorationDays
+        .map((d) => d.getTime())
+        .includes(day.getTime())
+    ) {
+      return true;
+    }
+  }
+  return false;
 }

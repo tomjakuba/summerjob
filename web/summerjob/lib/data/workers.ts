@@ -134,7 +134,8 @@ export async function updateWorker(id: string, data: WorkerUpdateData) {
             },
           },
           data: {
-            days: data.availability,
+            workDays: data.availability?.workDays,
+            adorationDays: data.availability?.adorationDays,
           },
         },
       },

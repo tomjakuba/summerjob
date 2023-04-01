@@ -85,6 +85,7 @@ export function PlanTable({
           <PlanJobRow
             key={job.id}
             isDisplayed={shouldShowJob(job)}
+            day={plan.day}
             job={job}
             plannedJobs={sortedJobs}
             rides={rides}

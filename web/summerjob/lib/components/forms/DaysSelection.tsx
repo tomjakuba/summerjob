@@ -3,11 +3,16 @@ import React from "react";
 import { UseFormRegisterReturn } from "react-hook-form";
 
 interface DaysSelectionProps {
+  name: string;
   days: Date[];
   register: () => UseFormRegisterReturn;
 }
 
-export default function DaysSelection({ days, register }: DaysSelectionProps) {
+export default function DaysSelection({
+  name,
+  days,
+  register,
+}: DaysSelectionProps) {
   return (
     <div
       className="btn-group"
@@ -19,14 +24,14 @@ export default function DaysSelection({ days, register }: DaysSelectionProps) {
           <input
             type="checkbox"
             className="btn-check"
-            id={day.toJSON()}
+            id={`${name}-${day.toJSON()}`}
             autoComplete="off"
             {...register()}
             value={day.toJSON()}
           />
           <label
             className="btn btn-day-select p-2 pe-3 ps-3"
-            htmlFor={day.toJSON()}
+            htmlFor={`${name}-${day.toJSON()}`}
           >
             {capitalizeFirstLetter(formatDateShort(day))}
           </label>

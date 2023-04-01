@@ -21,6 +21,7 @@ import { ActiveJobIssueBanner, ActiveJobIssueIcon } from "./ActiveJobIssue";
 
 interface PlanJobRowProps {
   job: ActiveJobNoPlan;
+  day: Date;
   plannedJobs: ActiveJobNoPlan[];
   isDisplayed: boolean;
   rides: RidesForJob[];
@@ -33,6 +34,7 @@ interface PlanJobRowProps {
 
 export function PlanJobRow({
   job,
+  day,
   plannedJobs,
   isDisplayed,
   rides,
@@ -124,6 +126,7 @@ export function PlanJobRow({
           key={job.id}
           data={formatRowData(
             job,
+            day,
             ridesForOtherJobs,
             confirmDelete,
             isBeingDeleted
@@ -133,6 +136,7 @@ export function PlanJobRow({
           <>
             <ActiveJobIssueBanner
               job={job}
+              day={day}
               ridesForOtherJobs={ridesForOtherJobs}
             />
             <div className="ms-2">
@@ -152,12 +156,23 @@ export function PlanJobRow({
                 reloadPlan={reloadPlan}
               />
               <br />
-              <strong>Alergeny</strong>
-              <p>{formatAllergens(job)}</p>
-              <strong>Pracantů (min/max/silných)</strong>
               <p>
-                {job.proposedJob.minWorkers}/{job.proposedJob.maxWorkers}/
-                {job.proposedJob.strongWorkers}
+                <strong>Adorace v oblasti: </strong>
+                <span>
+                  {job.proposedJob.area.supportsAdoration ? "Ano" : "Ne"}
+                </span>
+              </p>
+              <p>
+                <strong>Alergeny: </strong>
+                <span>{formatAllergens(job)}</span>
+              </p>
+              <p>
+                <strong>Pracantů (min/max/silných): </strong>
+                <span>
+                  {" "}
+                  {job.proposedJob.minWorkers}/{job.proposedJob.maxWorkers}/
+                  {job.proposedJob.strongWorkers}
+                </span>
               </p>
               <p>
                 <strong>Zodpovědná osoba: </strong>
@@ -202,6 +217,7 @@ export function PlanJobRow({
                       data={formatWorkerData(
                         worker,
                         job,
+                        day,
                         ridesForOtherJobs,
                         removeWorkerFromJob,
                         setWorkerToMove,
@@ -274,6 +290,7 @@ function formatAllergens(job: ActiveJobNoPlan) {
 
 function formatRowData(
   job: ActiveJobNoPlan,
+  day: Date,
   ridesForOtherJobs: RidesForJob[],
   deleteJob: () => void,
   isBeingDeleted: boolean
@@ -284,7 +301,11 @@ function formatRowData(
       key={`name-${job.id}`}
     >
       {job.proposedJob.name}
-      <ActiveJobIssueIcon job={job} ridesForOtherJobs={ridesForOtherJobs} />
+      <ActiveJobIssueIcon
+        job={job}
+        day={day}
+        ridesForOtherJobs={ridesForOtherJobs}
+      />
     </span>,
     `${job.workers.length} / ${job.proposedJob.minWorkers} .. ${job.proposedJob.maxWorkers}`,
     job.proposedJob.contact,
@@ -335,29 +356,31 @@ function deleteJobIcon(deleteJob: () => void, isBeingDeleted: boolean) {
 function formatWorkerData(
   worker: WorkerComplete,
   job: ActiveJobNoPlan,
+  day: Date,
   rides: RidesForJob[],
   removeWorker: (workerId: string) => void,
   requestMoveWorker: (worker: WorkerComplete) => void,
   reloadPlan: () => void
 ) {
-  let name = `${worker.firstName} ${worker.lastName}`;
+  const name = `${worker.firstName} ${worker.lastName}`;
   const abilities = [];
-  let isDriver = false;
-  if (job?.rides.map((r) => r.driverId).includes(worker.id)) {
-    isDriver = true;
-  }
+  const isDriver =
+    job?.rides.map((r) => r.driverId).includes(worker.id) || false;
+  const wantsAdoration = worker.availability.adorationDays
+    .map((d) => d.getTime())
+    .includes(day.getTime());
+
   if (worker.cars.length > 0) abilities.push("Auto");
   if (worker.isStrong) abilities.push("Silák");
   const allergies = translateAllergies(worker.allergies);
 
   return [
-    isDriver ? (
-      <>
-        {name} <i className="fas fa-car ms-2"></i>
-      </>
-    ) : (
-      name
-    ),
+    <>
+      {name} {isDriver && <i className="fas fa-car ms-2" title="Řidič"></i>}{" "}
+      {wantsAdoration && (
+        <i className="fas fa-church ms-2" title="Chce adorovat"></i>
+      )}
+    </>,
     worker.phone,
     abilities.join(", "),
     allergies.map((a) => a.code).join(", "),

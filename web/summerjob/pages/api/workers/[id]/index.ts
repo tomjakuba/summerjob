@@ -1,8 +1,8 @@
 import { http_method_handler } from "lib/api/method_handler";
 import { validateOrSendError } from "lib/api/validator";
-import { ApiBadRequestError, ApiError, WrappedError } from "lib/data/api-error";
+import { ApiError, WrappedError } from "lib/data/api-error";
 import { getWorkerById, updateWorker } from "lib/data/workers";
-import { WorkerUpdateData, WorkerUpdateSchema } from "lib/types/worker";
+import { WorkerUpdateDataInput, WorkerUpdateSchema } from "lib/types/worker";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export type WorkerAPIGetResponse = Awaited<ReturnType<typeof getWorkerById>>;
@@ -19,9 +19,7 @@ async function get(
   res.status(200).json(user);
 }
 
-export type WorkerAPIPatchData = Omit<WorkerUpdateData, "availability"> & {
-  availability?: string[];
-};
+export type WorkerAPIPatchData = WorkerUpdateDataInput;
 async function patch(req: NextApiRequest, res: NextApiResponse) {
   const id = req.query.id as string;
   const workerData = validateOrSendError(WorkerUpdateSchema, req.body, res);

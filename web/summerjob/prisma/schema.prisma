@@ -28,12 +28,13 @@ model Worker {
 }
 
 model WorkerAvailability {
-  id       String         @id @default(uuid())
-  worker   Worker         @relation(fields: [workerId], references: [id], onDelete: Cascade)
-  workerId String
-  event    SummerJobEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  eventId  String
-  days     DateTime[]     @db.Date
+  id            String         @id @default(uuid())
+  worker        Worker         @relation(fields: [workerId], references: [id], onDelete: Cascade)
+  workerId      String
+  event         SummerJobEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId       String
+  workDays      DateTime[]     @db.Date
+  adorationDays DateTime[]     @db.Date
 
   @@unique([workerId, eventId])
 }
@@ -142,12 +143,13 @@ model Plan {
 }
 
 model Area {
-  id               String         @id @default(uuid())
-  name             String         @db.VarChar(64)
-  requiresCar      Boolean
-  jobs             ProposedJob[]
-  summerJobEvent   SummerJobEvent @relation(fields: [summerJobEventId], references: [id], onDelete: Cascade)
-  summerJobEventId String
+  id                String         @id @default(uuid())
+  name              String         @db.VarChar(64)
+  requiresCar       Boolean
+  supportsAdoration Boolean        @default(false)
+  jobs              ProposedJob[]
+  summerJobEvent    SummerJobEvent @relation(fields: [summerJobEventId], references: [id], onDelete: Cascade)
+  summerJobEventId  String
 }
 
 model SummerJobEvent {

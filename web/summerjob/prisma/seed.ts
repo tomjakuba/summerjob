@@ -45,6 +45,7 @@ async function createWorkers(
     const sex = Math.random() > 0.5 ? "male" : "female";
     const firstName = faker.name.firstName(sex);
     const lastName = faker.name.lastName(sex);
+    const workDays = choose(days, between(4, days.length));
     return {
       firstName: firstName,
       lastName: lastName,
@@ -55,7 +56,8 @@ async function createWorkers(
       availability: {
         create: {
           eventId: eventId,
-          days: choose(days, between(2, days.length)),
+          workDays: workDays,
+          adorationDays: choose(workDays, between(0, workDays.length)),
         },
       },
     };

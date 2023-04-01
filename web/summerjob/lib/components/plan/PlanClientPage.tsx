@@ -351,7 +351,7 @@ function getAvailableAreas(plan?: PlanComplete) {
 }
 
 function isWorkerAvailable(worker: WorkerComplete, day: Date) {
-  return worker.availability.days
+  return worker.availability.workDays
     .map((d) => d.getTime())
     .includes(day.getTime());
 }

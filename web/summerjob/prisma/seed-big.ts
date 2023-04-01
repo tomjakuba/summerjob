@@ -51,6 +51,7 @@ async function createWorkers(
     const sex = Math.random() > 0.5 ? "male" : "female";
     const firstName = faker.name.firstName(sex);
     const lastName = faker.name.lastName(sex);
+    const workDays = choose(days, between(4, days.length));
     return {
       firstName: firstName,
       lastName: lastName,
@@ -61,7 +62,8 @@ async function createWorkers(
       availability: {
         create: {
           eventId: eventId,
-          days: chooseWithProbability(days, 0.9),
+          workDays: workDays,
+          adorationDays: chooseWithProbability(workDays, 0.15),
         },
       },
     };
@@ -138,15 +140,16 @@ async function createYearlyEvent() {
 
 async function createAreas(eventId: string) {
   const AREAS_COUNT = 7;
-  const createArea = () => {
+  const createArea = (areaId: number) => {
     return {
       name: faker.address.city(),
       summerJobEventId: eventId,
       requiresCar: Math.random() < 0.8,
+      supportsAdoration: areaId === 0,
     };
   };
   await prisma.area.createMany({
-    data: [...Array(AREAS_COUNT)].map(() => createArea()),
+    data: [...Array(AREAS_COUNT)].map((_, index) => createArea(index)),
   });
   return await prisma.area.findMany();
 }
