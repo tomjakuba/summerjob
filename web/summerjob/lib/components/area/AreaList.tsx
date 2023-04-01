@@ -80,9 +80,12 @@ function AreaRow({ area, eventId, onDataChanged }: AreaRowProps) {
       <div className="d-flex justify-content-between align-items-center">
         <div className="d-flex flex-column pe-5">
           <label className="fs-5">{area.name}</label>
-          <p className="text-muted">
-            Doprava nutná: {area.requiresCar ? "Ano" : "Ne"}.
-          </p>
+          <div className="text-muted">
+            Doprava nutná: {area.requiresCar ? "Ano" : "Ne"}
+          </div>
+          <div className="text-muted mb-2">
+            Adorace: {area.supportsAdoration ? "Ano" : "Ne"}
+          </div>
         </div>
         <div className="d-flex align-items-center gap-3">
           <Link

@@ -1,3 +1,4 @@
+import { YieldExpression } from "typescript";
 import { z } from "zod";
 import type {
   Allergy,
@@ -24,11 +25,17 @@ export const WorkerUpdateSchema = z
     email: z.string().min(1),
     phone: z.string().min(1),
     allergyIds: z.array(z.string()),
-    availability: z.array(z.coerce.date()),
+    availability: z.object({
+      workDays: z.array(z.date().or(z.string().min(1).pipe(z.coerce.date()))),
+      adorationDays: z.array(
+        z.date().or(z.string().min(1).pipe(z.coerce.date()))
+      ),
+    }),
   })
   .strict()
   .partial();
 
+export type WorkerUpdateDataInput = z.input<typeof WorkerUpdateSchema>;
 export type WorkerUpdateData = z.infer<typeof WorkerUpdateSchema>;
 
 export type WorkerBasicInfo = Pick<Worker, "id" | "firstName" | "lastName">;
@@ -62,7 +69,10 @@ export function deserializeWorkers(data: Serialized<WorkerComplete[]>) {
 }
 
 export function deserializeWorkerAvailability(worker: WorkerComplete) {
-  worker.availability.days = worker.availability.days.map(
+  worker.availability.workDays = worker.availability.workDays.map(
+    (day) => new Date(day)
+  );
+  worker.availability.adorationDays = worker.availability.adorationDays.map(
     (day) => new Date(day)
   );
   return worker;

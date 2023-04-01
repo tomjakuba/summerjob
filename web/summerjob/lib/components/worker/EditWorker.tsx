@@ -10,7 +10,6 @@ import {
 import { Allergy } from "lib/prisma/client";
 import { useState } from "react";
 import { useAPIWorkerUpdate } from "lib/fetcher/worker";
-import Image from "next/image";
 import Link from "next/link";
 import AllergyPill from "../forms/AllergyPill";
 import { deserializeAllergies } from "lib/types/allergy";
@@ -20,10 +19,8 @@ import { Serialized } from "lib/types/serialize";
 import DaysSelection from "../forms/DaysSelection";
 import { datesBetween } from "lib/helpers/helpers";
 
-const schema = WorkerUpdateSchema.omit({ availability: true }).extend({
-  availability: z.array(z.string()),
-});
-type WorkerForm = z.infer<typeof schema>;
+const schema = WorkerUpdateSchema;
+type WorkerForm = z.input<typeof schema>;
 
 interface EditWorkerProps {
   serializedWorker: Serialized<WorkerComplete>;
@@ -56,7 +53,12 @@ export default function EditWorker({
       email: worker.email,
       phone: worker.phone,
       allergyIds: worker.allergies.map((allergy) => allergy.id),
-      availability: worker.availability.days.map((day) => day.toJSON()),
+      availability: {
+        workDays: worker.availability.workDays.map((day) => day.toJSON()),
+        adorationDays: worker.availability.adorationDays.map((day) =>
+          day.toJSON()
+        ),
+      },
     },
   });
   const [saved, setSaved] = useState(false);
@@ -125,13 +127,25 @@ export default function EditWorker({
             />
             <label
               className="form-label d-block fw-bold mt-4"
-              htmlFor="availability"
+              htmlFor="availability.workDays"
             >
               Může pracovat v následující dny
             </label>
             <DaysSelection
+              name="availability.workDays"
               days={allDates}
-              register={() => register("availability")}
+              register={() => register("availability.workDays")}
+            />
+            <label
+              className="form-label d-block fw-bold mt-4"
+              htmlFor="availability.adorationDays"
+            >
+              Chce adorovat v následující dny
+            </label>
+            <DaysSelection
+              name="availability.adorationDays"
+              days={allDates}
+              register={() => register("availability.adorationDays")}
             />
             <label
               className="form-label d-block fw-bold mt-4"

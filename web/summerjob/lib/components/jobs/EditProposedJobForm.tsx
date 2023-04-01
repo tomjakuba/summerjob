@@ -182,6 +182,7 @@ export default function EditProposedJobForm({
               Dostupné v následující dny
             </label>
             <DaysSelection
+              name="availability"
               days={allDates}
               register={() => register("availability")}
             />
