@@ -2,7 +2,6 @@ import { Allergy, Area, Car, Worker } from "../../prisma/client";
 import {
   DataSource,
   JobToBePlanned,
-  ProposedJobComplete,
   ProposedJobNoActive,
   WorkerComplete,
 } from "../datasources/DataSource";
@@ -23,14 +22,7 @@ export class BasicPlanner implements Planner {
       return { success: false, jobs: [] };
     }
     const workersWithoutJob = await this.datasource.getWorkersWithoutJob(plan);
-    const proposedJobsAll = await this.datasource.getProposedJobs(
-      plan.summerJobEventId,
-      plan.day
-    );
-    const plannedProposedJobIds = plan.jobs.map((job) => job.proposedJobId);
-    const proposedJobs = proposedJobsAll.filter(
-      (j) => !plannedProposedJobIds.includes(j.id)
-    );
+
     const categorizedWorkers = this.categorizeWorkers(workersWithoutJob);
 
     const jobsInPlan: PlannedJob[] = plan.jobs.map((job) => ({
@@ -46,19 +38,44 @@ export class BasicPlanner implements Planner {
       })),
     }));
 
+    jobsInPlan.sort((a, b) => {
+      if (a.job.area.supportsAdoration && !b.job.area.supportsAdoration) {
+        return -1;
+      }
+      if (!a.job.area.supportsAdoration && b.job.area.supportsAdoration) {
+        return 1;
+      }
+      return 0;
+    });
+
     const minPlanned = this.planJobsRecursive(
       jobsInPlan.map((job) => ({ attemptsLeft: 1, plannedJob: job })),
+      plan.day,
       categorizedWorkers
     );
 
-    const filledWithRides = this.addExtraDrivers(
+    const filled1 = this.planFillJobs(
       minPlanned.plannedJobs,
-      minPlanned.remainingWorkers
+      [
+        ...minPlanned.remainingWorkers.others,
+        ...minPlanned.remainingWorkers.strong,
+      ],
+      plan.day
+    );
+
+    const filledWithRides = this.addExtraDrivers(
+      filled1.plannedJobs,
+      this.categorizeWorkers([
+        ...filled1.remainingWorkers,
+        ...minPlanned.remainingWorkers.drivers,
+      ]),
+      plan.day
     );
 
     const filledPlan = this.planFillJobs(
       filledWithRides.plannedJobs,
-      this.decategorizeWorkers(filledWithRides.remainingWorkers)
+      this.decategorizeWorkers(filledWithRides.remainingWorkers),
+      plan.day
     );
     // result.plannedJobs.forEach((element) => {
     //   this.logPlannedJob(element);
@@ -78,7 +95,8 @@ export class BasicPlanner implements Planner {
    */
   addExtraDrivers(
     plannedJobs: PlannedJob[],
-    workersWithoutJob: CategorizedWorkers
+    workersWithoutJob: CategorizedWorkers,
+    day: Date
   ): RecPlanningResult {
     if (workersWithoutJob.drivers.length === 0) {
       return { plannedJobs, remainingWorkers: workersWithoutJob };
@@ -101,7 +119,9 @@ export class BasicPlanner implements Planner {
       }
       const driverRequest = this.findDriver(
         workersWithoutJob,
-        job.job.allergens
+        job.job.allergens,
+        job.job.area.supportsAdoration,
+        day
       );
       if (!driverRequest.worker) {
         continue;
@@ -128,8 +148,6 @@ export class BasicPlanner implements Planner {
       }
       // Remove workers from shared ride and add them to this new ride instead
       for (const worker of workersWithSharedRide) {
-        console.log("Removing worker from shared ride", worker.lastName);
-
         let rideFound = false;
         for (const job of plannedJobs) {
           if (rideFound) {
@@ -163,7 +181,8 @@ export class BasicPlanner implements Planner {
    */
   planFillJobs(
     plannedJobs: PlannedJob[],
-    workersWithoutJob: WorkerComplete[]
+    workersWithoutJob: WorkerComplete[],
+    day: Date
   ): FillPlanningResult {
     for (const plannedJob of plannedJobs) {
       if (workersWithoutJob.length === 0) {
@@ -186,7 +205,21 @@ export class BasicPlanner implements Planner {
           break;
         }
         while (workersNeeded > 0 && seats > 0) {
-          const availableWorker = workersWithoutJob.find(
+          let availableWorker: WorkerComplete | undefined;
+          if (plannedJob.job.area.supportsAdoration) {
+            availableWorker = workersWithoutJob.find(
+              (w) =>
+                !this.isAllergicTo(w, plannedJob.job.allergens) &&
+                this.workerRequiresAdoration(w, day)
+            );
+          } else {
+            availableWorker = workersWithoutJob.find(
+              (w) =>
+                !this.isAllergicTo(w, plannedJob.job.allergens) &&
+                !this.workerRequiresAdoration(w, day)
+            );
+          }
+          availableWorker ??= workersWithoutJob.find(
             (w) => !this.isAllergicTo(w, plannedJob.job.allergens)
           );
           // If every worker is allergic to this job, we can't fill it
@@ -194,7 +227,7 @@ export class BasicPlanner implements Planner {
             break;
           }
           workersWithoutJob = workersWithoutJob.filter(
-            (w) => w.id !== availableWorker.id
+            (w) => w.id !== availableWorker!.id
           );
           ride.passengers.push(availableWorker);
           plannedJob.workers.push(availableWorker);
@@ -205,7 +238,15 @@ export class BasicPlanner implements Planner {
 
       if (!plannedJob.job.area.requiresCar) {
         while (workersNeeded > 0) {
-          const availableWorker = workersWithoutJob.find(
+          let availableWorker: WorkerComplete | undefined;
+          if (plannedJob.job.area.supportsAdoration) {
+            availableWorker = workersWithoutJob.find(
+              (w) =>
+                !this.isAllergicTo(w, plannedJob.job.allergens) &&
+                this.workerRequiresAdoration(w, day)
+            );
+          }
+          availableWorker ??= workersWithoutJob.find(
             (w) => !this.isAllergicTo(w, plannedJob.job.allergens)
           );
           // If every worker is allergic to this job, we can't fill it
@@ -213,7 +254,7 @@ export class BasicPlanner implements Planner {
             break;
           }
           workersWithoutJob = workersWithoutJob.filter(
-            (w) => w.id !== availableWorker.id
+            (w) => w.id !== availableWorker!.id
           );
           plannedJob.workers.push(availableWorker);
           workersNeeded--;
@@ -232,6 +273,7 @@ export class BasicPlanner implements Planner {
    */
   planJobsRecursive(
     jobsToPlan: JobPlanningAttempt[],
+    day: Date,
     workersWithoutJob: CategorizedWorkers
   ): RecPlanningResult {
     if (jobsToPlan.length === 0) {
@@ -259,7 +301,10 @@ export class BasicPlanner implements Planner {
     }
 
     // Remember the original state of workers in case we need to throw a worker away and replace them with a driver
-    const workersAddedByPlanner = [];
+    const workersAddedByPlanner = { strong: [], regular: [] } as {
+      strong: Array<WorkerComplete>;
+      regular: Array<WorkerComplete>;
+    };
 
     // Fill in strong workers without job
     const assignedStrongWorkers = plannedJob.workers.filter((w) => w.isStrong);
@@ -268,13 +313,15 @@ export class BasicPlanner implements Planner {
       for (let i = 0; i < required; i++) {
         const findResult = this.findStrongWorker(
           workersWithoutJob,
-          plannedJob.job.allergens
+          plannedJob.job.allergens,
+          plannedJob.job.area.supportsAdoration,
+          day
         );
         if (!findResult.worker) {
           break;
         }
         plannedJob.workers.push(findResult.worker);
-        workersAddedByPlanner.push(findResult.worker);
+        workersAddedByPlanner.strong.push(findResult.worker);
         workersWithoutJob = findResult.remainingWorkers;
       }
     }
@@ -285,13 +332,15 @@ export class BasicPlanner implements Planner {
       for (let i = 0; i < required; i++) {
         const findResult = this.findWorker(
           workersWithoutJob,
-          plannedJob.job.allergens
+          plannedJob.job.allergens,
+          plannedJob.job.area.supportsAdoration,
+          day
         );
         if (!findResult.worker) {
           break;
         }
         plannedJob.workers.push(findResult.worker);
-        workersAddedByPlanner.push(findResult.worker);
+        workersAddedByPlanner.regular.push(findResult.worker);
         workersWithoutJob = findResult.remainingWorkers;
       }
     }
@@ -316,7 +365,7 @@ export class BasicPlanner implements Planner {
         );
         if (workersWithoutTransport.length > 0) {
           // Plan rides for workers without transport
-          // If there is already a driver without transport, create a ride with them
+          // If there is already a car owner in job that doesn't have a drive planned, create a ride with them
           const drivers = workersWithoutTransport.filter(
             (w) => w.cars.length > 0
           );
@@ -336,7 +385,7 @@ export class BasicPlanner implements Planner {
           }
 
           if (workersWithoutTransport.length > 0) {
-            // TODO: Plan rides for workers without transport
+            // Plan rides for workers without transport
             // This can be done either by assigning them to a shared ride with another job (preferred)
             // or by finding a new driver for this job
             const sharedRidesInfo = this.findSharedRides(
@@ -367,13 +416,16 @@ export class BasicPlanner implements Planner {
                   ...jobsToPlan,
                   { attemptsLeft: attemptsLeft - 1, plannedJob: plannedJob },
                 ],
+                day,
                 workersWithoutJob
               );
             }
             // We can't find shared rides, find a new driver
             const findResult = this.findDriver(
               workersWithoutJob,
-              plannedJob.job.allergens
+              plannedJob.job.allergens,
+              plannedJob.job.area.supportsAdoration,
+              day
             );
             if (!findResult.worker) {
               // No driver found, just shuffle the current state of the job and try again later
@@ -382,8 +434,30 @@ export class BasicPlanner implements Planner {
                   ...jobsToPlan,
                   { attemptsLeft: attemptsLeft - 1, plannedJob: plannedJob },
                 ],
+                day,
                 workersWithoutJob
               );
+            }
+
+            // Driver found, but it might be over max workers limit, so we need to throw away some workers
+            if (plannedJob.workers.length + 1 > plannedJob.job.maxWorkers) {
+              // Since ride assignments are done from the start of the worker array, and we know at least one worker is without a ride,
+              // we can remove the last worker from the planned job if the planner added them - manually added workers are never removed
+              if (workersAddedByPlanner.regular.length > 0) {
+                plannedJob.workers.pop();
+                const removedWorker = workersAddedByPlanner.regular.pop()!;
+                workersWithoutJob.others.push(removedWorker);
+                workersWithoutTransport = workersWithoutTransport.filter(
+                  (w) => w.id !== removedWorker.id
+                );
+              } else if (workersAddedByPlanner.strong.length > 0) {
+                plannedJob.workers.pop();
+                const removedWorker = workersAddedByPlanner.strong.pop()!;
+                workersWithoutJob.strong.push(removedWorker);
+                workersWithoutTransport = workersWithoutTransport.filter(
+                  (w) => w.id !== removedWorker.id
+                );
+              }
             }
 
             const driver = findResult.worker;
@@ -406,6 +480,7 @@ export class BasicPlanner implements Planner {
               ...jobsToPlan,
               { attemptsLeft: attemptsLeft - 1, plannedJob: plannedJob },
             ],
+            day,
             workersWithoutJob
           );
         }
@@ -417,6 +492,7 @@ export class BasicPlanner implements Planner {
         ...jobsToPlan,
         { attemptsLeft: attemptsLeft - 1, plannedJob: plannedJob },
       ],
+      day,
       workersWithoutJob
     );
   }
@@ -500,13 +576,33 @@ export class BasicPlanner implements Planner {
     }
   }
 
+  workerRequiresAdoration(worker: WorkerComplete, day: Date): boolean {
+    return worker.availability.adorationDays
+      .map((d) => d.getTime())
+      .includes(day.getTime());
+  }
+
   findDriver(
     workers: CategorizedWorkers,
-    jobAllergens: Allergy[]
+    jobAllergens: Allergy[],
+    areaSupportsAdoration: boolean,
+    day: Date
   ): FindWorkerResult {
-    const driver = workers.drivers.find(
-      (w) => !this.isAllergicTo(w, jobAllergens)
-    );
+    let driver: WorkerComplete | undefined;
+    if (areaSupportsAdoration) {
+      driver = workers.drivers.find(
+        (w) =>
+          !this.isAllergicTo(w, jobAllergens) &&
+          this.workerRequiresAdoration(w, day)
+      );
+    } else {
+      driver ??= workers.drivers.find(
+        (w) =>
+          !this.isAllergicTo(w, jobAllergens) &&
+          !this.workerRequiresAdoration(w, day)
+      );
+    }
+    driver ??= workers.drivers.find((w) => !this.isAllergicTo(w, jobAllergens));
     if (!driver) {
       return { worker: null, remainingWorkers: workers };
     }
@@ -515,18 +611,32 @@ export class BasicPlanner implements Planner {
       remainingWorkers: {
         others: workers.others,
         strong: workers.strong,
-        drivers: workers.drivers.filter((w) => w.id !== driver.id),
+        drivers: workers.drivers.filter((w) => w.id !== driver!.id),
       },
     };
   }
 
   findStrongWorker(
     workers: CategorizedWorkers,
-    jobAllergens: Allergy[]
+    jobAllergens: Allergy[],
+    areaSupportsAdoration: boolean,
+    day: Date
   ): FindWorkerResult {
-    const worker = workers.strong.find(
-      (worker) => !this.isAllergicTo(worker, jobAllergens)
-    );
+    let worker: WorkerComplete | undefined;
+    if (areaSupportsAdoration) {
+      worker = workers.strong.find(
+        (w) =>
+          !this.isAllergicTo(w, jobAllergens) &&
+          this.workerRequiresAdoration(w, day)
+      );
+    } else {
+      worker ??= workers.strong.find(
+        (w) =>
+          !this.isAllergicTo(w, jobAllergens) &&
+          !this.workerRequiresAdoration(w, day)
+      );
+    }
+    worker ??= workers.strong.find((w) => !this.isAllergicTo(w, jobAllergens));
     if (!worker) {
       return { worker: null, remainingWorkers: workers };
     }
@@ -534,7 +644,7 @@ export class BasicPlanner implements Planner {
       worker: worker,
       remainingWorkers: {
         others: workers.others,
-        strong: workers.strong.filter((w) => w.id !== worker.id),
+        strong: workers.strong.filter((w) => w.id !== worker!.id),
         drivers: workers.drivers,
       },
     };
@@ -542,11 +652,25 @@ export class BasicPlanner implements Planner {
 
   findWorker(
     workers: CategorizedWorkers,
-    jobAllergens: Allergy[]
+    jobAllergens: Allergy[],
+    areaSupportsAdoration: boolean,
+    day: Date
   ): FindWorkerResult {
-    let worker = workers.others.find(
-      (w) => !this.isAllergicTo(w, jobAllergens)
-    );
+    let worker: WorkerComplete | undefined;
+    if (areaSupportsAdoration) {
+      worker = workers.others.find(
+        (w) =>
+          !this.isAllergicTo(w, jobAllergens) &&
+          this.workerRequiresAdoration(w, day)
+      );
+    } else {
+      worker ??= workers.others.find(
+        (w) =>
+          !this.isAllergicTo(w, jobAllergens) &&
+          !this.workerRequiresAdoration(w, day)
+      );
+    }
+    worker ??= workers.others.find((w) => !this.isAllergicTo(w, jobAllergens));
     if (worker) {
       return {
         worker: worker,
@@ -558,27 +682,23 @@ export class BasicPlanner implements Planner {
       };
     }
 
-    worker = workers.strong.find((w) => !this.isAllergicTo(w, jobAllergens));
-    if (worker) {
-      return {
-        worker: worker,
-        remainingWorkers: {
-          others: workers.others,
-          strong: workers.strong.filter((w) => w.id !== worker!.id),
-          drivers: workers.drivers,
-        },
-      };
+    const findStrong = this.findStrongWorker(
+      workers,
+      jobAllergens,
+      areaSupportsAdoration,
+      day
+    );
+    if (findStrong.worker) {
+      return findStrong;
     }
-    worker = workers.drivers.find((w) => !this.isAllergicTo(w, jobAllergens));
-    if (worker) {
-      return {
-        worker: worker,
-        remainingWorkers: {
-          others: workers.others,
-          strong: workers.strong,
-          drivers: workers.drivers.filter((w) => w.id !== worker!.id),
-        },
-      };
+    const findDriver = this.findDriver(
+      workers,
+      jobAllergens,
+      areaSupportsAdoration,
+      day
+    );
+    if (findDriver.worker) {
+      return findDriver;
     }
     return { worker: null, remainingWorkers: workers };
   }
