@@ -15,7 +15,7 @@ export async function getWorkersWithoutJob(
       availability: {
         some: {
           eventId: plan.summerJobEventId,
-          days: {
+          workDays: {
             has: plan.day.toJSON(),
           },
         },
