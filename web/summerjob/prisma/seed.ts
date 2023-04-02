@@ -8,6 +8,7 @@ import {
   Worker,
 } from "../lib/prisma/client";
 import { faker } from "@faker-js/faker/locale/cz";
+import { Prisma } from "../lib/prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -21,6 +22,10 @@ function choose<T>(array: T[], amount: number): T[] {
 
 function between(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+function chooseWithProbability<T>(array: T[], probability: number): T[] {
+  return array.filter((_, i) => Math.random() < probability);
 }
 
 async function createAllergies() {
@@ -39,14 +44,17 @@ async function createAllergies() {
 async function createWorkers(
   allergies: Allergy[],
   eventId: string,
-  days: Date[]
+  days: Date[],
+  count = 100
 ) {
+  const HAS_CAR_PERCENTAGE = 0.25;
+  const WORKERS_COUNT = count;
   const createWorker = () => {
     const sex = Math.random() > 0.5 ? "male" : "female";
     const firstName = faker.name.firstName(sex);
     const lastName = faker.name.lastName(sex);
     const workDays = choose(days, between(4, days.length));
-    return {
+    return Prisma.validator<Prisma.WorkerCreateInput>()({
       firstName: firstName,
       lastName: lastName,
       phone: faker.phone.number("### ### ###"),
@@ -57,10 +65,15 @@ async function createWorkers(
         create: {
           eventId: eventId,
           workDays: workDays,
-          adorationDays: choose(workDays, between(0, workDays.length)),
+          adorationDays: chooseWithProbability(workDays, 0.15),
         },
       },
-    };
+      permissions: {
+        create: {
+          permissions: [],
+        },
+      },
+    });
   };
   const withCar = (worker: any) => {
     const odometerValue = between(10000, 100000);
@@ -71,7 +84,7 @@ async function createWorkers(
           {
             name: faker.vehicle.vehicle() + ", " + faker.vehicle.vrm(),
             description: faker.color.human(),
-            seats: between(1, 3) * 2,
+            seats: between(4, 5),
             odometers: {
               create: [
                 {
@@ -86,31 +99,31 @@ async function createWorkers(
       },
     };
   };
-  for (let i = 0; i < 14; i++) {
+  const numWorkersWithCar = Math.floor(WORKERS_COUNT * HAS_CAR_PERCENTAGE);
+  for (let i = 0; i < WORKERS_COUNT - numWorkersWithCar; i++) {
     const worker = createWorker();
-    if (i === 0 || Math.random() < 0.2) {
+    if (i === 0 || Math.random() < 0.15) {
       worker.isStrong = true;
     }
     await prisma.worker.create({
       data: worker,
     });
   }
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < numWorkersWithCar; i++) {
     const worker = withCar(createWorker());
     await prisma.worker.create({
       data: worker,
     });
   }
+
   if (allergies.length > 0) {
-    const allergyWorkers = await prisma.worker.findMany({
-      take: 5,
-    });
-    for (let i = 0; i < 5; i++) {
+    const allergyWorkers = await prisma.worker.findMany({});
+    for (let i = 0; i < WORKERS_COUNT; i++) {
       await prisma.worker.update({
         where: { id: allergyWorkers[i].id },
         data: {
           allergies: {
-            connect: choose(allergies, between(1, 3)).map((allergy) => ({
+            connect: chooseWithProbability(allergies, 0.2).map((allergy) => ({
               id: allergy.id,
             })),
           },
@@ -122,27 +135,30 @@ async function createWorkers(
 }
 
 async function createYearlyEvent() {
+  const year = new Date().getFullYear() + 1;
   const event = await prisma.summerJobEvent.create({
     data: {
-      name: "Krkonoše 2023",
-      startDate: new Date("2023-07-03"),
-      endDate: new Date("2023-07-09"),
+      name: `Krkonoše ${year}`,
+      startDate: new Date(`${year}-07-03`),
+      endDate: new Date(`${year}-07-09`),
       isActive: true,
     },
   });
   return event;
 }
 
-async function createAreas(eventId: string) {
-  const createArea = () => {
+async function createAreas(eventId: string, count = 7) {
+  const AREAS_COUNT = count;
+  const createArea = (areaId: number) => {
     return {
       name: faker.address.city(),
       summerJobEventId: eventId,
-      requiresCar: Math.random() > 0.5,
+      requiresCar: Math.random() < 0.8,
+      supportsAdoration: areaId === 0,
     };
   };
   await prisma.area.createMany({
-    data: [createArea(), createArea(), createArea()],
+    data: [...Array(AREAS_COUNT)].map((_, index) => createArea(index)),
   });
   return await prisma.area.findMany();
 }
@@ -151,15 +167,20 @@ async function createProposedJobs(
   areaIds: string[],
   eventId: string,
   days: Date[],
-  allergens: Allergy[]
+  allergens: Allergy[],
+  count = 70
 ) {
-  const titles = [
+  let titles = [
     "Hrabání listí",
     "Přesouvání kamení",
     "Řezání dřeva",
     "Úprava zahrady",
     "Vymalování místnosti",
   ];
+  for (let i = 0; i < count - 5; i++) {
+    titles.push("Práce: " + faker.commerce.productName());
+  }
+  titles = titles.slice(0, count);
   const createProposedJob = (name: string) => {
     return {
       name: name,
@@ -183,7 +204,7 @@ async function createProposedJobs(
         availability: {
           create: {
             eventId: eventId,
-            days: choose(days, between(2, days.length)),
+            days: chooseWithProbability(days, 0.5),
           },
         },
         allergens: {
@@ -274,6 +295,7 @@ async function populatePlan(
 }
 
 async function main() {
+  const mini = process.argv[2] === "mini";
   console.log("Creating yearly event...");
   const yearlyEvent = await createYearlyEvent();
   const allergies = await createAllergies();
@@ -281,21 +303,25 @@ async function main() {
   const workers = await createWorkers(
     allergies,
     yearlyEvent.id,
-    datesBetween(yearlyEvent.startDate, yearlyEvent.endDate)
+    datesBetween(yearlyEvent.startDate, yearlyEvent.endDate),
+    mini ? 5 : 100
   );
   console.log("Creating areas...");
-  const areas = await createAreas(yearlyEvent.id);
+  const areas = await createAreas(yearlyEvent.id, mini ? 2 : 10);
   console.log("Creating proposed jobs...");
   const proposedJobs = await createProposedJobs(
     areas.map((area) => area.id),
     yearlyEvent.id,
     datesBetween(yearlyEvent.startDate, yearlyEvent.endDate),
-    allergies
+    allergies,
+    mini ? 5 : 70
   );
   console.log("Creating plan...");
   const plan = await createPlan(yearlyEvent);
   console.log("Populating plan...");
-  await populatePlan(plan, proposedJobs, workers);
+  if (!mini) {
+    await populatePlan(plan, proposedJobs, workers);
+  }
 }
 
 main()

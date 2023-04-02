@@ -24,7 +24,15 @@ model Worker {
   responsibleFor ActiveJob[]          @relation("ResponsibleWorker")
   deleted        Boolean              @default(false)
   availability   WorkerAvailability[]
-  permissions    String[]
+  blocked        Boolean              @default(false)
+  permissions    WorkerPermissions    @relation(fields: [permissionsId], references: [id])
+  permissionsId  String               @unique
+}
+
+model WorkerPermissions {
+  id          String   @id @default(uuid())
+  worker      Worker?
+  permissions String[]
 }
 
 model WorkerAvailability {
