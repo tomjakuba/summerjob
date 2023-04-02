@@ -1,6 +1,6 @@
 import {
   getClientSafeSession,
-  getSession,
+  getSMJSession,
   toClientSession,
 } from "lib/auth/auth";
 import { LoginClientTest } from "lib/components/auth/test";

@@ -1,4 +1,4 @@
-import { getSession } from "lib/auth/auth";
+import { getSMJSession } from "lib/auth/auth";
 import CenteredBox from "lib/components/auth/CenteredBox";
 import SignInClientPage from "lib/components/auth/SignInClientPage";
 import { redirect } from "next/navigation";
@@ -8,7 +8,7 @@ type Props = {
 };
 
 export default async function SignInPage({ searchParams }: Props) {
-  const session = await getSession();
+  const session = await getSMJSession();
   if (searchParams?.callbackUrl && session) {
     if (typeof searchParams.callbackUrl === "string") {
       redirect(searchParams.callbackUrl);

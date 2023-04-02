@@ -4,6 +4,7 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "lib/prisma/connection";
 import { createTransport } from "nodemailer";
 import { emailHtml, emailText } from "lib/auth/auth";
+import { getUserByEmail, getUserById } from "lib/data/users";
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -40,13 +41,17 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    signIn(params) {
+    async signIn(params) {
+      if (!params.user.email) return false;
+      const user = await getUserByEmail(params.user.email);
+      if (!user || user.blocked || user.deleted) return false;
       return true;
     },
   },
   pages: {
     signIn: "/auth/signIn",
     verifyRequest: "/auth/checkEmail",
+    error: "/auth/error",
   },
 };
 

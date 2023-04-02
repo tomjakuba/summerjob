@@ -3,7 +3,7 @@ import { Session } from "next-auth";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "pages/api/auth/[...nextauth]";
 
-export async function getSession() {
+export async function getSMJSession() {
   const session = await getServerSession(authOptions);
   return session;
 }
@@ -17,7 +17,7 @@ export function toClientSession(session: Session): UserSession {
 }
 
 export async function getClientSafeSession(): Promise<UserSession | null> {
-  const session = await getSession();
+  const session = await getSMJSession();
   if (!session) return null;
   return toClientSession(session);
 }

@@ -12,3 +12,9 @@ main {
 .maxwidth-500 {
   max-width: 500px;
 }
+
+@media (min-width: 768px) {
+  .maxwidth-500 {
+    min-width: 500px;
+  }
+}

@@ -1,4 +1,4 @@
-import { getSession } from "lib/auth/auth";
+import { getSMJSession } from "lib/auth/auth";
 import CenteredBox from "lib/components/auth/CenteredBox";
 import { redirect } from "next/navigation";
 import Image from "next/image";
@@ -9,7 +9,7 @@ import DevLogin from "lib/components/auth/DevLogin";
 export const dynamic = "force-dynamic";
 
 export default async function SignInPage() {
-  const session = await getSession();
+  const session = await getSMJSession();
   if (session) {
     redirect("/");
   }

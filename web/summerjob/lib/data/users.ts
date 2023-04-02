@@ -5,7 +5,21 @@ export async function getUserById(id: string) {
     where: {
       id,
     },
-    include: {},
+    include: {
+      permissions: true,
+    },
+  });
+  return user;
+}
+
+export async function getUserByEmail(email: string) {
+  const user = await prisma.worker.findUnique({
+    where: {
+      email,
+    },
+    include: {
+      permissions: true,
+    },
   });
   return user;
 }
