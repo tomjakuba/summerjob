@@ -3,11 +3,19 @@ import CenteredBox from "lib/components/auth/CenteredBox";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import logoImage from "public/logo-smj-yellow.png";
+import { dev_createSession } from "lib/data/auth";
+import DevLogin from "lib/components/auth/DevLogin";
+
+export const dynamic = "force-dynamic";
 
 export default async function SignInPage() {
   const session = await getSession();
   if (session) {
     redirect("/");
+  }
+  let devSession = null;
+  if (process.env.NODE_ENV === "development") {
+    devSession = await dev_createSession();
   }
   return (
     <CenteredBox>
@@ -31,6 +39,17 @@ export default async function SignInPage() {
             <p>Zaslali jsme Vám e-mail s odkazem pro přihlášení.</p> Pokud
             e-mail neobdržíte, zkontrolujte prosím složku SPAM.
           </div>
+          {devSession && (
+            <DevLogin
+              cookies={[
+                {
+                  name: "next-auth.session-token",
+                  value: devSession.sessionToken,
+                },
+              ]}
+              redirectUrl={`/plans`}
+            />
+          )}
         </div>
       </div>
     </CenteredBox>

@@ -17,6 +17,7 @@ export default async function SignInPage({ searchParams }: Props) {
   } else if (session) {
     redirect("/");
   }
+
   return (
     <CenteredBox>
       <SignInClientPage />
