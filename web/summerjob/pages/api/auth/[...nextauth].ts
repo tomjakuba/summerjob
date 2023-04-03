@@ -19,7 +19,7 @@ export const authOptions: NextAuthOptions = {
         token,
         provider,
       }) {
-        // Send email here
+        // In dev, emails are not sent, user is automatically signed in
         if (process.env.NODE_ENV !== "production") {
           return;
         }
@@ -46,6 +46,19 @@ export const authOptions: NextAuthOptions = {
       const user = await getUserByEmail(params.user.email);
       if (!user || user.blocked || user.deleted) return false;
       return true;
+    },
+    async session({ session, user }) {
+      const userRecord = await getUserByEmail(user.email);
+      if (!userRecord) return session;
+
+      const extended = {
+        ...session,
+        userID: userRecord.id,
+        username: `${userRecord.firstName} ${userRecord.lastName}`,
+        permissions: userRecord.permissions.permissions,
+      };
+
+      return extended;
     },
   },
   pages: {

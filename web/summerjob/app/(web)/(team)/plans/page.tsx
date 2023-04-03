@@ -1,4 +1,4 @@
-import ErrorPage from "lib/components/error-page/error";
+import ErrorPage from "lib/components/error-page/ErrorPage";
 import PlansClientPage from "lib/components/plan/PlansClientPage";
 import { getPlans } from "lib/data/plans";
 import { getActiveSummerJobEvent } from "lib/data/summerjob-event";

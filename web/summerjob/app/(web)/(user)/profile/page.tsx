@@ -1,4 +1,6 @@
+import { getSMJSession } from "lib/auth/auth";
 import ErrorPage404 from "lib/components/404/404";
+import AccessDeniedPage from "lib/components/error-page/AccessDeniedPage";
 import EditBox from "lib/components/forms/EditBox";
 import EditProfile from "lib/components/profile/EditProfile";
 import { getAllergies } from "lib/data/allergies";
@@ -10,13 +12,11 @@ import { serializeWorker } from "lib/types/worker";
 export const dynamic = "force-dynamic";
 
 export default async function MyProfilePage() {
-  // TODO: replace with ID from session
-  const workers = await getWorkers();
-  if (workers.length === 0) {
-    return <ErrorPage404 message="Žádní pracanti nejsou zaregistrováni." />;
+  const session = await getSMJSession();
+  if (!session) {
+    return <AccessDeniedPage />;
   }
-  const worker = await getWorkerById(workers[0].id);
-  // ^^^^^^^^^^^^^^
+  const worker = await getWorkerById(session.userID);
   if (!worker) {
     return <ErrorPage404 message="Pracant nenalezen." />;
   }

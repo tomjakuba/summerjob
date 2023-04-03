@@ -1,5 +1,5 @@
 "use client";
-import ErrorPage from "lib/components/error-page/error";
+import ErrorPage from "lib/components/error-page/ErrorPage";
 import AddJobToPlanForm from "lib/components/plan/AddJobToPlanForm";
 import { Modal, ModalSize } from "lib/components/modal/Modal";
 import PageHeader from "lib/components/page-header/PageHeader";

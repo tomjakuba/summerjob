@@ -1,11 +1,12 @@
-import { UserSession } from "lib/types/auth";
+import { ExtendedSession, Permission, UserSession } from "lib/types/auth";
 import { Session } from "next-auth";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "pages/api/auth/[...nextauth]";
 
 export async function getSMJSession() {
   const session = await getServerSession(authOptions);
-  return session;
+  if (!session) return null;
+  return session as ExtendedSession;
 }
 
 export function toClientSession(session: Session): UserSession {
@@ -20,6 +21,26 @@ export async function getClientSafeSession(): Promise<UserSession | null> {
   const session = await getSMJSession();
   if (!session) return null;
   return toClientSession(session);
+}
+
+/**
+ * Checks whether the current user has any of the given permissions, returns true if at least one is present.
+ * If the user is an admin, they are always allowed. There's no need to specify admin permissions in the list.
+ * @param permissions List of permissions to check for, if any of them are present, the user is allowed. If the user is an admin, they are always allowed.
+ * @returns Success flag and the session if successful.
+ */
+export async function withPermissions(
+  permissions: Permission[]
+): Promise<{ success: true; session: ExtendedSession } | { success: false }> {
+  const session = await getSMJSession();
+  if (!session) return { success: false };
+  if (session.permissions.includes(Permission.ADMIN))
+    return { success: true, session };
+  for (const permission of permissions) {
+    if (session.permissions.includes(permission))
+      return { success: true, session };
+  }
+  return { success: false };
 }
 
 /**

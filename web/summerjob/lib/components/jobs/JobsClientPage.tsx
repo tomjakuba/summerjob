@@ -1,5 +1,5 @@
 "use client";
-import ErrorPage from "lib/components/error-page/error";
+import ErrorPage from "lib/components/error-page/ErrorPage";
 import PageHeader from "lib/components/page-header/PageHeader";
 import { JobsTable } from "lib/components/jobs/JobsTable";
 import {

@@ -14,7 +14,7 @@ import { ReactNode, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import Select, { FormatOptionLabelMeta } from "react-select";
 import { z } from "zod";
-import ErrorPage from "../error-page/error";
+import ErrorPage from "../error-page/ErrorPage";
 
 interface AddJobToPlanFormProps {
   planId: string;

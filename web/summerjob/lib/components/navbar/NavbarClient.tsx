@@ -4,30 +4,16 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
 import logoImage from "public/logo-smj-yellow.png";
-import { UserSession } from "lib/types/auth";
 import { signIn, signOut } from "next-auth/react";
+import type { NavPath } from "./NavbarServer";
 
-type NavPath = {
-  path: string;
-  name: string;
-  icon: string;
-};
-
-interface NavbarProps {
-  session: UserSession | null;
+interface NavbarClientProps {
+  paths: NavPath[];
+  username?: string;
 }
 
-export function Navbar({ session }: NavbarProps) {
+export function NavbarClient({ paths, username }: NavbarClientProps) {
   const pathname = usePathname();
-  const navPaths: NavPath[] = [
-    { path: "/plans", name: "Plán", icon: "fas fa-calendar-alt" },
-    { path: "/jobs", name: "Joby", icon: "fas fa-person-digging" },
-    { path: "/cars", name: "Auta", icon: "fas fa-car" },
-    { path: "/workers", name: "Pracanti", icon: "far fa-user" },
-    { path: "/admin", name: "Administrace", icon: "fas fa-cogs" },
-    { path: "/my-plan", name: "Můj plán", icon: "fas fa-calendar-alt" },
-    { path: "/profile", name: "Profil", icon: "fas fa-user" },
-  ];
   const [expanded, setExpanded] = useState(false);
   const toggleExpanded = () => setExpanded(!expanded);
   return (
@@ -57,7 +43,7 @@ export function Navbar({ session }: NavbarProps) {
             id="navcol-1"
           >
             <ul className="navbar-nav me-auto">
-              {navPaths.map((navPath) => {
+              {paths.map((navPath) => {
                 return (
                   <li className="nav-item" key={navPath.path}>
                     <Link
@@ -80,9 +66,9 @@ export function Navbar({ session }: NavbarProps) {
                 );
               })}
             </ul>
-            {session && (
+            {username && (
               <>
-                <div>{session.name}</div>
+                <div>{username}</div>
                 <button
                   className="btn"
                   id="btn-nav-logout"
@@ -93,7 +79,7 @@ export function Navbar({ session }: NavbarProps) {
                 </button>
               </>
             )}
-            {!session && (
+            {!username && (
               <>
                 <button
                   className="btn"

@@ -1,17 +1,17 @@
-import { Navbar } from "../../lib/components/navbar/Navbar";
+import { NavbarServer } from "../../lib/components/navbar/NavbarServer";
 import "styles/bootstrap/css/bootstrap.min.css";
 import "styles/custom.css";
-import { getClientSafeSession } from "lib/auth/auth";
+import { getClientSafeSession, getSMJSession } from "lib/auth/auth";
 
 export default async function WebLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getClientSafeSession();
+  const session = await getSMJSession();
   return (
     <>
-      <Navbar session={session} />
+      <NavbarServer session={session} />
       <main>{children}</main>
     </>
   );
