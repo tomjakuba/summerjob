@@ -32,7 +32,7 @@ export default function AdminPage() {
               <div className="row">
                 <div className="col">
                   <h5>Správa uživatelů</h5>
-                  <p>Přidat a upravit uživatele, nastavit práva.</p>
+                  <p>Nastavit role, zablokovat uživatele.</p>
                 </div>
                 <div className="col d-flex justify-content-end align-items-center gap-3">
                   <i className="fas fa-chevron-right"></i>

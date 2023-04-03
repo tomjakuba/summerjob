@@ -55,7 +55,7 @@ export const authOptions: NextAuthOptions = {
         ...session,
         userID: userRecord.id,
         username: `${userRecord.firstName} ${userRecord.lastName}`,
-        permissions: userRecord.permissions.permissions,
+        permissions: userRecord.permissions,
       };
 
       return extended;
