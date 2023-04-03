@@ -98,7 +98,7 @@ export function JobsTable({ data, shouldShowJob, reload }: JobsTableProps) {
             )
         )}
       <RowCategory
-        title="Dokončené"
+        title={`Dokončené (${sortedCompleted.length})`}
         numCols={_columns.length}
         secondaryTitle={
           "Joby označené jako dokončené se nebudou zobrazovat při plánování"
@@ -118,7 +118,7 @@ export function JobsTable({ data, shouldShowJob, reload }: JobsTableProps) {
           )}
       </RowCategory>
       <RowCategory
-        title="Skryté"
+        title={`Skryté (${sortedHidden.length})`}
         numCols={_columns.length}
         secondaryTitle={
           "Joby označené jako skryté se nebudou zobrazovat při plánování"
