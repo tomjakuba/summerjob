@@ -116,8 +116,8 @@ export default function EditWorker({
               className="form-control p-0 fs-5"
               type="tel"
               maxLength={20}
-              pattern="((+|00)[0-9]{1,3})?[ ]?[0-9]{3}[ ]?[0-9]{3}[ ]?[0-9]{3}"
-              placeholder="+420 123 456 789 / 123 456 789"
+              pattern="((?:\+|00)[0-9]{1,3})?[ ]?[0-9]{3}[ ]?[0-9]{3}[ ]?[0-9]{3}"
+              placeholder="(+420) 123 456 789"
               {...register("phone")}
             />
             <label className="form-label fw-bold mt-4" htmlFor="email">
