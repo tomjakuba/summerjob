@@ -15,7 +15,7 @@ interface UsersClientPageProps {
 
 export default function UsersClientPage({ sUsers }: UsersClientPageProps) {
   const inititalUsers = deserializeUsers(sUsers);
-  const { data, error } = useAPIUsers({
+  const { data, error, mutate } = useAPIUsers({
     fallbackData: inititalUsers,
   });
   const sortedAlphabetically = useMemo(() => {
@@ -68,7 +68,7 @@ export default function UsersClientPage({ sUsers }: UsersClientPageProps) {
         </div>
         <div className="row gx-3">
           <div className="col-12">
-            <UsersTable users={filteredData || []} />
+            <UsersTable users={filteredData || []} onWorkerUpdated={mutate} />
           </div>
         </div>
       </div>

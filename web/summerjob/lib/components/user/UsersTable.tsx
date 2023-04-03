@@ -3,13 +3,17 @@ import { UserComplete } from "lib/types/user";
 import { useMemo } from "react";
 import { MessageRow } from "../table/MessageRow";
 import RowCategory from "../table/RowCategory";
-import { SimpleRow } from "../table/SimpleRow";
+import UserRow from "./UserRow";
 
 interface UsersTableProps {
   users: UserComplete[];
+  onWorkerUpdated: () => void;
 }
 
-export default function UsersTable({ users }: UsersTableProps) {
+export default function UsersTable({
+  users,
+  onWorkerUpdated,
+}: UsersTableProps) {
   const [regularUsers, blockedUsers] = useMemo(() => {
     return users.reduce(
       (acc, u) => {
@@ -33,10 +37,10 @@ export default function UsersTable({ users }: UsersTableProps) {
         </thead>
         <tbody className="smj-table-body mb-0">
           {users.length === 0 && (
-            <MessageRow message="Žádní pracanti" colspan={_columns.length} />
+            <MessageRow message="Žádní uživatelé" colspan={_columns.length} />
           )}
           {regularUsers.map((user) => (
-            <SimpleRow key={user.id} data={formatUserRow(user)} />
+            <UserRow key={user.id} user={user} onUpdate={onWorkerUpdated} />
           ))}
           <RowCategory
             title={`Zamčené účty (${blockedUsers.length})`}
@@ -45,37 +49,13 @@ export default function UsersTable({ users }: UsersTableProps) {
             className={"bg-category-hidden"}
           >
             {blockedUsers.map((user) => (
-              <SimpleRow key={user.id} data={formatUserRow(user)} />
+              <UserRow key={user.id} user={user} onUpdate={onWorkerUpdated} />
             ))}
           </RowCategory>
         </tbody>
       </table>
     </div>
   );
-}
-
-function formatUserRow(user: UserComplete) {
-  const permissions = user.permissions;
-  // TODO: translate permissions
-  const permissionString = permissions.join(", ");
-  return [
-    `${user.lastName}, ${user.firstName}`,
-    user.email,
-    permissionString,
-    <span
-      key={`actions-${user.id}`}
-      className="d-flex align-items-center gap-3"
-    >
-      <i
-        className="fas fa-edit smj-action-edit cursor-pointer"
-        title="Upravit role"
-      ></i>
-      <i
-        className="fas fa-lock smj-action-pin cursor-pointer"
-        title="Zamknout účet"
-      ></i>
-    </span>,
-  ];
 }
 
 const _columns = ["Celé jméno", "Email", "Oprávnění", "Akce"];

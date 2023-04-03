@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { Permission } from "./auth";
 import { Serialized } from "./serialize";
 
@@ -10,6 +11,18 @@ export type UserComplete = {
   deleted: boolean;
   permissions: Permission[];
 };
+
+const PermissionEnum = z.nativeEnum(Permission);
+type PermissionEnum = z.infer<typeof PermissionEnum>;
+export const UserUpdateSchema = z
+  .object({
+    blocked: z.boolean(),
+    permissions: z.array(PermissionEnum),
+  })
+  .partial()
+  .strict();
+
+export type UserUpdateData = z.infer<typeof UserUpdateSchema>;
 
 export function serializeUser(user: UserComplete): Serialized<UserComplete> {
   return { data: JSON.stringify(user) };
