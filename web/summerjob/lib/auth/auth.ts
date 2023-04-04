@@ -1,10 +1,21 @@
 import { ExtendedSession, Permission, UserSession } from "lib/types/auth";
+import { NextApiRequest, NextApiResponse } from "next";
 import { Session } from "next-auth";
 import { getServerSession } from "next-auth/next";
+import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "pages/api/auth/[...nextauth]";
 
 export async function getSMJSession() {
   const session = await getServerSession(authOptions);
+  if (!session) return null;
+  return session as ExtendedSession;
+}
+
+export async function getSMJSessionAPI(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  const session = await getServerSession(req, res, authOptions);
   if (!session) return null;
   return session as ExtendedSession;
 }
@@ -26,6 +37,7 @@ export async function getClientSafeSession(): Promise<UserSession | null> {
 /**
  * Checks whether the current user has any of the given permissions, returns true if at least one is present.
  * If the user is an admin, they are always allowed. There's no need to specify admin permissions in the list.
+ * Use this function in server-side pages.
  * @param permissions List of permissions to check for, if any of them are present, the user is allowed. If the user is an admin, they are always allowed.
  * @returns Success flag and the session if successful.
  */
@@ -33,6 +45,29 @@ export async function withPermissions(
   permissions: Permission[]
 ): Promise<{ success: true; session: ExtendedSession } | { success: false }> {
   const session = await getSMJSession();
+  return isAccessAllowed(permissions, session);
+}
+
+/**
+ * Checks whether the current user has any of the given permissions, returns true if at least one is present.
+ * If the user is an admin, they are always allowed. There's no need to specify admin permissions in the list.
+ * Use this function in API routes.
+ * @param permissions List of permissions to check for, if any of them are present, the user is allowed. If the user is an admin, they are always allowed.
+ * @returns Success flag and the session if successful.
+ */
+export async function withPermissionsAPI(
+  permissions: Permission[],
+  req: NextApiRequest,
+  res: NextApiResponse
+): Promise<{ success: true; session: ExtendedSession } | { success: false }> {
+  const session = await getSMJSessionAPI(req, res);
+  return isAccessAllowed(permissions, session);
+}
+
+function isAccessAllowed(
+  permissions: Permission[],
+  session: ExtendedSession | null
+): { success: true; session: ExtendedSession } | { success: false } {
   if (!session) return { success: false };
   if (session.permissions.includes(Permission.ADMIN))
     return { success: true, session };
