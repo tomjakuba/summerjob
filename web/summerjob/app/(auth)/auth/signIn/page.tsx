@@ -17,10 +17,20 @@ export default async function SignInPage({ searchParams }: Props) {
   } else if (session) {
     redirect("/");
   }
+  const errorMsg = ErrorReason.get(searchParams?.error as string) || undefined;
 
   return (
     <CenteredBox>
-      <SignInClientPage />
+      <SignInClientPage errorMessage={errorMsg} />
     </CenteredBox>
   );
 }
+
+// Taken from https://next-auth.js.org/configuration/pages#sign-in-page
+const ErrorReason = new Map<string, string>([
+  [
+    "EmailSignin",
+    "Nepodařilo se odeslat přihlašovací e-mail. Zkuste to později. Pokud problém přetrvává, kontaktujte správce.",
+  ],
+  ["Default", "Nastala chyba. Zkuste to znovu."],
+]);

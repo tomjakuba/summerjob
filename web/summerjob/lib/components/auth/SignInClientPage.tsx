@@ -4,7 +4,13 @@ import Image from "next/image";
 import logoImage from "public/logo-smj-yellow.png";
 import { useState } from "react";
 
-export default function SignInClientPage() {
+interface SignInClientPageProps {
+  errorMessage?: string;
+}
+
+export default function SignInClientPage({
+  errorMessage,
+}: SignInClientPageProps) {
   const [email, setEmail] = useState("");
   return (
     <div className="container maxwidth-500">
@@ -22,6 +28,11 @@ export default function SignInClientPage() {
           </div>
         </div>
       </div>
+      {errorMessage && (
+        <div className="row mb-2 ps-2 pe-2">
+          <div className="col-12 alert alert-warning">{errorMessage}</div>
+        </div>
+      )}
       <div className="row mb-3">
         <div className="col-12">
           <form
