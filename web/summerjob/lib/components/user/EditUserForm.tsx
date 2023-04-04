@@ -40,7 +40,10 @@ export default function EditUserForm({ user, onUpdate }: EditUserProps) {
         </p>
         <div className="mb-3">
           {Object.values(Permission).map((permission) => (
-            <label className="d-flex align-items-center gap-2">
+            <label
+              className="d-flex align-items-center gap-2"
+              key={`label-${permission}`}
+            >
               <input
                 type="checkbox"
                 value={permission}
