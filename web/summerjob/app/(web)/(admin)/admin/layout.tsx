@@ -1,0 +1,15 @@
+import { withPermissions } from "lib/auth/auth";
+import AccessDeniedPage from "lib/components/error-page/AccessDeniedPage";
+import { Permission } from "lib/types/auth";
+
+export default async function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const isAllowed = await withPermissions([Permission.ADMIN]);
+  if (!isAllowed.success) {
+    return <AccessDeniedPage />;
+  }
+  return <>{children}</>;
+}

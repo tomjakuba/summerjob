@@ -202,25 +202,6 @@ export default function EditWorker({
             {error && <ErrorMessageModal onClose={reset} />}
           </form>
         </div>
-        {/* <div className="w-100 d-lg-none mt-3"></div> */}
-        {/* <div className="col-sm-auto col-lg-3 d-flex flex-column">
-          <div className="position-relative">
-            <Image
-              className="position-relative"
-              src="/profile.webp"
-              alt="Worker photo"
-              fill={true}
-              quality={95}
-              sizes="(max-width: 768px) 100vw,
-              (max-width: 1200px) 50vw,
-              33vw"
-            />
-          </div>
-
-          <button className="btn btn-warning ms-auto mt-2" type="button">
-            Změnit obrázek
-          </button>
-        </div> */}
       </div>
     </>
   );
