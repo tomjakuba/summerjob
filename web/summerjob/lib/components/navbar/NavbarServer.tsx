@@ -18,26 +18,31 @@ export function NavbarServer({ session }: NavbarServerProps) {
       path: "/plans",
       name: "Plán",
       icon: "fas fa-calendar-alt",
-      permissions: [],
+      permissions: [Permission.PLANS],
     },
     {
       path: "/jobs",
       name: "Joby",
       icon: "fas fa-person-digging",
-      permissions: [],
+      permissions: [Permission.JOBS],
     },
-    { path: "/cars", name: "Auta", icon: "fas fa-car", permissions: [] },
+    {
+      path: "/cars",
+      name: "Auta",
+      icon: "fas fa-car",
+      permissions: [Permission.CARS],
+    },
     {
       path: "/workers",
       name: "Pracanti",
       icon: "far fa-user",
-      permissions: [],
+      permissions: [Permission.WORKERS],
     },
     {
       path: "/admin",
       name: "Administrace",
       icon: "fas fa-cogs",
-      permissions: [],
+      permissions: [Permission.ADMIN],
     },
     {
       path: "/my-plan",
@@ -50,6 +55,7 @@ export function NavbarServer({ session }: NavbarServerProps) {
 
   const availablePaths = navPaths.filter((path) => {
     if (path.permissions.length === 0) return true;
+    if (session?.permissions.includes(Permission.ADMIN)) return true;
     return path.permissions.some((permission) =>
       session?.permissions.includes(permission)
     );
