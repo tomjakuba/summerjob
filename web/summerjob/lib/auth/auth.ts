@@ -2,7 +2,6 @@ import { ExtendedSession, Permission, UserSession } from "lib/types/auth";
 import { NextApiRequest, NextApiResponse } from "next";
 import { Session } from "next-auth";
 import { getServerSession } from "next-auth/next";
-import { NextRequest, NextResponse } from "next/server";
 import { authOptions } from "pages/api/auth/[...nextauth]";
 
 export async function getSMJSession() {
@@ -91,14 +90,14 @@ export function emailHtml(params: { url: string; host: string }) {
 
   const escapedHost = host.replace(/\./g, "&#8203;.");
 
-  const brandColor = "#346df1";
+  const brandColor = "#f9da68";
   const color = {
     background: "#f9f9f9",
     text: "#444",
     mainBackground: "#fff",
     buttonBackground: brandColor,
     buttonBorder: brandColor,
-    buttonText: "#fff",
+    buttonText: "#000",
   };
 
   return `
@@ -108,7 +107,7 @@ export function emailHtml(params: { url: string; host: string }) {
     <tr>
       <td align="center"
         style="padding: 10px 0px; font-size: 22px; font-family: Helvetica, Arial, sans-serif; color: ${color.text};">
-        Sign in to <strong>${escapedHost}</strong>
+        Přihlášení do aplikace <strong>SummerJob</strong>
       </td>
     </tr>
     <tr>
@@ -117,8 +116,7 @@ export function emailHtml(params: { url: string; host: string }) {
           <tr>
             <td align="center" style="border-radius: 5px;" bgcolor="${color.buttonBackground}"><a href="${url}"
                 target="_blank"
-                style="font-size: 18px; font-family: Helvetica, Arial, sans-serif; color: ${color.buttonText}; text-decoration: none; border-radius: 5px; padding: 10px 20px; border: 1px solid ${color.buttonBorder}; display: inline-block; font-weight: bold;">Sign
-                in</a></td>
+                style="font-size: 18px; font-family: Helvetica, Arial, sans-serif; color: ${color.buttonText}; text-decoration: none; border-radius: 5px; padding: 10px 20px; border: 1px solid ${color.buttonBorder}; display: inline-block; ">Přihlásit se</a></td>
           </tr>
         </table>
       </td>
@@ -126,7 +124,7 @@ export function emailHtml(params: { url: string; host: string }) {
     <tr>
       <td align="center"
         style="padding: 0px 0px 10px 0px; font-size: 16px; line-height: 22px; font-family: Helvetica, Arial, sans-serif; color: ${color.text};">
-        If you did not request this email you can safely ignore it.
+        Pokud jste si tento e-mail nevyžádali, můžete jej ignorovat.
       </td>
     </tr>
   </table>
@@ -136,5 +134,5 @@ export function emailHtml(params: { url: string; host: string }) {
 
 /** Email Text body (fallback for email clients that don't render HTML, e.g. feature phones) */
 export function emailText({ url, host }: { url: string; host: string }) {
-  return `Sign in to ${host}\n${url}\n\n`;
+  return `Přihlášení do aplikace SummerJob\n${url}\n\n`;
 }

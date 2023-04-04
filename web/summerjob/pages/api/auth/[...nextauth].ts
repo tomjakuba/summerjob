@@ -20,7 +20,10 @@ export const authOptions: NextAuthOptions = {
         provider,
       }) {
         // In dev, emails are not sent, user is automatically signed in
-        if (process.env.NODE_ENV !== "production") {
+        if (process.env.NODE_ENV === "development") {
+          console.log(
+            "E-mails are not sent in dev mode. You will be logged in automatically."
+          );
           return;
         }
         const { host } = new URL(url);
@@ -29,7 +32,7 @@ export const authOptions: NextAuthOptions = {
         const result = await transport.sendMail({
           to: email,
           from: provider.from,
-          subject: `Sign in to ${host}`,
+          subject: `SummerJob přihlášení`,
           text: emailText({ url, host }),
           html: emailHtml({ url, host }),
         });
