@@ -47,7 +47,7 @@ export default async function SignInPage() {
                   value: devSession.sessionToken,
                 },
               ]}
-              redirectUrl={`/plans`}
+              redirectUrl={`/`}
             />
           )}
         </div>

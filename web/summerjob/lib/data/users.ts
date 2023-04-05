@@ -1,6 +1,7 @@
 import { PrismaClient, WorkerPermissions } from "lib/prisma/client";
 import prisma from "lib/prisma/connection";
 import { Permission } from "lib/types/auth";
+import { PrismaTransactionClient } from "lib/types/prisma";
 import { UserComplete, UserUpdateData } from "lib/types/user";
 import { cache_getActiveSummerJobEventId } from "./cache";
 
@@ -80,24 +81,12 @@ export async function updateUser(
   const user = await prisma.$transaction(async (tx) => {
     const user = await internal_updateUser(id, data, tx);
     if (!user) return null;
-    const nextAuthUser = await tx.user.findFirst({
-      where: {
-        email: user?.email,
-      },
-    });
-    await tx.session.deleteMany({
-      where: {
-        userId: nextAuthUser?.id,
-      },
-    });
+    await deleteUserSessions(user.email, tx);
     return user;
   });
-  return null;
+  return user;
 }
 
-type PrismaTransactionClient = Parameters<
-  Parameters<typeof prisma.$transaction>[0]
->[0];
 async function internal_updateUser(
   id: string,
   data: UserUpdateData,
@@ -128,6 +117,22 @@ async function internal_updateUser(
   if (!user) return null;
   // TODO: Fix this type cast once prisma has fixed their return types
   return databaseUserToUserComplete(user as unknown as DBUserComplete);
+}
+
+export async function deleteUserSessions(
+  email: string,
+  prismaClient: PrismaClient | PrismaTransactionClient = prisma
+) {
+  const nextAuthUser = await prismaClient.user.findFirst({
+    where: {
+      email,
+    },
+  });
+  await prismaClient.session.deleteMany({
+    where: {
+      userId: nextAuthUser?.id,
+    },
+  });
 }
 
 type DBUserComplete = Omit<UserComplete, "permissions"> & {

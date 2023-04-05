@@ -128,6 +128,9 @@ export default function EditWorker({
               type="email"
               {...register("email")}
             />
+            <p className="text-muted mt-1">
+              Změnou e-mailu dojde k odhlášení uživatele z aplikace.
+            </p>
             <label
               className="form-label d-block fw-bold mt-4"
               htmlFor="availability.workDays"

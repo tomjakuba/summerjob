@@ -1,8 +1,10 @@
-import { WorkerAvailability, Worker } from "lib/prisma/client";
+import { WorkerAvailability, Worker, PrismaClient } from "lib/prisma/client";
 import prisma from "lib/prisma/connection";
+import { PrismaTransactionClient } from "lib/types/prisma";
 import { WorkerComplete, WorkerUpdateData } from "lib/types/worker";
 import { cache_getActiveSummerJobEventId } from "./cache";
 import { NoActiveEventError } from "./internal-error";
+import { deleteUserSessions } from "./users";
 
 export async function getWorkers(
   planId: string | undefined = undefined,
@@ -108,12 +110,31 @@ export function databaseWorkerToWorkerComplete(
 }
 
 export async function updateWorker(id: string, data: WorkerUpdateData) {
+  if (!data.email) {
+    return await internal_updateWorker(id, data);
+  }
+  data.email = data.email.toLowerCase();
+  return await prisma.$transaction(async (tx) => {
+    const user = await internal_updateWorker(id, data, tx);
+    if (!user) return null;
+    await deleteUserSessions(user.email, tx);
+    return user;
+  });
+}
+
+export async function internal_updateWorker(
+  id: string,
+  data: WorkerUpdateData,
+  prismaClient: PrismaClient | PrismaTransactionClient = prisma
+) {
   const activeEventId = await cache_getActiveSummerJobEventId();
-  if (!activeEventId) {
-    throw new NoActiveEventError();
+  if (data.availability) {
+    if (!activeEventId) {
+      throw new NoActiveEventError();
+    }
   }
 
-  const user = await prisma.worker.update({
+  return await prisma.worker.update({
     where: {
       id,
     },
@@ -130,7 +151,7 @@ export async function updateWorker(id: string, data: WorkerUpdateData) {
           where: {
             workerId_eventId: {
               workerId: id,
-              eventId: activeEventId,
+              eventId: activeEventId ?? "",
             },
           },
           data: {
@@ -141,6 +162,4 @@ export async function updateWorker(id: string, data: WorkerUpdateData) {
       },
     },
   });
-
-  return user;
 }
