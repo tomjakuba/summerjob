@@ -18,7 +18,6 @@ export function Modal({ children, title, size, onClose }: ModalProps) {
         className={`modal fade show ${size}`}
         style={{ display: "block" }}
         tabIndex={-1}
-        onAnimationEnd={() => {}}
       >
         <div className="modal-dialog">
           <div className="modal-content rounded-3">

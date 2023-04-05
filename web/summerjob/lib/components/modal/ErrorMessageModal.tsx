@@ -17,8 +17,9 @@ export default function ErrorMessageModal({
           : "Během ukládání nastala chyba. Zkontrolujte připojení k internetu a zkuste to znovu."}
       </p>
       <button
+        type="button"
         className="btn pt-2 pb-2 btn-secondary float-end"
-        onClick={onClose}
+        onClick={() => onClose()}
       >
         Zavřít
       </button>
