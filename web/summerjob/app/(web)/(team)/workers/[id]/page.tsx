@@ -23,10 +23,7 @@ export default async function EditWorkerPage({ params }: Params) {
   const translatedAllergens = translateAllergies(allergies);
   const serializedAllergens = serializeAllergies(translatedAllergens);
   const summerJobEvent = await cache_getActiveSummerJobEvent();
-  if (!summerJobEvent) {
-    return <ErrorPage404 message="Není nastaven aktivní SummerJob ročník." />;
-  }
-  const { startDate, endDate } = summerJobEvent;
+  const { startDate, endDate } = summerJobEvent!;
 
   return (
     <>

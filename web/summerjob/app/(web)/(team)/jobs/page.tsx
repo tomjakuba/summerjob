@@ -10,10 +10,7 @@ export default async function ProposedJobsPage() {
   const jobs = await getProposedJobs();
   const serialized = serializeProposedJobs(jobs);
   const summerJobEvent = await cache_getActiveSummerJobEvent();
-  if (!summerJobEvent) {
-    return <ErrorPage404 message="Není nastaven aktivní SummerJob ročník." />;
-  }
-  const { startDate, endDate } = summerJobEvent;
+  const { startDate, endDate } = summerJobEvent!;
   return (
     <ProposedJobsClientPage
       initialData={serialized}

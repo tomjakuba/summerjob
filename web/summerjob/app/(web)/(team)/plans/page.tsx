@@ -10,13 +10,7 @@ export default async function PlansPage() {
   const plans = await getPlans();
   const serialized = serializePlans(plans);
   const summerJobEvent = await getActiveSummerJobEvent();
-  if (!summerJobEvent)
-    return (
-      <ErrorPage
-        error={"Nelze zobrazit plány - není nastaven aktivní ročník."}
-      />
-    );
-  const { startDate, endDate } = summerJobEvent;
+  const { startDate, endDate } = summerJobEvent!;
   return (
     <PlansClientPage
       initialData={serialized}
