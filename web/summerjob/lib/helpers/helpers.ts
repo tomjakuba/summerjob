@@ -78,3 +78,18 @@ export function relativeTime(time: Date) {
 export function datesAfterDate(dates: Date[], date: Date) {
   return dates.filter((d) => d >= date);
 }
+
+/**
+ * Picks only the specified keys from an object and returns a new object with only those keys and their values
+ * @param obj Original object
+ * @param keys Keys to pick from that object
+ * @returns New object with only the specified keys and their values
+ */
+export function pick<T extends {}, K extends string | number | symbol>(
+  obj: T,
+  ...keys: K[]
+) {
+  return Object.fromEntries(
+    keys.map((key) => [key, obj[key as unknown as keyof T]])
+  ) as { [key in K]: key extends keyof T ? T[key] : undefined };
+}

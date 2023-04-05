@@ -16,7 +16,7 @@ import ErrorMessageModal from "../modal/ErrorMessageModal";
 import SuccessProceedModal from "../modal/SuccessProceedModal";
 import { Serialized } from "lib/types/serialize";
 import DaysSelection from "../forms/DaysSelection";
-import { datesBetween } from "lib/helpers/helpers";
+import { datesBetween, pick } from "lib/helpers/helpers";
 import { useRouter } from "next/navigation";
 
 const schema = WorkerUpdateSchema;
@@ -42,6 +42,7 @@ export default function EditWorker({
     new Date(eventEndDate)
   );
   const {
+    formState: { dirtyFields },
     register,
     handleSubmit,
     formState: { errors },
@@ -70,7 +71,8 @@ export default function EditWorker({
     },
   });
   const onSubmit = (data: WorkerForm) => {
-    trigger(data);
+    const modified = pick(data, ...Object.keys(dirtyFields)) as WorkerForm;
+    trigger(modified);
   };
 
   return (
