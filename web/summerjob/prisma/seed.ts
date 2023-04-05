@@ -58,7 +58,7 @@ async function createWorkers(
       firstName: firstName,
       lastName: lastName,
       phone: faker.phone.number("### ### ###"),
-      email: faker.internet.email(firstName, lastName),
+      email: faker.internet.email(firstName, lastName).toLocaleLowerCase(),
       isStrong: Math.random() > 0.75,
       registeredIn: { connect: { id: eventId } },
       availability: {
