@@ -13,10 +13,7 @@ export const dynamic = "force-dynamic";
 
 export default async function MyProfilePage() {
   const session = await getSMJSession();
-  if (!session) {
-    return <AccessDeniedPage />;
-  }
-  const worker = await getWorkerById(session.userID);
+  const worker = await getWorkerById(session!.userID);
   if (!worker) {
     return <ErrorPage404 message="Pracant nenalezen." />;
   }

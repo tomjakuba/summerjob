@@ -1,6 +1,6 @@
-import { APIAccessController } from "lib/api/APIAccessControler";
 import { APIMethodHandler } from "lib/api/MethodHandler";
 import { validateOrSendError } from "lib/api/validator";
+import { getSMJSessionAPI, isAccessAllowed } from "lib/auth/auth";
 import { ApiError, WrappedError } from "lib/data/api-error";
 import { getWorkerById, updateWorker } from "lib/data/workers";
 import { Permission } from "lib/types/auth";
@@ -24,6 +24,10 @@ async function get(
 export type WorkerAPIPatchData = WorkerUpdateDataInput;
 async function patch(req: NextApiRequest, res: NextApiResponse) {
   const id = req.query.id as string;
+  const allowed = await isAllowedToAccessWorker(req, res, id);
+  if (!allowed) {
+    return;
+  }
   const workerData = validateOrSendError(WorkerUpdateSchema, req.body, res);
   if (!workerData) {
     return;
@@ -32,7 +36,27 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
   res.status(204).end();
 }
 
-export default APIAccessController(
-  [Permission.WORKERS],
-  APIMethodHandler({ get, patch })
-);
+async function isAllowedToAccessWorker(
+  req: NextApiRequest,
+  res: NextApiResponse,
+  workerId: string
+) {
+  const session = await getSMJSessionAPI(req, res);
+  if (!session) {
+    res.status(401).end();
+    return;
+  }
+  const regularAccess = isAccessAllowed([Permission.WORKERS], session);
+  if (regularAccess) {
+    return true;
+  }
+  // Users can access their own data and modify them in profile page
+  if (session.userID === workerId) {
+    return true;
+  }
+  res.status(403).end();
+  return false;
+}
+
+// Access control is done individually in this case to allow users to access their own data
+export default APIMethodHandler({ get, patch });
