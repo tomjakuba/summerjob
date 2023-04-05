@@ -5,16 +5,17 @@ import {
 } from "lib/data/api-error";
 import { InternalError } from "lib/data/internal-error";
 import { Prisma } from "lib/prisma/client";
+import { APIMethod } from "lib/types/api";
 import { NextApiRequest, NextApiResponse } from "next";
 
 interface MethodHandlerProps {
-  get?: (req: NextApiRequest, res: NextApiResponse) => Promise<void>;
-  post?: (req: NextApiRequest, res: NextApiResponse) => Promise<void>;
-  del?: (req: NextApiRequest, res: NextApiResponse) => Promise<void>;
-  patch?: (req: NextApiRequest, res: NextApiResponse) => Promise<void>;
+  get?: APIMethod;
+  post?: APIMethod;
+  del?: APIMethod;
+  patch?: APIMethod;
 }
 
-export function http_method_handler({
+export function APIMethodHandler({
   get,
   post,
   patch,
@@ -55,7 +56,7 @@ export function http_method_handler({
 }
 
 async function handle(
-  func: (req: NextApiRequest, res: NextApiResponse) => Promise<void>,
+  func: APIMethod,
   req: NextApiRequest,
   res: NextApiResponse
 ) {
@@ -78,12 +79,14 @@ async function handle(
       });
       return;
     } else if (error instanceof InternalError) {
+      // TODO: Replace with logging error
       console.error(error);
       res.status(500).json({
         error: new ApiInternalServerError(error.reason),
       });
       return;
     }
+    // TODO: Replace with logging error
     console.error(error);
     res.status(500).json({
       error: new ApiInternalServerError(),

@@ -44,7 +44,8 @@ export async function withPermissions(
   permissions: Permission[]
 ): Promise<{ success: true; session: ExtendedSession } | { success: false }> {
   const session = await getSMJSession();
-  return isAccessAllowed(permissions, session);
+  const allowed = isAccessAllowed(permissions, session);
+  return allowed ? { success: true, session: session! } : { success: false };
 }
 
 /**
@@ -60,21 +61,20 @@ export async function withPermissionsAPI(
   res: NextApiResponse
 ): Promise<{ success: true; session: ExtendedSession } | { success: false }> {
   const session = await getSMJSessionAPI(req, res);
-  return isAccessAllowed(permissions, session);
+  const allowed = isAccessAllowed(permissions, session);
+  return allowed ? { success: true, session: session! } : { success: false };
 }
 
-function isAccessAllowed(
+export function isAccessAllowed(
   permissions: Permission[],
   session: ExtendedSession | null
-): { success: true; session: ExtendedSession } | { success: false } {
-  if (!session) return { success: false };
-  if (session.permissions.includes(Permission.ADMIN))
-    return { success: true, session };
+): boolean {
+  if (!session) return false;
+  if (session.permissions.includes(Permission.ADMIN)) return true;
   for (const permission of permissions) {
-    if (session.permissions.includes(permission))
-      return { success: true, session };
+    if (session.permissions.includes(permission)) return true;
   }
-  return { success: false };
+  return false;
 }
 
 /**

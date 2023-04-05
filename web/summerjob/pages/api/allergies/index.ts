@@ -1,4 +1,5 @@
-import { http_method_handler } from "lib/api/method_handler";
+import { APIAccessController } from "lib/api/APIAccessControler";
+import { APIMethodHandler } from "lib/api/MethodHandler";
 import { getAllergies } from "lib/data/allergies";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -11,4 +12,4 @@ async function get(
   res.status(200).json(allergies);
 }
 
-export default http_method_handler({ get: get });
+export default APIAccessController([], APIMethodHandler({ get }));

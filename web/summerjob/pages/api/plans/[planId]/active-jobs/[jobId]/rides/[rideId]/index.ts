@@ -1,6 +1,8 @@
-import { http_method_handler } from "lib/api/method_handler";
+import { APIAccessController } from "lib/api/APIAccessControler";
+import { APIMethodHandler } from "lib/api/MethodHandler";
 import { validateOrSendError } from "lib/api/validator";
 import { updateRide, deleteRide } from "lib/data/rides";
+import { Permission } from "lib/types/auth";
 import { RideUpdateSchema } from "lib/types/ride";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -20,4 +22,7 @@ async function del(req: NextApiRequest, res: NextApiResponse) {
   res.status(204).end();
 }
 
-export default http_method_handler({ patch: patch, del: del });
+export default APIAccessController(
+  [Permission.PLANS],
+  APIMethodHandler({ patch })
+);

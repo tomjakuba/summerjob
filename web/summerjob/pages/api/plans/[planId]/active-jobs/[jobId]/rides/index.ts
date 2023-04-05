@@ -1,6 +1,8 @@
-import { http_method_handler } from "lib/api/method_handler";
+import { APIAccessController } from "lib/api/APIAccessControler";
+import { APIMethodHandler } from "lib/api/MethodHandler";
 import { WrappedError, ApiBadRequestError, ApiError } from "lib/data/api-error";
 import { createRide } from "lib/data/rides";
+import { Permission } from "lib/types/auth";
 import { RideCreateData, RideCreateSchema } from "lib/types/ride";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -23,4 +25,7 @@ async function post(
   res.status(201).json(ride);
 }
 
-export default http_method_handler({ post: post });
+export default APIAccessController(
+  [Permission.PLANS],
+  APIMethodHandler({ post })
+);

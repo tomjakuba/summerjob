@@ -1,7 +1,9 @@
-import { http_method_handler } from "lib/api/method_handler";
+import { APIAccessController } from "lib/api/APIAccessControler";
+import { APIMethodHandler } from "lib/api/MethodHandler";
 import { validateOrSendError } from "lib/api/validator";
 import { ApiError, WrappedError } from "lib/data/api-error";
 import { getWorkerById, updateWorker } from "lib/data/workers";
+import { Permission } from "lib/types/auth";
 import { WorkerUpdateDataInput, WorkerUpdateSchema } from "lib/types/worker";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -30,4 +32,7 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
   res.status(204).end();
 }
 
-export default http_method_handler({ get: get, patch: patch });
+export default APIAccessController(
+  [Permission.WORKERS],
+  APIMethodHandler({ get, patch })
+);

@@ -1,5 +1,7 @@
-import { http_method_handler } from "lib/api/method_handler";
+import { APIAccessController } from "lib/api/APIAccessControler";
+import { APIMethodHandler } from "lib/api/MethodHandler";
 import { deletePlan, getPlanById } from "lib/data/plans";
+import { Permission } from "lib/types/auth";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export type PlanAPIGetResponse = Awaited<ReturnType<typeof getPlanById>>;
@@ -28,4 +30,7 @@ async function del(req: NextApiRequest, res: NextApiResponse) {
   res.status(204).end();
 }
 
-export default http_method_handler({ get: get, patch: patch, del: del });
+export default APIAccessController(
+  [Permission.PLANS],
+  APIMethodHandler({ get, patch, del })
+);

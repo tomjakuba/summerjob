@@ -1,5 +1,7 @@
-import { http_method_handler } from "lib/api/method_handler";
+import { APIAccessController } from "lib/api/APIAccessControler";
+import { APIMethodHandler } from "lib/api/MethodHandler";
 import { getWorkers } from "lib/data/workers";
+import { Permission } from "lib/types/auth";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export type WorkersAPIGetResponse = Awaited<ReturnType<typeof getWorkers>>;
@@ -13,4 +15,7 @@ async function get(
   res.status(200).json(users);
 }
 
-export default http_method_handler({ get: get });
+export default APIAccessController(
+  [Permission.WORKERS, Permission.PLANS],
+  APIMethodHandler({ get })
+);

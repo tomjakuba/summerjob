@@ -1,4 +1,5 @@
-import { http_method_handler } from "lib/api/method_handler";
+import { APIAccessController } from "lib/api/APIAccessControler";
+import { APIMethodHandler } from "lib/api/MethodHandler";
 import { validateOrSendError } from "lib/api/validator";
 import { createActiveJob, createActiveJobs } from "lib/data/active-jobs";
 import { ApiError, WrappedError } from "lib/data/api-error";
@@ -8,6 +9,7 @@ import {
   ActiveJobCreateMultipleSchema,
   ActiveJobCreateSchema,
 } from "lib/types/active-job";
+import { Permission } from "lib/types/auth";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export type ActiveJobsAPIPostData =
@@ -42,4 +44,7 @@ async function post(
   res.status(202).end();
 }
 
-export default http_method_handler({ post: post });
+export default APIAccessController(
+  [Permission.PLANS],
+  APIMethodHandler({ post })
+);

@@ -1,4 +1,5 @@
-import { http_method_handler } from "lib/api/method_handler";
+import { APIAccessController } from "lib/api/APIAccessControler";
+import { APIMethodHandler } from "lib/api/MethodHandler";
 import { validateOrSendError } from "lib/api/validator";
 import {
   deleteActiveJob,
@@ -6,6 +7,7 @@ import {
   updateActiveJob,
 } from "lib/data/active-jobs";
 import { ActiveJobUpdateSchema } from "lib/types/active-job";
+import { Permission } from "lib/types/auth";
 import { NextApiRequest, NextApiResponse } from "next";
 
 async function patch(req: NextApiRequest, res: NextApiResponse) {
@@ -40,4 +42,7 @@ async function del(req: NextApiRequest, res: NextApiResponse) {
   res.status(204).end();
 }
 
-export default http_method_handler({ get: get, patch: patch, del: del });
+export default APIAccessController(
+  [Permission.PLANS],
+  APIMethodHandler({ patch, get, del })
+);

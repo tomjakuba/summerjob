@@ -1,4 +1,5 @@
-import { http_method_handler } from "lib/api/method_handler";
+import { APIAccessController } from "lib/api/APIAccessControler";
+import { APIMethodHandler } from "lib/api/MethodHandler";
 import { getSMJSessionAPI } from "lib/auth/auth";
 import { getMyPlans } from "lib/data/my-plan";
 import { getActiveSummerJobEvent } from "lib/data/summerjob-event";
@@ -15,13 +16,8 @@ async function get(
     return;
   }
   const session = await getSMJSessionAPI(req, res);
-  if (!session) {
-    res.status(401).end();
-    return;
-  }
-
-  const plans = await getMyPlans(session.userID);
+  const plans = await getMyPlans(session!.userID);
   res.status(200).json(plans);
 }
 
-export default http_method_handler({ get: get });
+export default APIAccessController([], APIMethodHandler({ get }));

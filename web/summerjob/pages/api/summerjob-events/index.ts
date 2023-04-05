@@ -1,9 +1,11 @@
-import { http_method_handler } from "lib/api/method_handler";
+import { APIAccessController } from "lib/api/APIAccessControler";
+import { APIMethodHandler } from "lib/api/MethodHandler";
 import { validateOrSendError } from "lib/api/validator";
 import {
   createSummerJobEvent,
   getSummerJobEvents,
 } from "lib/data/summerjob-event";
+import { Permission } from "lib/types/auth";
 import {
   SummerJobEventCreateDataInput,
   SummerJobEventCreateSchema,
@@ -34,4 +36,7 @@ async function get(
   res.status(200).json(events);
 }
 
-export default http_method_handler({ get: get, post: post });
+export default APIAccessController(
+  [Permission.ADMIN],
+  APIMethodHandler({ get, post })
+);

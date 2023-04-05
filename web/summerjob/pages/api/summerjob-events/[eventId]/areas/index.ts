@@ -1,8 +1,10 @@
-import { http_method_handler } from "lib/api/method_handler";
+import { APIAccessController } from "lib/api/APIAccessControler";
+import { APIMethodHandler } from "lib/api/MethodHandler";
 import { validateOrSendError } from "lib/api/validator";
 import { WrappedError } from "lib/data/api-error";
 import { createArea, getAreas } from "lib/data/areas";
 import { AreaCreateData, AreaCreateSchema } from "lib/types/area";
+import { Permission } from "lib/types/auth";
 import { NextApiRequest, NextApiResponse } from "next";
 import { ApiError } from "next/dist/server/api-utils";
 
@@ -30,4 +32,7 @@ async function post(
   res.status(201).json(area);
 }
 
-export default http_method_handler({ get: get, post: post });
+export default APIAccessController(
+  [Permission.ADMIN],
+  APIMethodHandler({ get, post })
+);

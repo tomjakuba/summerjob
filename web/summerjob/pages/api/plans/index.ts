@@ -1,9 +1,12 @@
 import { createPlan, getPlans } from "lib/data/plans";
 import { NextApiRequest, NextApiResponse } from "next";
-import { http_method_handler } from "lib/api/method_handler";
+
 import { Prisma } from "lib/prisma/client";
 import { ApiBadRequestError, WrappedError } from "lib/data/api-error";
 import { InvalidDataError } from "lib/data/internal-error";
+import { APIAccessController } from "lib/api/APIAccessControler";
+import { APIMethodHandler } from "lib/api/MethodHandler";
+import { Permission } from "lib/types/auth";
 
 export type PlansAPIGetResponse = Awaited<ReturnType<typeof getPlans>>;
 async function get(
@@ -40,4 +43,7 @@ async function post(
   }
 }
 
-export default http_method_handler({ get: get, post: post });
+export default APIAccessController(
+  [Permission.PLANS],
+  APIMethodHandler({ get, post })
+);

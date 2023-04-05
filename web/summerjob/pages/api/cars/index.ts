@@ -1,6 +1,9 @@
-import { http_method_handler } from "lib/api/method_handler";
+import { APIAccessController } from "lib/api/APIAccessControler";
+import { APIMethodHandler } from "lib/api/MethodHandler";
 import { ApiBadRequestError, ApiError, WrappedError } from "lib/data/api-error";
 import { createCar, getCars } from "lib/data/cars";
+import { PERMISSION } from "lib/permissions/permissions";
+import { Permission } from "lib/types/auth";
 import { CarCreateData, CarCreateSchema } from "lib/types/car";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -30,4 +33,7 @@ async function post(
   res.status(201).json(car);
 }
 
-export default http_method_handler({ get: get, post: post });
+export default APIAccessController(
+  [Permission.CARS, Permission.PLANS],
+  APIMethodHandler({ get, post })
+);
