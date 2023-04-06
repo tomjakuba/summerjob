@@ -70,6 +70,7 @@ export function isAccessAllowed(
   session: ExtendedSession | null
 ): boolean {
   if (!session) return false;
+  if (permissions.length === 0) return true;
   if (session.permissions.includes(Permission.ADMIN)) return true;
   for (const permission of permissions) {
     if (session.permissions.includes(permission)) return true;
