@@ -128,6 +128,7 @@ export async function deleteUserSessions(
       email,
     },
   });
+  if (!nextAuthUser) return;
   await prismaClient.session.deleteMany({
     where: {
       userId: nextAuthUser?.id,
