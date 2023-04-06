@@ -13,7 +13,7 @@ export default function ConfirmationModal({
   return (
     <Modal title="Potvrdit akci" size={ModalSize.MEDIUM} onClose={onReject}>
       {children}
-      <div className="d-flex justify-content-between">
+      <div className="d-flex justify-content-between mt-3">
         <button
           className="btn btn-secondary pt-2 pb-2"
           type="button"

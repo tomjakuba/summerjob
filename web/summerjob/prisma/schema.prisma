@@ -52,7 +52,7 @@ model Car {
   name        String        @db.VarChar(64)
   description String        @default("")
   seats       Int
-  owner       Worker        @relation(fields: [ownerId], references: [id])
+  owner       Worker        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId     String
   rides       Ride[]
   odometers   CarOdometer[]

@@ -2,7 +2,7 @@ import { APIMethodHandler } from "lib/api/MethodHandler";
 import { validateOrSendError } from "lib/api/validator";
 import { getSMJSessionAPI, isAccessAllowed } from "lib/auth/auth";
 import { ApiError, WrappedError } from "lib/data/api-error";
-import { getWorkerById, updateWorker } from "lib/data/workers";
+import { deleteWorker, getWorkerById, updateWorker } from "lib/data/workers";
 import { Permission } from "lib/types/auth";
 import { WorkerUpdateDataInput, WorkerUpdateSchema } from "lib/types/worker";
 import { NextApiRequest, NextApiResponse } from "next";
@@ -36,6 +36,16 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
   res.status(204).end();
 }
 
+async function del(req: NextApiRequest, res: NextApiResponse) {
+  const id = req.query.id as string;
+  const allowed = await isAllowedToDeleteWorker(req, res);
+  if (!allowed) {
+    return;
+  }
+  await deleteWorker(id);
+  res.status(204).end();
+}
+
 async function isAllowedToAccessWorker(
   req: NextApiRequest,
   res: NextApiResponse,
@@ -58,5 +68,21 @@ async function isAllowedToAccessWorker(
   return false;
 }
 
+async function isAllowedToDeleteWorker(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  const session = await getSMJSessionAPI(req, res);
+  if (!session) {
+    res.status(401).end();
+    return;
+  }
+  const regularAccess = isAccessAllowed([Permission.WORKERS], session);
+  if (!regularAccess) {
+    res.status(403).end();
+  }
+  return true;
+}
+
 // Access control is done individually in this case to allow users to access their own data
-export default APIMethodHandler({ get, patch });
+export default APIMethodHandler({ get, patch, del });

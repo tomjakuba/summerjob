@@ -17,6 +17,7 @@ export async function getWorkers(
           isActive: true,
         },
       },
+      deleted: false,
     },
   };
   if (planId) {
@@ -109,6 +110,73 @@ export function databaseWorkerToWorkerComplete(
   return { ...rest, availability: availability[0] };
 }
 
+export async function deleteWorker(id: string) {
+  await prisma.$transaction(async (tx) => {
+    // Check if the worker has ever been assigned to a job
+    // If not, we can just delete them
+    const worker = await tx.worker.findUnique({
+      where: { id },
+      include: {
+        jobs: true,
+      },
+    });
+    if (!worker) {
+      return;
+    }
+    await deleteUserSessions(worker.email);
+    if (worker.jobs.length === 0) {
+      await tx.worker.delete({
+        where: {
+          id,
+        },
+      });
+      return;
+    }
+    // If the worker has been assigned to a job, we cannot delete them from the database as it would break the job history
+    // Instead, we anonymize them
+    await prisma.worker.update({
+      where: {
+        id,
+      },
+      data: {
+        firstName: "Deleted",
+        lastName: "Worker",
+        email: `${id}@deleted.xyz`,
+        phone: "00000000",
+        allergies: {
+          set: [],
+        },
+        availability: {
+          updateMany: {
+            where: {},
+            data: {
+              workDays: [],
+              adorationDays: [],
+            },
+          },
+        },
+        cars: {
+          updateMany: {
+            where: {},
+            data: {
+              deleted: true,
+              description: "Deleted",
+              name: "Deleted Car",
+            },
+          },
+        },
+        deleted: true,
+        blocked: true,
+        permissions: {
+          update: {
+            permissions: [],
+          },
+        },
+      },
+    });
+  });
+}
+
 export async function updateWorker(id: string, data: WorkerUpdateData) {
   if (!data.email) {
     return await internal_updateWorker(id, data);
@@ -134,7 +202,7 @@ export async function internal_updateWorker(
     }
   }
 
-  return await prisma.worker.update({
+  return await prismaClient.worker.update({
     where: {
       id,
     },

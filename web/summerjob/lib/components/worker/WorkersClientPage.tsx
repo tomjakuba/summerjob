@@ -17,7 +17,7 @@ export default function WorkersClientPage({
   sWorkers,
 }: WorkersClientPageProps) {
   const inititalWorkers = deserializeWorkers(sWorkers);
-  const { data, error } = useAPIWorkers({
+  const { data, error, mutate } = useAPIWorkers({
     fallbackData: inititalWorkers,
   });
 
@@ -66,7 +66,7 @@ export default function WorkersClientPage({
           </div>
           <div className="row gx-3">
             <div className="col-sm-12 col-lg-10">
-              <WorkersTable workers={filteredData || []} />
+              <WorkersTable workers={filteredData || []} onUpdated={mutate} />
             </div>
             <div className="col-sm-12 col-lg-2">
               <div className="vstack smj-search-stack smj-shadow rounded-3">

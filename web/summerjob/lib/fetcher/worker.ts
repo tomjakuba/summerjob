@@ -4,8 +4,8 @@ import type {
   WorkerAPIGetResponse,
   WorkerAPIPatchData,
 } from "pages/api/workers/[id]";
-import { useEffect, useMemo } from "react";
-import { useData, useDataPartialUpdate } from "./fetcher";
+import { useMemo } from "react";
+import { useData, useDataDelete, useDataPartialUpdate } from "./fetcher";
 
 export function useAPIWorkerUpdate(workerId: string, options?: any) {
   return useDataPartialUpdate<WorkerAPIPatchData>(
@@ -37,4 +37,8 @@ export function useAPIWorkersWithoutJob(planId: string, options?: any) {
 
 export function useAPIWorker(id: string) {
   return useData<WorkerAPIGetResponse>(`/api/workers/${id}`);
+}
+
+export function useAPIWorkerDelete(id: string, options?: any) {
+  return useDataDelete(`/api/workers/${id}`, options);
 }
