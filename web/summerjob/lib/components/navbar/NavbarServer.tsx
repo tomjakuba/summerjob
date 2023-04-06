@@ -16,8 +16,8 @@ export function NavbarServer({ session }: NavbarServerProps) {
   const navPaths: NavPath[] = [
     {
       path: "/plans",
-      name: "Plán",
-      icon: "fas fa-calendar-alt",
+      name: "Plány",
+      icon: "fas fa-calendar-days",
       permissions: [Permission.PLANS],
     },
     {
@@ -47,7 +47,7 @@ export function NavbarServer({ session }: NavbarServerProps) {
     {
       path: "/my-plan",
       name: "Můj plán",
-      icon: "fas fa-calendar-alt",
+      icon: "fas fa-calendar-week",
       permissions: [],
     },
     { path: "/profile", name: "Profil", icon: "fas fa-user", permissions: [] },
