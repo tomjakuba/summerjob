@@ -18,12 +18,13 @@ export type WorkerWithAllergies = Worker & {
   allergies: Allergy[];
 };
 
-export const WorkerUpdateSchema = z
+export const WorkerCreateSchema = z
   .object({
     firstName: z.string().min(1),
     lastName: z.string().min(1),
     email: z.string().min(1),
     phone: z.string().min(1),
+    strong: z.boolean(),
     allergyIds: z.array(z.string()),
     availability: z.object({
       workDays: z.array(z.date().or(z.string().min(1).pipe(z.coerce.date()))),
@@ -32,8 +33,12 @@ export const WorkerUpdateSchema = z
       ),
     }),
   })
-  .strict()
-  .partial();
+  .strict();
+
+export type WorkerCreateDataInput = z.input<typeof WorkerCreateSchema>;
+export type WorkerCreateData = z.infer<typeof WorkerCreateSchema>;
+
+export const WorkerUpdateSchema = WorkerCreateSchema.partial().strict();
 
 export type WorkerUpdateDataInput = z.input<typeof WorkerUpdateSchema>;
 export type WorkerUpdateData = z.infer<typeof WorkerUpdateSchema>;

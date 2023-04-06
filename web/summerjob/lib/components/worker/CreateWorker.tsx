@@ -2,99 +2,68 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import {
-  deserializeWorker,
-  WorkerComplete,
-  WorkerUpdateSchema,
-} from "lib/types/worker";
+import { WorkerCreateSchema } from "lib/types/worker";
 import { Allergy } from "lib/prisma/client";
 import { useState } from "react";
-import { useAPIWorkerUpdate } from "lib/fetcher/worker";
-import Link from "next/link";
 import AllergyPill from "../forms/AllergyPill";
 import { deserializeAllergies } from "lib/types/allergy";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
 import SuccessProceedModal from "../modal/SuccessProceedModal";
 import { Serialized } from "lib/types/serialize";
 import DaysSelection from "../forms/DaysSelection";
-import { datesBetween, pick } from "lib/helpers/helpers";
+import { datesBetween } from "lib/helpers/helpers";
 import { useRouter } from "next/navigation";
+import { useAPIWorkerCreate } from "lib/fetcher/worker";
 
-const schema = WorkerUpdateSchema;
+const schema = WorkerCreateSchema;
 type WorkerForm = z.input<typeof schema>;
 
 interface EditWorkerProps {
-  serializedWorker: Serialized<WorkerComplete>;
   serializedAllergens: Serialized<Allergy>;
   eventStartDate: string;
   eventEndDate: string;
-  isProfilePage: boolean;
 }
 
-export default function EditWorker({
-  serializedWorker,
+export default function CreateWorker({
   serializedAllergens,
   eventStartDate,
   eventEndDate,
-  isProfilePage,
 }: EditWorkerProps) {
-  const worker = deserializeWorker(serializedWorker);
   const allergies = deserializeAllergies(serializedAllergens);
   const allDates = datesBetween(
     new Date(eventStartDate),
     new Date(eventEndDate)
   );
   const {
-    formState: { dirtyFields },
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<WorkerForm>({
     resolver: zodResolver(schema),
-    defaultValues: {
-      firstName: worker.firstName,
-      lastName: worker.lastName,
-      email: worker.email,
-      phone: worker.phone,
-      strong: worker.isStrong,
-      allergyIds: worker.allergies.map((allergy) => allergy.id),
-      availability: {
-        workDays: worker.availability.workDays.map((day) => day.toJSON()),
-        adorationDays: worker.availability.adorationDays.map((day) =>
-          day.toJSON()
-        ),
-      },
-    },
   });
 
   const router = useRouter();
   const [saved, setSaved] = useState(false);
-  const { trigger, isMutating, reset, error } = useAPIWorkerUpdate(worker.id, {
+  const { trigger, isMutating, reset, error } = useAPIWorkerCreate({
     onSuccess: () => {
       setSaved(true);
-      router.refresh();
     },
   });
 
   const onSubmit = (data: WorkerForm) => {
-    const modified = pick(data, ...Object.keys(dirtyFields)) as WorkerForm;
-    trigger(modified);
+    trigger(data);
   };
 
   const onConfirmationClosed = () => {
     setSaved(false);
-    if (!isProfilePage) {
-      router.back();
-    }
+    router.back();
   };
 
   return (
     <>
       <div className="row">
         <div className="col">
-          <h3>
-            {worker.firstName} {worker.lastName}
-          </h3>
+          <h3>Přidat pracanta</h3>
         </div>
       </div>
       <div className="row">
@@ -144,18 +113,11 @@ export default function EditWorker({
               type="email"
               {...register("email")}
             />
-            <p className="text-muted mt-1">
-              {isProfilePage
-                ? "Změnou e-mailu dojde k odhlášení z aplikace."
-                : "Změnou e-mailu dojde k odhlášení uživatele z aplikace."}
-            </p>
             <label
               className="form-label d-block fw-bold mt-4"
               htmlFor="availability.workDays"
             >
-              {isProfilePage
-                ? "Můžu pracovat v následující dny"
-                : "Může pracovat v následující dny"}
+              Může pracovat v následující dny
             </label>
             <DaysSelection
               name="availability.workDays"
@@ -166,9 +128,7 @@ export default function EditWorker({
               className="form-label d-block fw-bold mt-4"
               htmlFor="availability.adorationDays"
             >
-              {isProfilePage
-                ? "Chci adorovat v následující dny"
-                : "Chce adorovat v následující dny"}
+              Chce adorovat v následující dny
             </label>
             <DaysSelection
               name="availability.adorationDays"
@@ -205,36 +165,11 @@ export default function EditWorker({
                 <i className="fas fa-dumbbell ms-2"></i>
               </label>
             </div>
+
             <label className="form-label d-block fw-bold mt-4" htmlFor="car">
               Auta
             </label>
-            {isProfilePage && worker.cars.length === 0 && (
-              <p>Pro přiřazení auta kontaktujte tým SummerJob.</p>
-            )}
-            {isProfilePage && worker.cars.length > 0 && (
-              <div className="list-group">
-                {worker.cars.map((car) => (
-                  <div key={car.id} className="list-group-item ps-2 w-50">
-                    {car.name}
-                  </div>
-                ))}
-              </div>
-            )}
-            {!isProfilePage && worker.cars.length === 0 && <p>Žádná auta</p>}
-            {!isProfilePage && worker.cars.length > 0 && (
-              <div className="list-group">
-                {worker.cars.map((car) => (
-                  <Link
-                    key={car.id}
-                    href={`/cars/${car.id}`}
-                    className="list-group-item list-group-item-action ps-2 d-flex align-items-center justify-content-between w-50"
-                  >
-                    {car.name}
-                    <i className="fas fa-angle-right ms-2"></i>
-                  </Link>
-                ))}
-              </div>
-            )}
+            <p>Auta je možné přiřadit v záložce Auta po vytvoření pracanta.</p>
 
             <div className="d-flex justify-content-between gap-3">
               <button

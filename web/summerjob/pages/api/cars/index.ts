@@ -1,5 +1,6 @@
 import { APIAccessController } from "lib/api/APIAccessControler";
 import { APIMethodHandler } from "lib/api/MethodHandler";
+import { validateOrSendError } from "lib/api/validator";
 import { ApiBadRequestError, ApiError, WrappedError } from "lib/data/api-error";
 import { createCar, getCars } from "lib/data/cars";
 import { Permission } from "lib/types/auth";
@@ -21,14 +22,11 @@ async function post(
   req: NextApiRequest,
   res: NextApiResponse<CarsAPIPostResponse | WrappedError<ApiError>>
 ) {
-  const result = CarCreateSchema.safeParse(req.body);
-  if (!result.success) {
-    res.status(400).json({
-      error: new ApiBadRequestError(JSON.stringify(result.error.issues)),
-    });
+  const data = validateOrSendError(CarCreateSchema, req.body, res);
+  if (!data) {
     return;
   }
-  const car = await createCar(result.data);
+  const car = await createCar(data);
   res.status(201).json(car);
 }
 

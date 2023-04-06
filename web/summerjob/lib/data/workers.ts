@@ -1,7 +1,11 @@
 import { WorkerAvailability, Worker, PrismaClient } from "lib/prisma/client";
 import prisma from "lib/prisma/connection";
 import { PrismaTransactionClient } from "lib/types/prisma";
-import { WorkerComplete, WorkerUpdateData } from "lib/types/worker";
+import {
+  WorkerComplete,
+  WorkerCreateData,
+  WorkerUpdateData,
+} from "lib/types/worker";
 import { cache_getActiveSummerJobEventId } from "./cache";
 import { NoActiveEventError } from "./internal-error";
 import { deleteUserSessions } from "./users";
@@ -191,6 +195,49 @@ export async function deleteWorker(id: string) {
   });
 }
 
+export async function createWorker(data: WorkerCreateData) {
+  const activeEventId = await cache_getActiveSummerJobEventId();
+  if (data.availability) {
+    if (!activeEventId) {
+      throw new NoActiveEventError();
+    }
+  }
+
+  return await prisma.worker.create({
+    data: {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      email: data.email.toLowerCase(),
+      phone: data.phone,
+      isStrong: data.strong,
+      allergies: {
+        connect: data.allergyIds.map((id) => ({ id })),
+      },
+      availability: {
+        create: {
+          workDays: data.availability?.workDays ?? [],
+          adorationDays: data.availability?.adorationDays ?? [],
+          event: {
+            connect: {
+              id: activeEventId,
+            },
+          },
+        },
+      },
+      registeredIn: {
+        connect: {
+          id: activeEventId,
+        },
+      },
+      permissions: {
+        create: {
+          permissions: [],
+        },
+      },
+    },
+  });
+}
+
 export async function updateWorker(id: string, data: WorkerUpdateData) {
   if (!data.email) {
     return await internal_updateWorker(id, data);
@@ -225,6 +272,7 @@ export async function internal_updateWorker(
       lastName: data.lastName,
       email: data.email,
       phone: data.phone,
+      isStrong: data.strong,
       allergies: {
         set: data.allergyIds?.map((allergyId) => ({ id: allergyId })),
       },

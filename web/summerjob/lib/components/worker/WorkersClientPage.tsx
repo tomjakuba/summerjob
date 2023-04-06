@@ -38,10 +38,12 @@ export default function WorkersClientPage({
   return (
     <>
       <PageHeader title="Pracanti">
-        <button className="btn btn-warning btn-with-icon" type="button">
-          <i className="far fa-user"></i>
-          <span>Přidat pracanta</span>
-        </button>
+        <Link href={`/workers/new`}>
+          <button className="btn btn-warning btn-with-icon" type="button">
+            <i className="far fa-user"></i>
+            <span>Přidat pracanta</span>
+          </button>
+        </Link>
         <Link href={`/print-workers`} prefetch={false}>
           <button className="btn btn-primary btn-with-icon" type="button">
             <i className="fas fa-print"></i>

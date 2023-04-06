@@ -1,11 +1,19 @@
 import { deserializeWorkerAvailability } from "lib/types/worker";
-import type { WorkersAPIGetResponse } from "pages/api/workers";
+import type {
+  WorkersAPIGetResponse,
+  WorkersAPIPostData,
+} from "pages/api/workers";
 import type {
   WorkerAPIGetResponse,
   WorkerAPIPatchData,
 } from "pages/api/workers/[id]";
 import { useMemo } from "react";
-import { useData, useDataDelete, useDataPartialUpdate } from "./fetcher";
+import {
+  useData,
+  useDataCreate,
+  useDataDelete,
+  useDataPartialUpdate,
+} from "./fetcher";
 
 export function useAPIWorkerUpdate(workerId: string, options?: any) {
   return useDataPartialUpdate<WorkerAPIPatchData>(
@@ -41,4 +49,8 @@ export function useAPIWorker(id: string) {
 
 export function useAPIWorkerDelete(id: string, options?: any) {
   return useDataDelete(`/api/workers/${id}`, options);
+}
+
+export function useAPIWorkerCreate(options?: any) {
+  return useDataCreate<WorkersAPIPostData>("/api/workers", options);
 }
