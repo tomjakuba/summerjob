@@ -45,7 +45,11 @@ export async function getWorkers(
     ...whereClause,
     include: {
       allergies: true,
-      cars: true,
+      cars: {
+        where: {
+          deleted: false,
+        },
+      },
       availability: {
         where: {
           event: {
@@ -84,7 +88,11 @@ export async function getWorkerById(
       id,
     },
     include: {
-      cars: true,
+      cars: {
+        where: {
+          deleted: false,
+        },
+      },
       allergies: true,
       availability: {
         where: {
@@ -118,6 +126,7 @@ export async function deleteWorker(id: string) {
       where: { id },
       include: {
         jobs: true,
+        permissions: true,
       },
     });
     if (!worker) {
@@ -128,6 +137,11 @@ export async function deleteWorker(id: string) {
       await tx.worker.delete({
         where: {
           id,
+        },
+      });
+      await tx.workerPermissions.delete({
+        where: {
+          id: worker.permissions.id,
         },
       });
       return;

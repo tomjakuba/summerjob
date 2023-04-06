@@ -2,7 +2,6 @@ import { APIAccessController } from "lib/api/APIAccessControler";
 import { APIMethodHandler } from "lib/api/MethodHandler";
 import { ApiBadRequestError, ApiError, WrappedError } from "lib/data/api-error";
 import { createCar, getCars } from "lib/data/cars";
-import { PERMISSION } from "lib/permissions/permissions";
 import { Permission } from "lib/types/auth";
 import { CarCreateData, CarCreateSchema } from "lib/types/car";
 import { NextApiRequest, NextApiResponse } from "next";

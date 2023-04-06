@@ -25,7 +25,11 @@ export async function getActiveJobById(
       workers: {
         include: {
           allergies: true,
-          cars: true,
+          cars: {
+            where: {
+              deleted: false,
+            },
+          },
           availability: {
             where: {
               eventId: activeEventId,

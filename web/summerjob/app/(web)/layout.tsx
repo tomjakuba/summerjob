@@ -11,7 +11,7 @@ export default async function WebLayout({
 }) {
   const session = await getSMJSession();
   if (!session) {
-    redirect("/auth/signIn");
+    return redirect("/auth/signIn");
   }
   return (
     <>

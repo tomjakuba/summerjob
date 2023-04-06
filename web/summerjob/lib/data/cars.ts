@@ -39,6 +39,7 @@ export async function getCars(): Promise<CarComplete[]> {
           },
         },
       },
+      deleted: false,
     },
     include: {
       owner: true,
@@ -134,9 +135,36 @@ export async function createCar(carData: CarCreateData) {
 }
 
 export async function deleteCar(carId: string) {
-  await prisma.car.delete({
-    where: {
-      id: carId,
-    },
+  await prisma.$transaction(async (tx) => {
+    // Check if car has any rides associated with it
+    // If not, delete the car
+    const car = await tx.car.findUnique({
+      where: {
+        id: carId,
+      },
+      include: {
+        rides: true,
+      },
+    });
+    if (!car) {
+      return;
+    }
+    if (car.rides.length === 0) {
+      await tx.car.delete({
+        where: {
+          id: carId,
+        },
+      });
+      return;
+    }
+    // If the car has rides associated with it, anonymize the car instead and mark it as deleted
+    await tx.car.update({
+      where: {
+        id: carId,
+      },
+      data: {
+        deleted: true,
+      },
+    });
   });
 }

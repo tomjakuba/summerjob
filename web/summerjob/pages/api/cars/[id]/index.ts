@@ -18,18 +18,6 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
 
 async function del(req: NextApiRequest, res: NextApiResponse) {
   const id = req.query.id as string;
-  // FIXME: Anonymize data if there are rides instead of ignoring the request
-  // --->
-  const car = await getCarById(id);
-  if (!car) {
-    res.status(204).end();
-    return;
-  }
-  if (car?.rides.length > 0) {
-    res.status(409).end();
-    return;
-  }
-  // <---
   await deleteCar(id);
   res.status(204).end();
 }

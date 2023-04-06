@@ -8,7 +8,7 @@ export default async function PrintLayout({
 }) {
   const session = await getSMJSession();
   if (!session) {
-    redirect("/auth/signIn");
+    return redirect("/auth/signIn");
   }
   return <>{children}</>;
 }

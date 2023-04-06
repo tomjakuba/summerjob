@@ -33,7 +33,11 @@ export async function getCompletePlans(): Promise<PlanComplete[]> {
           workers: {
             include: {
               allergies: true,
-              cars: true,
+              cars: {
+                where: {
+                  deleted: false,
+                },
+              },
               availability: {
                 where: {
                   eventId: activeEventId,
@@ -93,7 +97,11 @@ export async function getPlanById(id: string): Promise<PlanComplete | null> {
           workers: {
             include: {
               allergies: true,
-              cars: true,
+              cars: {
+                where: {
+                  deleted: false,
+                },
+              },
               availability: {
                 where: {
                   eventId: activeEventId,
