@@ -24,5 +24,5 @@ async function del(req: NextApiRequest, res: NextApiResponse) {
 
 export default APIAccessController(
   [Permission.PLANS],
-  APIMethodHandler({ patch })
+  APIMethodHandler({ patch, del })
 );
