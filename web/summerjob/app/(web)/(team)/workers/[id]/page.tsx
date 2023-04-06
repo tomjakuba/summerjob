@@ -34,6 +34,7 @@ export default async function EditWorkerPage({ params }: Params) {
             serializedAllergens={serializedAllergens}
             eventStartDate={startDate.toJSON()}
             eventEndDate={endDate.toJSON()}
+            isProfilePage={false}
           />
         </EditBox>
       </section>

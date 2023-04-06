@@ -18,6 +18,7 @@ import SuccessProceedModal from "../modal/SuccessProceedModal";
 import { Serialized } from "lib/types/serialize";
 import DaysSelection from "../forms/DaysSelection";
 import { datesBetween, pick } from "lib/helpers/helpers";
+import { useRouter } from "next/navigation";
 
 const schema = WorkerUpdateSchema;
 type WorkerForm = z.input<typeof schema>;
@@ -27,6 +28,7 @@ interface EditWorkerProps {
   serializedAllergens: Serialized<Allergy>;
   eventStartDate: string;
   eventEndDate: string;
+  isProfilePage: boolean;
 }
 
 export default function EditWorker({
@@ -34,6 +36,7 @@ export default function EditWorker({
   serializedAllergens,
   eventStartDate,
   eventEndDate,
+  isProfilePage,
 }: EditWorkerProps) {
   const worker = deserializeWorker(serializedWorker);
   const allergies = deserializeAllergies(serializedAllergens);
@@ -62,16 +65,26 @@ export default function EditWorker({
       },
     },
   });
+
+  const router = useRouter();
   const [saved, setSaved] = useState(false);
   const { trigger, isMutating, reset, error } = useAPIWorkerUpdate(worker.id, {
     onSuccess: () => {
       setSaved(true);
+      router.refresh();
     },
   });
 
   const onSubmit = (data: WorkerForm) => {
     const modified = pick(data, ...Object.keys(dirtyFields)) as WorkerForm;
     trigger(modified);
+  };
+
+  const onConfirmationClosed = () => {
+    setSaved(false);
+    if (!isProfilePage) {
+      router.back();
+    }
   };
 
   return (
@@ -115,8 +128,10 @@ export default function EditWorker({
             <input
               id="phone"
               className="form-control p-0 fs-5"
-              type="text"
+              type="tel"
               maxLength={20}
+              pattern="((?:\+|00)[0-9]{1,3})?[ ]?[0-9]{3}[ ]?[0-9]{3}[ ]?[0-9]{3}"
+              placeholder="(+420) 123 456 789"
               {...register("phone")}
             />
             <label className="form-label fw-bold mt-4" htmlFor="email">
@@ -129,13 +144,17 @@ export default function EditWorker({
               {...register("email")}
             />
             <p className="text-muted mt-1">
-              Změnou e-mailu dojde k odhlášení uživatele z aplikace.
+              {isProfilePage
+                ? "Změnou e-mailu dojde k odhlášení z aplikace."
+                : "Změnou e-mailu dojde k odhlášení uživatele z aplikace."}
             </p>
             <label
               className="form-label d-block fw-bold mt-4"
               htmlFor="availability.workDays"
             >
-              Může pracovat v následující dny
+              {isProfilePage
+                ? "Můžu pracovat v následující dny"
+                : "Může pracovat v následující dny"}
             </label>
             <DaysSelection
               name="availability.workDays"
@@ -146,7 +165,9 @@ export default function EditWorker({
               className="form-label d-block fw-bold mt-4"
               htmlFor="availability.adorationDays"
             >
-              Chce adorovat v následující dny
+              {isProfilePage
+                ? "Chci adorovat v následující dny"
+                : "Chce adorovat v následující dny"}
             </label>
             <DaysSelection
               name="availability.adorationDays"
@@ -171,8 +192,20 @@ export default function EditWorker({
             <label className="form-label d-block fw-bold mt-4" htmlFor="car">
               Auta
             </label>
-            {worker.cars.length === 0 && <p>Žádná auta</p>}
-            {worker.cars.length > 0 && (
+            {isProfilePage && worker.cars.length === 0 && (
+              <p>Pro přiřazení auta kontaktujte tým SummerJob.</p>
+            )}
+            {isProfilePage && worker.cars.length > 0 && (
+              <div className="list-group">
+                {worker.cars.map((car) => (
+                  <div key={car.id} className="list-group-item ps-2 w-50">
+                    {car.name}
+                  </div>
+                ))}
+              </div>
+            )}
+            {!isProfilePage && worker.cars.length === 0 && <p>Žádná auta</p>}
+            {!isProfilePage && worker.cars.length > 0 && (
               <div className="list-group">
                 {worker.cars.map((car) => (
                   <Link
@@ -202,9 +235,7 @@ export default function EditWorker({
                 disabled={isMutating}
               />
             </div>
-            {saved && (
-              <SuccessProceedModal onClose={() => window.history.back()} />
-            )}
+            {saved && <SuccessProceedModal onClose={onConfirmationClosed} />}
             {error && <ErrorMessageModal onClose={reset} />}
           </form>
         </div>

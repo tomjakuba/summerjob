@@ -1,8 +1,7 @@
 import { getSMJSession } from "lib/auth/auth";
 import ErrorPage404 from "lib/components/404/404";
-import AccessDeniedPage from "lib/components/error-page/AccessDeniedPage";
 import EditBox from "lib/components/forms/EditBox";
-import EditProfile from "lib/components/profile/EditProfile";
+import EditWorker from "lib/components/worker/EditWorker";
 import { getAllergies } from "lib/data/allergies";
 import { cache_getActiveSummerJobEvent } from "lib/data/cache";
 import { getWorkerById } from "lib/data/workers";
@@ -28,11 +27,12 @@ export default async function MyProfilePage() {
     <>
       <section className="mb-3">
         <EditBox>
-          <EditProfile
+          <EditWorker
             serializedWorker={serializedWorker}
             serializedAllergens={serializedAllergens}
             eventStartDate={startDate.toJSON()}
             eventEndDate={endDate.toJSON()}
+            isProfilePage={true}
           />
         </EditBox>
       </section>
