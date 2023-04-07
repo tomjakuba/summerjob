@@ -70,7 +70,7 @@ function formatWorkerRow(
       {deletingError && (
         <ErrorMessageModal
           onClose={resetError}
-          message={"Nepodařilo se odstranit pracanta."}
+          mainMessage={"Nepodařilo se odstranit pracanta."}
         />
       )}
     </span>,

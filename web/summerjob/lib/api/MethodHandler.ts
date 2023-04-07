@@ -80,7 +80,9 @@ async function handle(
       return;
     } else if (error instanceof InternalError) {
       // TODO: Replace with logging error
-      console.error(error);
+      if (process.env.NODE_ENV === "development") {
+        console.error(error);
+      }
       res.status(500).json({
         error: new ApiInternalServerError(error.reason),
       });

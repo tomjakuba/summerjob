@@ -308,7 +308,7 @@ export default function PlanClientPage({
             {deleteError && (
               <ErrorMessageModal
                 onClose={onErrorMessageClose}
-                message={"Nepovedlo se odstranit plán."}
+                mainMessage={"Nepovedlo se odstranit plán."}
               />
             )}
             {showGenerateConfirmation && !errorGenerating && (
@@ -329,7 +329,7 @@ export default function PlanClientPage({
             {errorGenerating && (
               <ErrorMessageModal
                 onClose={onGeneratingErrorMessageClose}
-                message={"Nepovedlo se vygenerovat plán."}
+                mainMessage={"Nepovedlo se vygenerovat plán."}
               />
             )}
           </section>

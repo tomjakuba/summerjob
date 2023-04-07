@@ -54,3 +54,7 @@ export function useAPIWorkerDelete(id: string, options?: any) {
 export function useAPIWorkerCreate(options?: any) {
   return useDataCreate<WorkersAPIPostData>("/api/workers", options);
 }
+
+export function useAPIWorkersCreate(options?: any) {
+  return useDataCreate<WorkersAPIPostData>("/api/workers", options);
+}

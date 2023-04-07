@@ -133,7 +133,7 @@ export default function ProposedJobRow({
       {deleteError && (
         <ErrorMessageModal
           onClose={onErrorMessageClose}
-          message={"Nepovedlo se odstranit job."}
+          mainMessage={"Nepovedlo se odstranit job."}
         />
       )}
     </ExpandableRow>

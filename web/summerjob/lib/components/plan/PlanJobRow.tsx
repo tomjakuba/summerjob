@@ -245,7 +245,7 @@ export function PlanJobRow({
           {deleteError && (
             <ErrorMessageModal
               onClose={onErrorMessageClose}
-              message={"Nepovedlo se odstranit job."}
+              mainMessage={"Nepovedlo se odstranit job."}
             />
           )}
           {workerToMove && (

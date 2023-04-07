@@ -22,7 +22,7 @@ export const WorkerCreateSchema = z
   .object({
     firstName: z.string().min(1),
     lastName: z.string().min(1),
-    email: z.string().min(1),
+    email: z.string().min(1).email(),
     phone: z.string().min(1),
     strong: z.boolean(),
     allergyIds: z.array(z.string()),
@@ -37,6 +37,15 @@ export const WorkerCreateSchema = z
 
 export type WorkerCreateDataInput = z.input<typeof WorkerCreateSchema>;
 export type WorkerCreateData = z.infer<typeof WorkerCreateSchema>;
+
+export const WorkersCreateSchema = z
+  .object({
+    workers: z.array(WorkerCreateSchema),
+  })
+  .strict();
+
+export type WorkersCreateDataInput = z.input<typeof WorkersCreateSchema>;
+export type WorkersCreateData = z.infer<typeof WorkersCreateSchema>;
 
 export const WorkerUpdateSchema = WorkerCreateSchema.partial().strict();
 

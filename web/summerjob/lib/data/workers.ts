@@ -5,9 +5,10 @@ import {
   WorkerComplete,
   WorkerCreateData,
   WorkerUpdateData,
+  WorkersCreateData,
 } from "lib/types/worker";
 import { cache_getActiveSummerJobEventId } from "./cache";
-import { NoActiveEventError } from "./internal-error";
+import { NoActiveEventError, WorkerAlreadyExistsError } from "./internal-error";
 import { deleteUserSessions } from "./users";
 
 export async function getWorkers(
@@ -195,16 +196,80 @@ export async function deleteWorker(id: string) {
   });
 }
 
-export async function createWorker(data: WorkerCreateData) {
+export async function createWorkers(data: WorkersCreateData) {
   const activeEventId = await cache_getActiveSummerJobEventId();
-  if (data.availability) {
-    if (!activeEventId) {
-      throw new NoActiveEventError();
+  if (!activeEventId) {
+    throw new NoActiveEventError();
+  }
+  const workers = await prisma.$transaction(async (tx) => {
+    const workers: Worker[] = [];
+    for (const worker of data.workers) {
+      workers.push(await createWorker(worker, tx));
     }
+    return workers;
+  });
+  return workers;
+}
+
+/**
+ * Creates a new worker in the currently active event or updates an existing worker from previous events, assigning them to the currently active event
+ * @param data Worker data
+ * @param prismaClient If this is called from a transaction, the transaction client should be passed here
+ * @returns New or updated worker
+ */
+export async function createWorker(
+  data: WorkerCreateData,
+  prismaClient: PrismaClient | PrismaTransactionClient = prisma
+) {
+  const activeEventId = await cache_getActiveSummerJobEventId();
+  if (!activeEventId) {
+    throw new NoActiveEventError();
   }
 
-  return await prisma.worker.create({
-    data: {
+  const existingUser = await prismaClient.worker.findFirst({
+    where: {
+      email: data.email.toLowerCase(),
+      availability: {
+        some: {
+          eventId: activeEventId,
+        },
+      },
+    },
+  });
+
+  if (existingUser) {
+    throw new WorkerAlreadyExistsError(existingUser.email);
+  }
+
+  return await prismaClient.worker.upsert({
+    where: {
+      email: data.email.toLowerCase(),
+    },
+    update: {
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phone: data.phone,
+      allergies: {
+        connect: data.allergyIds.map((id) => ({ id })),
+      },
+      availability: {
+        create: {
+          workDays: data.availability.workDays,
+          adorationDays: data.availability.adorationDays,
+          event: {
+            connect: {
+              id: activeEventId,
+            },
+          },
+        },
+      },
+      registeredIn: {
+        connect: {
+          id: activeEventId,
+        },
+      },
+    },
+    create: {
       firstName: data.firstName,
       lastName: data.lastName,
       email: data.email.toLowerCase(),

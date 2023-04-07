@@ -116,7 +116,7 @@ function AreaRow({ area, eventId, onDataChanged }: AreaRowProps) {
       {error && (
         <ErrorMessageModal
           onClose={onErrorMessageClose}
-          message={"Nepovedlo se odstranit oblast."}
+          mainMessage={"Nepovedlo se odstranit oblast."}
         />
       )}
     </li>

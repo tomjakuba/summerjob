@@ -62,7 +62,7 @@ export default function DeleteEventButton({
       )}
       {error && (
         <ErrorMessageModal
-          message="Nastala chyba. Zkuste to později."
+          mainMessage="Nastala chyba. Zkuste to později."
           onClose={hideError}
         />
       )}

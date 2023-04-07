@@ -4,7 +4,7 @@ import { getAllergies } from "lib/data/allergies";
 import { cache_getActiveSummerJobEvent } from "lib/data/cache";
 import { translateAllergies, serializeAllergies } from "lib/types/allergy";
 
-export default async function EditWorkerPage() {
+export default async function CreateWorkerPage() {
   const allergies = await getAllergies();
   const translatedAllergens = translateAllergies(allergies);
   const serializedAllergens = serializeAllergies(translatedAllergens);

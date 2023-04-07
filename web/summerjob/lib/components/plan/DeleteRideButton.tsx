@@ -34,7 +34,7 @@ export default function DeleteRideButton({
       {error && (
         <ErrorMessageModal
           onClose={reset}
-          message={"Odstranění jízdy se nezdařilo."}
+          mainMessage={"Odstranění jízdy se nezdařilo."}
         />
       )}
     </>

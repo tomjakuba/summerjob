@@ -39,7 +39,11 @@ const sendData =
       const data = await res.json();
       const parsingResult = ApiErrorSchema.safeParse(data.error);
       if (parsingResult.success) {
-        throw new ApiError(parsingResult.data.reason, parsingResult.data.type);
+        throw new ApiError(
+          parsingResult.data.reason,
+          parsingResult.data.type,
+          parsingResult.data.issues
+        );
       }
       throw new Error("An error occurred while submitting the data.");
     }
