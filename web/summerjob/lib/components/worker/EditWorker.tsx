@@ -54,7 +54,7 @@ export default function EditWorker({
       email: worker.email,
       phone: worker.phone,
       strong: worker.isStrong,
-      allergyIds: worker.allergies,
+      allergyIds: worker.allergies as Allergy[],
       availability: {
         workDays: worker.availability.workDays.map((day) => day.toJSON()),
         adorationDays: worker.availability.adorationDays.map((day) =>

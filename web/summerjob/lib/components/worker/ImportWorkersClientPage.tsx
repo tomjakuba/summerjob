@@ -12,6 +12,7 @@ import { useAPIWorkersCreate } from "lib/fetcher/worker";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
 import { useRouter } from "next/navigation";
 import SuccessProceedModal from "../modal/SuccessProceedModal";
+import { Allergy } from "lib/types/allergy";
 
 interface ImportWorkersClientPageProps {
   eventName: string;
@@ -84,12 +85,12 @@ export default function ImportWorkersClientPage({
               </pre>
               Příklad:
               <pre>
-                Jan;Novák;jan.novak@gmail.com;+420123456789;POLLEN,GRASS;2022/07/01,2022/07/02,2022/07/04;2022/07/02,2022/07/04
+                Jan;Novák;jan.novak@gmail.com;+420123456789;DUST,ANIMALS;2022/07/01,2022/07/02,2022/07/04;2022/07/02,2022/07/04
               </pre>
             </div>
             <p>
-              {/* // TODO: List allergy codes  */}
-              {/* Seznam evidovaných alergií: */}
+              Seznam evidovaných alergií: {Object.values(Allergy).join(", ")}
+              <br />
               Datum je možné zadat i v jiném formátu. Před importem zkontrolujte
               níže, že se data naimportují správně.
             </p>
