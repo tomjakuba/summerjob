@@ -1,6 +1,5 @@
 "use client";
 import { formatDateLong } from "lib/helpers/helpers";
-import { translateAllergies } from "lib/types/allergy";
 import { MyPlan } from "lib/types/my-plan";
 import { useMemo, useState } from "react";
 import SimpleDatePicker from "../date-picker/date-picker";
@@ -68,9 +67,7 @@ export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
                 </p>
                 <p>
                   <strong>Alergeny: </strong>
-                  {translateAllergies(selectedPlan.job.allergens)
-                    .map((a) => a.code)
-                    .join(", ") || "Žádné"}
+                  {selectedPlan.job.allergens.join(", ") || "Žádné"}
                 </p>
                 <p>
                   <strong>Adresa: </strong>

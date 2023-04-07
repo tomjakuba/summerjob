@@ -1,21 +1,10 @@
-import { YieldExpression } from "typescript";
 import { z } from "zod";
-import type {
-  Allergy,
-  Car,
-  Worker,
-  WorkerAvailability,
-} from "../../lib/prisma/client";
+import type { Car, Worker, WorkerAvailability } from "../../lib/prisma/client";
 import { Serialized } from "./serialize";
 
 export type WorkerComplete = Worker & {
   cars: Car[];
-  allergies: Allergy[];
   availability: WorkerAvailability;
-};
-
-export type WorkerWithAllergies = Worker & {
-  allergies: Allergy[];
 };
 
 export const WorkerCreateSchema = z

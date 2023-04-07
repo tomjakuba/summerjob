@@ -24,7 +24,6 @@ export async function getActiveJobById(
     include: {
       workers: {
         include: {
-          allergies: true,
           cars: {
             where: {
               deleted: false,
@@ -41,7 +40,6 @@ export async function getActiveJobById(
       proposedJob: {
         include: {
           area: true,
-          allergens: true,
         },
       },
       responsibleWorker: true,

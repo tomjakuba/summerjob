@@ -155,11 +155,9 @@ function missingRides(job: ActiveJobNoPlan, ridesForOtherJobs: RidesForJob[]) {
 }
 
 function allergies(job: ActiveJobNoPlan) {
-  const jobAllergenIds = job.proposedJob.allergens.map((a) => a.id);
+  const jobAllergenIds = job.proposedJob.allergens;
   return job.workers.some((worker) =>
-    worker.allergies
-      .map((a) => a.id)
-      .some((allergyId) => jobAllergenIds.includes(allergyId))
+    worker.allergies.some((allergyId) => jobAllergenIds.includes(allergyId))
   );
 }
 

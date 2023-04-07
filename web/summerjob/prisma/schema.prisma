@@ -16,7 +16,7 @@ model Worker {
   email          String               @unique
   cars           Car[]
   isStrong       Boolean              @default(false)
-  allergies      Allergy[]
+  allergies      String[]
   jobs           ActiveJob[]
   driving        Ride[]               @relation("Driver")
   passengerIn    Ride[]
@@ -73,13 +73,6 @@ model CarOdometer {
   @@unique([carId, eventId])
 }
 
-model Allergy {
-  id                 String        @id @default(uuid())
-  code               String        @db.VarChar(32)
-  workersWithAllergy Worker[]
-  jobsWithAllergens  ProposedJob[]
-}
-
 model ProposedJob {
   id                 String                    @id @default(uuid())
   name               String
@@ -99,7 +92,7 @@ model ProposedJob {
   area               Area                      @relation(fields: [areaId], references: [id], onDelete: Cascade)
   areaId             String
   activeJobs         ActiveJob[]
-  allergens          Allergy[]
+  allergens          String[]
   availability       ProposedJobAvailability[]
 }
 

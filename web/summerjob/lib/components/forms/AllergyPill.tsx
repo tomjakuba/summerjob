@@ -1,27 +1,26 @@
-import { Allergy } from "lib/prisma/client";
 import { UseFormRegisterReturn } from "react-hook-form";
 
 export default function AllergyPill({
   allergy,
   register,
 }: {
-  allergy: Allergy;
+  allergy: string;
   register: () => UseFormRegisterReturn;
 }) {
   return (
     <div className="d-inline-block me-3">
       <input
-        id={allergy.id}
+        id={allergy}
         className="btn-check"
         type="checkbox"
-        value={allergy.id}
+        value={allergy}
         {...register()}
       />
       <label
         className="form-label btn-light btn p-2 allergy-checkbox-label"
-        htmlFor={allergy.id}
+        htmlFor={allergy}
       >
-        {allergy.code}
+        {allergy}
       </label>
     </div>
   );

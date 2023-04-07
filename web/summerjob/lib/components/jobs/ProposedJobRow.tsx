@@ -8,7 +8,6 @@ import {
   datesAfterDate,
   formatDateShort,
 } from "lib/helpers/helpers";
-import { translateAllergies } from "lib/types/allergy";
 import { ProposedJobComplete } from "lib/types/proposed-job";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -98,11 +97,7 @@ export default function ProposedJobRow({
         </p>
         <p>
           <strong>Alergeny: </strong>
-          {job.allergens.length > 0
-            ? translateAllergies(job.allergens)
-                .map((a) => a.code)
-                .join(", ")
-            : "Žádné"}
+          {job.allergens.length > 0 ? job.allergens.join(", ") : "Žádné"}
         </p>
         <p>
           <strong>Dostupné: </strong>

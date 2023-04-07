@@ -22,7 +22,6 @@ export async function getProposedJobById(
     include: {
       area: true,
       activeJobs: true,
-      allergens: true,
       availability: {
         where: {
           eventId: activeEventId,
@@ -48,7 +47,6 @@ export async function getProposedJobs(): Promise<ProposedJobComplete[]> {
     include: {
       area: true,
       activeJobs: true,
-      allergens: true,
       availability: {
         where: {
           event: {
@@ -105,7 +103,6 @@ export async function getProposedJobsAssignableTo(
     include: {
       area: true,
       activeJobs: true,
-      allergens: true,
       availability: {
         where: {
           event: {
@@ -133,6 +130,7 @@ export async function updateProposedJob(
     throw new NoActiveEventError();
   }
   const { allergens, availability, ...rest } = proposedJobData;
+  const allergyUpdate = allergens ? { allergies: { set: allergens } } : {};
 
   const proposedJob = await prisma.proposedJob.update({
     where: {
@@ -140,9 +138,7 @@ export async function updateProposedJob(
     },
     data: {
       ...rest,
-      allergens: {
-        set: allergens?.map((allergyId) => ({ id: allergyId })),
-      },
+      ...allergyUpdate,
       availability: {
         update: {
           where: {
@@ -175,7 +171,7 @@ export async function createProposedJob(data: ProposedJobCreateData) {
     data: {
       ...proposedJobDataWithoutAllergens,
       allergens: {
-        connect: allergens.map((allergyId) => ({ id: allergyId })),
+        set: allergens,
       },
       availability: {
         create: {

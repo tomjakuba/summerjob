@@ -2,12 +2,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAPIProposedJobUpdate } from "lib/fetcher/proposed-job";
 import { datesBetween } from "lib/helpers/helpers";
-import { Allergy } from "lib/prisma/client";
-import { deserializeAllergies } from "lib/types/allergy";
 import {
   deserializeProposedJob,
   ProposedJobComplete,
-  ProposedJobUpdateData,
   ProposedJobUpdateSchema,
 } from "lib/types/proposed-job";
 import { Serialized } from "lib/types/serialize";
@@ -20,10 +17,10 @@ import AllergyPill from "../forms/AllergyPill";
 import DaysSelection from "../forms/DaysSelection";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
 import SuccessProceedModal from "../modal/SuccessProceedModal";
+import { Allergy } from "lib/types/allergy";
 
 interface EditProposedJobProps {
   serializedJob: Serialized<ProposedJobComplete>;
-  serializedAllergens: Serialized<Allergy>;
   eventStartDate: string;
   eventEndDate: string;
 }
@@ -35,12 +32,11 @@ type ProposedJobForm = z.infer<typeof schema>;
 
 export default function EditProposedJobForm({
   serializedJob,
-  serializedAllergens,
   eventStartDate,
   eventEndDate,
 }: EditProposedJobProps) {
   const job = deserializeProposedJob(serializedJob);
-  const allergens = deserializeAllergies(serializedAllergens);
+  const allergens = Object.values(Allergy);
   const { trigger, error, isMutating, reset } = useAPIProposedJobUpdate(job.id);
   const [saved, setSaved] = useState(false);
   const {
@@ -54,7 +50,7 @@ export default function EditProposedJobForm({
       name: job.name,
       publicDescription: job.publicDescription,
       privateDescription: job.privateDescription,
-      allergens: job.allergens.map((allergy) => allergy.id),
+      allergens: job.allergens,
       address: job.address,
       contact: job.contact,
       requiredDays: job.requiredDays,
@@ -192,7 +188,7 @@ export default function EditProposedJobForm({
             <div className="form-check-inline">
               {allergens.map((allergy) => (
                 <AllergyPill
-                  key={allergy.id}
+                  key={allergy}
                   allergy={allergy}
                   register={() => register("allergens")}
                 />

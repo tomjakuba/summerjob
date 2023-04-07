@@ -9,7 +9,6 @@ import {
   useAPIActiveJobDelete,
   useAPIActiveJobUpdate,
 } from "lib/fetcher/active-job";
-import { translateAllergies } from "lib/types/allergy";
 import { useMemo, useState } from "react";
 import ConfirmationModal from "../modal/ConfirmationModal";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
@@ -283,9 +282,7 @@ function formatAmenities(job: ActiveJobNoPlan) {
 
 function formatAllergens(job: ActiveJobNoPlan) {
   if (job.proposedJob.allergens.length == 0) return "Žádné";
-  return translateAllergies(job.proposedJob.allergens)
-    .map((a) => a.code)
-    .join(", ");
+  return job.proposedJob.allergens.join(", ");
 }
 
 function formatRowData(
@@ -372,7 +369,7 @@ function formatWorkerData(
 
   if (worker.cars.length > 0) abilities.push("Auto");
   if (worker.isStrong) abilities.push("Silák");
-  const allergies = translateAllergies(worker.allergies);
+  const allergies = worker.allergies;
 
   return [
     <>
@@ -383,7 +380,7 @@ function formatWorkerData(
     </>,
     worker.phone,
     abilities.join(", "),
-    allergies.map((a) => a.code).join(", "),
+    allergies.join(", "),
     <RideSelect
       key={`rideselect-${worker.id}`}
       worker={worker}

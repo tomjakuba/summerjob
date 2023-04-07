@@ -1,11 +1,10 @@
 import { ActiveJobNoPlan } from "lib/types/active-job";
-import { WorkerComplete, WorkerWithAllergies } from "lib/types/worker";
+import { WorkerComplete } from "lib/types/worker";
 import { ExpandableRow } from "../table/ExpandableRow";
 import { SimpleRow } from "../table/SimpleRow";
 import type { Worker } from "lib/prisma/client";
 import { useAPIActiveJobUpdateDynamic } from "lib/fetcher/active-job";
 import { useEffect, useState } from "react";
-import { translateAllergies } from "lib/types/allergy";
 import MoveWorkerModal from "./MoveWorkerModal";
 
 const NO_JOB = "NO_JOB";
@@ -146,13 +145,13 @@ function formatWorkerData(
 
   if (worker.cars.length > 0) abilities.push("Auto");
   if (worker.isStrong) abilities.push("Silák");
-  const allergies = translateAllergies(worker.allergies);
+  const allergies = worker.allergies;
 
   return [
     name,
     worker.phone,
     abilities.join(", "),
-    allergies.map((a) => a.code).join(", "),
+    allergies.join(", "),
     <span
       key={`actions-${worker.id}`}
       className="d-flex align-items-center gap-3"

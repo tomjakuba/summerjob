@@ -1,6 +1,5 @@
 import {
   ActiveJob,
-  Allergy,
   Area,
   ProposedJob,
   ProposedJobAvailability,
@@ -14,12 +13,10 @@ export type ProposedJobWithArea = ProposedJob & {
 
 export type ProposedJobNoActive = ProposedJob & {
   area: Area;
-  allergens: Allergy[];
 };
 
 export type ProposedJobComplete = ProposedJob & {
   area: Area;
-  allergens: Allergy[];
   activeJobs: ActiveJob[];
   availability: ProposedJobAvailability;
 };

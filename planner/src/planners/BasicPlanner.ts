@@ -1,4 +1,4 @@
-import { Allergy, Area, Car, Worker } from "../../prisma/client";
+import { Area, Car, Worker } from "../../prisma/client";
 import {
   DataSource,
   JobToBePlanned,
@@ -584,7 +584,7 @@ export class BasicPlanner implements Planner {
 
   findDriver(
     workers: CategorizedWorkers,
-    jobAllergens: Allergy[],
+    jobAllergens: string[],
     areaSupportsAdoration: boolean,
     day: Date
   ): FindWorkerResult {
@@ -618,7 +618,7 @@ export class BasicPlanner implements Planner {
 
   findStrongWorker(
     workers: CategorizedWorkers,
-    jobAllergens: Allergy[],
+    jobAllergens: string[],
     areaSupportsAdoration: boolean,
     day: Date
   ): FindWorkerResult {
@@ -652,7 +652,7 @@ export class BasicPlanner implements Planner {
 
   findWorker(
     workers: CategorizedWorkers,
-    jobAllergens: Allergy[],
+    jobAllergens: string[],
     areaSupportsAdoration: boolean,
     day: Date
   ): FindWorkerResult {
@@ -703,12 +703,8 @@ export class BasicPlanner implements Planner {
     return { worker: null, remainingWorkers: workers };
   }
 
-  isAllergicTo(worker: WorkerComplete, allergens: Allergy[]): boolean {
-    return (
-      worker.allergies
-        .map((a) => a.id)
-        .filter((id) => allergens.map((a) => a.id).includes(id)).length > 0
-    );
+  isAllergicTo(worker: WorkerComplete, allergens: string[]): boolean {
+    return worker.allergies.some((id) => allergens.includes(id));
   }
 
   categorizeWorkers(workers: WorkerComplete[]): CategorizedWorkers {

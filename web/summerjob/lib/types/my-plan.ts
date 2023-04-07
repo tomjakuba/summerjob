@@ -1,4 +1,3 @@
-import { Allergy } from "lib/prisma/client";
 import { Serialized } from "./serialize";
 
 export type MyRide = {
@@ -18,7 +17,7 @@ export type MyPlan = {
     responsibleWorkerName: string;
     workerNames: string[];
     contact: string;
-    allergens: Allergy[];
+    allergens: string[];
     location: {
       name: string;
       address: string;

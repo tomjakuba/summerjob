@@ -1,4 +1,4 @@
-import { ActiveJobNoPlan, ActiveJobUpdateData } from "lib/types/active-job";
+import { ActiveJobNoPlan } from "lib/types/active-job";
 import type { Worker } from "lib/prisma/client";
 import { PlanComplete } from "lib/types/plan";
 import {
@@ -7,9 +7,7 @@ import {
   SortOrder,
 } from "../table/SortableTable";
 import { useCallback, useMemo, useState } from "react";
-import { WorkerComplete, WorkerWithAllergies } from "lib/types/worker";
-import { SWRMutationResponse } from "swr/mutation";
-import { Key } from "swr";
+import { WorkerComplete } from "lib/types/worker";
 import { PlanJobRow } from "./PlanJobRow";
 import { PlanJoblessRow } from "./PlanJoblessRow";
 import { RidesForJob } from "lib/types/ride";

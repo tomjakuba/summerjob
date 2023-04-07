@@ -2,8 +2,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAPIProposedJobCreate } from "lib/fetcher/proposed-job";
 import { datesBetween } from "lib/helpers/helpers";
-import { Allergy, Area } from "lib/prisma/client";
-import { deserializeAllergies } from "lib/types/allergy";
+import { Area } from "lib/prisma/client";
 import { deserializeAreas } from "lib/types/area";
 import {
   ProposedJobCreateData,
@@ -17,22 +16,21 @@ import AllergyPill from "../forms/AllergyPill";
 import DaysSelection from "../forms/DaysSelection";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
 import SuccessProceedModal from "../modal/SuccessProceedModal";
+import { Allergy } from "lib/types/allergy";
 
 interface CreateProposedJobProps {
   serializedAreas: Serialized<Area[]>;
-  serializedAllergens: Serialized<Allergy>;
   eventStartDate: string;
   eventEndDate: string;
 }
 
 export default function CreateProposedJobForm({
   serializedAreas,
-  serializedAllergens,
   eventStartDate,
   eventEndDate,
 }: CreateProposedJobProps) {
   const areas = deserializeAreas(serializedAreas);
-  const allergens = deserializeAllergies(serializedAllergens);
+  const allergens = Object.values(Allergy);
   const { trigger, error, isMutating, reset } = useAPIProposedJobCreate();
   const [saved, setSaved] = useState(false);
   const {
@@ -202,7 +200,7 @@ export default function CreateProposedJobForm({
             <div className="form-check-inline">
               {allergens.map((allergy) => (
                 <AllergyPill
-                  key={allergy.id}
+                  key={allergy}
                   allergy={allergy}
                   register={() => register("allergens")}
                 />

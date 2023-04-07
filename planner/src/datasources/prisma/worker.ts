@@ -22,7 +22,6 @@ export async function getWorkersWithoutJob(
       },
     },
     include: {
-      allergies: true,
       cars: true,
       availability: {
         where: {

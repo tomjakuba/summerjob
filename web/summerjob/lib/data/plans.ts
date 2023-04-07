@@ -32,7 +32,6 @@ export async function getCompletePlans(): Promise<PlanComplete[]> {
         include: {
           workers: {
             include: {
-              allergies: true,
               cars: {
                 where: {
                   deleted: false,
@@ -49,7 +48,6 @@ export async function getCompletePlans(): Promise<PlanComplete[]> {
           proposedJob: {
             include: {
               area: true,
-              allergens: true,
             },
           },
           rides: {
@@ -96,7 +94,6 @@ export async function getPlanById(id: string): Promise<PlanComplete | null> {
         include: {
           workers: {
             include: {
-              allergies: true,
               cars: {
                 where: {
                   deleted: false,
@@ -113,7 +110,6 @@ export async function getPlanById(id: string): Promise<PlanComplete | null> {
           proposedJob: {
             include: {
               area: true,
-              allergens: true,
             },
           },
           rides: {

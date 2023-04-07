@@ -1,14 +1,14 @@
 import { APIAccessController } from "lib/api/APIAccessControler";
 import { APIMethodHandler } from "lib/api/MethodHandler";
-import { getAllergies } from "lib/data/allergies";
+import { Allergy } from "lib/types/allergy";
 import { NextApiRequest, NextApiResponse } from "next";
 
-export type AllergiesAPIGetResponse = Awaited<ReturnType<typeof getAllergies>>;
+export type AllergiesAPIGetResponse = string[];
 async function get(
   req: NextApiRequest,
   res: NextApiResponse<AllergiesAPIGetResponse>
 ) {
-  const allergies = await getAllergies();
+  const allergies = Object.values(Allergy);
   res.status(200).json(allergies);
 }
 

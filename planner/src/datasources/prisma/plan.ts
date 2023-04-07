@@ -21,7 +21,6 @@ export async function getPlanById(
         include: {
           workers: {
             include: {
-              allergies: true,
               cars: true,
               availability: {
                 where: {
@@ -35,7 +34,6 @@ export async function getPlanById(
           proposedJob: {
             include: {
               area: true,
-              allergens: true,
             },
           },
           rides: {

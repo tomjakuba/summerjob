@@ -27,7 +27,6 @@ export async function getProposedJobs(
     include: {
       area: true,
       activeJobs: true,
-      allergens: true,
       availability: {
         where: {
           event: {

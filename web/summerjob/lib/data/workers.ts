@@ -49,7 +49,6 @@ export async function getWorkers(
   const users = await prisma.worker.findMany({
     ...whereClause,
     include: {
-      allergies: true,
       cars: {
         where: {
           deleted: false,
@@ -98,7 +97,6 @@ export async function getWorkerById(
           deleted: false,
         },
       },
-      allergies: true,
       availability: {
         where: {
           eventId: activeEventId,
@@ -250,7 +248,7 @@ export async function createWorker(
       lastName: data.lastName,
       phone: data.phone,
       allergies: {
-        connect: data.allergyIds.map((id) => ({ id })),
+        set: data.allergyIds,
       },
       availability: {
         create: {
@@ -276,7 +274,7 @@ export async function createWorker(
       phone: data.phone,
       isStrong: data.strong,
       allergies: {
-        connect: data.allergyIds.map((id) => ({ id })),
+        set: data.allergyIds,
       },
       availability: {
         create: {
@@ -328,6 +326,10 @@ export async function internal_updateWorker(
     }
   }
 
+  const allergyUpdate = data.allergyIds
+    ? { allergies: { set: data.allergyIds } }
+    : {};
+
   return await prismaClient.worker.update({
     where: {
       id,
@@ -338,9 +340,7 @@ export async function internal_updateWorker(
       email: data.email,
       phone: data.phone,
       isStrong: data.strong,
-      allergies: {
-        set: data.allergyIds?.map((allergyId) => ({ id: allergyId })),
-      },
+      ...allergyUpdate,
       availability: {
         update: {
           where: {

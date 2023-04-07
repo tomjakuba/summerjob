@@ -3,10 +3,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { WorkerCreateSchema } from "lib/types/worker";
-import { Allergy } from "lib/prisma/client";
 import { useState } from "react";
 import AllergyPill from "../forms/AllergyPill";
-import { deserializeAllergies } from "lib/types/allergy";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
 import SuccessProceedModal from "../modal/SuccessProceedModal";
 import { Serialized } from "lib/types/serialize";
@@ -14,22 +12,21 @@ import DaysSelection from "../forms/DaysSelection";
 import { datesBetween } from "lib/helpers/helpers";
 import { useRouter } from "next/navigation";
 import { useAPIWorkerCreate } from "lib/fetcher/worker";
+import { Allergy } from "lib/types/allergy";
 
 const schema = WorkerCreateSchema;
 type WorkerForm = z.input<typeof schema>;
 
 interface EditWorkerProps {
-  serializedAllergens: Serialized<Allergy>;
   eventStartDate: string;
   eventEndDate: string;
 }
 
 export default function CreateWorker({
-  serializedAllergens,
   eventStartDate,
   eventEndDate,
 }: EditWorkerProps) {
-  const allergies = deserializeAllergies(serializedAllergens);
+  const allergies = Object.values(Allergy);
   const allDates = datesBetween(
     new Date(eventStartDate),
     new Date(eventEndDate)
@@ -144,7 +141,7 @@ export default function CreateWorker({
             <div className="form-check-inline">
               {allergies.map((allergy) => (
                 <AllergyPill
-                  key={allergy.id}
+                  key={allergy}
                   allergy={allergy}
                   register={() => register("allergyIds")}
                 />

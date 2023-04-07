@@ -7,25 +7,23 @@ import {
   WorkerComplete,
   WorkerUpdateSchema,
 } from "lib/types/worker";
-import { Allergy } from "lib/prisma/client";
 import { useState } from "react";
 import { useAPIWorkerUpdate } from "lib/fetcher/worker";
 import Link from "next/link";
 import AllergyPill from "../forms/AllergyPill";
-import { deserializeAllergies } from "lib/types/allergy";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
 import SuccessProceedModal from "../modal/SuccessProceedModal";
 import { Serialized } from "lib/types/serialize";
 import DaysSelection from "../forms/DaysSelection";
 import { datesBetween, pick } from "lib/helpers/helpers";
 import { useRouter } from "next/navigation";
+import { Allergy } from "lib/types/allergy";
 
 const schema = WorkerUpdateSchema;
 type WorkerForm = z.input<typeof schema>;
 
 interface EditWorkerProps {
   serializedWorker: Serialized<WorkerComplete>;
-  serializedAllergens: Serialized<Allergy>;
   eventStartDate: string;
   eventEndDate: string;
   isProfilePage: boolean;
@@ -33,13 +31,12 @@ interface EditWorkerProps {
 
 export default function EditWorker({
   serializedWorker,
-  serializedAllergens,
   eventStartDate,
   eventEndDate,
   isProfilePage,
 }: EditWorkerProps) {
   const worker = deserializeWorker(serializedWorker);
-  const allergies = deserializeAllergies(serializedAllergens);
+  const allergies = Object.values(Allergy);
   const allDates = datesBetween(
     new Date(eventStartDate),
     new Date(eventEndDate)
@@ -57,7 +54,7 @@ export default function EditWorker({
       email: worker.email,
       phone: worker.phone,
       strong: worker.isStrong,
-      allergyIds: worker.allergies.map((allergy) => allergy.id),
+      allergyIds: worker.allergies,
       availability: {
         workDays: worker.availability.workDays.map((day) => day.toJSON()),
         adorationDays: worker.availability.adorationDays.map((day) =>
@@ -184,7 +181,7 @@ export default function EditWorker({
             <div className="form-check-inline">
               {allergies.map((allergy) => (
                 <AllergyPill
-                  key={allergy.id}
+                  key={allergy}
                   allergy={allergy}
                   register={() => register("allergyIds")}
                 />

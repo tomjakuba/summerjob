@@ -1,5 +1,4 @@
 import {
-  Allergy,
   Car,
   Plan,
   PrismaClient,
@@ -28,21 +27,13 @@ function chooseWithProbability<T>(array: T[], probability: number): T[] {
   return array.filter((_, i) => Math.random() < probability);
 }
 
-async function createAllergies() {
-  const allergies = [
-    "ALLERGY_ANIMALS",
-    "ALLERGY_POLLEN",
-    "ALLERGY_DUST",
-    "ALLERGY_GRASS",
-  ];
-  await prisma.allergy.createMany({
-    data: allergies.map((allergy) => ({ code: allergy })),
-  });
-  return await prisma.allergy.findMany();
+function createAllergies() {
+  const allergies = ["DUST", "ANIMALS", "HAY"];
+  return allergies;
 }
 
 async function createWorkers(
-  allergies: Allergy[],
+  allergies: string[],
   eventId: string,
   days: Date[],
   count = 100
@@ -123,9 +114,7 @@ async function createWorkers(
         where: { id: allergyWorkers[i].id },
         data: {
           allergies: {
-            connect: chooseWithProbability(allergies, 0.2).map((allergy) => ({
-              id: allergy.id,
-            })),
+            set: chooseWithProbability(allergies, 0.2),
           },
         },
       });
@@ -167,7 +156,7 @@ async function createProposedJobs(
   areaIds: string[],
   eventId: string,
   days: Date[],
-  allergens: Allergy[],
+  allergens: string[],
   count = 70
 ) {
   let titles = [
@@ -208,9 +197,7 @@ async function createProposedJobs(
           },
         },
         allergens: {
-          connect: choose(allergens, between(0, 2)).map((allergen) => ({
-            id: allergen.id,
-          })),
+          set: choose(allergens, between(0, 2)),
         },
       },
     });
@@ -298,7 +285,7 @@ async function main() {
   const mini = process.argv[2] === "mini";
   console.log("Creating yearly event...");
   const yearlyEvent = await createYearlyEvent();
-  const allergies = await createAllergies();
+  const allergies = createAllergies();
   console.log("Creating workers, cars...");
   const workers = await createWorkers(
     allergies,
