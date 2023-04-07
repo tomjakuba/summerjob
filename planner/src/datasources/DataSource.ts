@@ -1,6 +1,5 @@
 import {
   ActiveJob,
-  Allergy,
   Area,
   Car,
   Plan,
@@ -31,13 +30,11 @@ export type ActiveJobNoPlan = ActiveJob & {
 
 export type WorkerComplete = Worker & {
   cars: Car[];
-  allergies: Allergy[];
   availability: WorkerAvailability;
 };
 
 export type ProposedJobNoActive = ProposedJob & {
   area: Area;
-  allergens: Allergy[];
 };
 
 export type RideComplete = Ride & {
@@ -53,7 +50,6 @@ export type ActiveJobWithProposed = ActiveJob & {
 
 export type ProposedJobComplete = ProposedJob & {
   area: Area;
-  allergens: Allergy[];
   activeJobs: ActiveJob[];
   availability: ProposedJobAvailability;
 };
