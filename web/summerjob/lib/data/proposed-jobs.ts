@@ -130,7 +130,7 @@ export async function updateProposedJob(
     throw new NoActiveEventError();
   }
   const { allergens, availability, ...rest } = proposedJobData;
-  const allergyUpdate = allergens ? { allergies: { set: allergens } } : {};
+  const allergyUpdate = allergens ? { allergens: { set: allergens } } : {};
 
   const proposedJob = await prisma.proposedJob.update({
     where: {

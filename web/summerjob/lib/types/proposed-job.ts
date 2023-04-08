@@ -36,10 +36,13 @@ export const ProposedJobCreateSchema = z
     requiredDays: z.number().min(1),
     hasFood: z.boolean(),
     hasShower: z.boolean(),
-    availability: z.array(z.coerce.date()),
+    availability: z.array(z.date().or(z.string().min(1).pipe(z.coerce.date()))),
   })
   .strict();
 
+export type ProposedJobCreateDataInput = z.input<
+  typeof ProposedJobCreateSchema
+>;
 export type ProposedJobCreateData = z.infer<typeof ProposedJobCreateSchema>;
 
 export const ProposedJobUpdateSchema = ProposedJobCreateSchema.merge(
@@ -52,6 +55,9 @@ export const ProposedJobUpdateSchema = ProposedJobCreateSchema.merge(
   .strict()
   .partial();
 
+export type ProposedJobUpdateDataInput = z.input<
+  typeof ProposedJobUpdateSchema
+>;
 export type ProposedJobUpdateData = z.infer<typeof ProposedJobUpdateSchema>;
 
 export function serializeProposedJobs(

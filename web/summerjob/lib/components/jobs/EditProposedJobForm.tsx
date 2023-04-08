@@ -25,10 +25,8 @@ interface EditProposedJobProps {
   eventEndDate: string;
 }
 
-const schema = ProposedJobUpdateSchema.omit({ availability: true }).extend({
-  availability: z.array(z.string()),
-});
-type ProposedJobForm = z.infer<typeof schema>;
+const schema = ProposedJobUpdateSchema;
+type ProposedJobForm = z.input<typeof schema>;
 
 export default function EditProposedJobForm({
   serializedJob,

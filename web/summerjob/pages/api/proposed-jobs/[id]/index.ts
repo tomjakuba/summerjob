@@ -1,21 +1,15 @@
 import { APIAccessController } from "lib/api/APIAccessControler";
 import { APIMethodHandler } from "lib/api/MethodHandler";
 import { validateOrSendError } from "lib/api/validator";
-import { ApiBadRequestError } from "lib/data/api-error";
 import { deleteProposedJob, updateProposedJob } from "lib/data/proposed-jobs";
 import { Permission } from "lib/types/auth";
 import {
-  type ProposedJobUpdateData,
   ProposedJobUpdateSchema,
+  ProposedJobUpdateDataInput,
 } from "lib/types/proposed-job";
 import { NextApiRequest, NextApiResponse } from "next";
 
-export type ProposedJobAPIPatchData = Omit<
-  ProposedJobUpdateData,
-  "availability"
-> & {
-  availability?: string[];
-};
+export type ProposedJobAPIPatchData = ProposedJobUpdateDataInput;
 async function patch(req: NextApiRequest, res: NextApiResponse) {
   const id = req.query.id as string;
   const proposedJobData = validateOrSendError(
