@@ -6,6 +6,10 @@ import { cache_getActiveSummerJobEvent } from "lib/data/cache";
 import { getWorkerById } from "lib/data/workers";
 import { serializeWorker } from "lib/types/worker";
 
+export const metadata = {
+  title: "Můj profil",
+};
+
 export const dynamic = "force-dynamic";
 
 export default async function MyProfilePage() {

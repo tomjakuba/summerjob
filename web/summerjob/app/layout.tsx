@@ -1,7 +1,7 @@
 import "../styles/fonts/fontawesome/all.min.css";
 
 export const metadata = {
-  title: "SummerJob Plánovač",
+  title: { template: "%s | SummerJob Plánovač", default: "SummerJob Plánovač" },
   description: "SummerJob Plánovač",
   author: "SummerJob",
   icons: {

@@ -1,10 +1,13 @@
 import { getSMJSession } from "lib/auth/auth";
 import ErrorPage404 from "lib/components/404/404";
-import AccessDeniedPage from "lib/components/error-page/AccessDeniedPage";
 import MyPlanClientPage from "lib/components/my-plan/MyPlanClientPage";
 import { getMyPlans } from "lib/data/my-plan";
 import { getWorkerById } from "lib/data/workers";
 import { serializeMyPlans } from "lib/types/my-plan";
+
+export const metadata = {
+  title: "Můj plán",
+};
 
 export const dynamic = "force-dynamic";
 
