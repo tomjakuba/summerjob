@@ -5,7 +5,9 @@ import {
   createSummerJobEvent,
   getSummerJobEvents,
 } from "lib/data/summerjob-event";
-import { Permission } from "lib/types/auth";
+import logger from "lib/logger/logger";
+import { ExtendedSession, Permission } from "lib/types/auth";
+import { APILogEvent } from "lib/types/logger";
 import {
   SummerJobEventCreateDataInput,
   SummerJobEventCreateSchema,
@@ -16,11 +18,16 @@ export type SummerJobEventsAPIPostData = SummerJobEventCreateDataInput;
 export type SummerJobEventsAPIPostResponse = Awaited<
   ReturnType<typeof createSummerJobEvent>
 >;
-async function post(req: NextApiRequest, res: NextApiResponse) {
+async function post(
+  req: NextApiRequest,
+  res: NextApiResponse,
+  session: ExtendedSession
+) {
   const data = validateOrSendError(SummerJobEventCreateSchema, req.body, res);
   if (!data) {
     return;
   }
+  await logger.apiRequest(APILogEvent.SMJEVENT_CREATE, req.body, session);
   const job = await createSummerJobEvent(data);
   res.status(201).json(job);
 }

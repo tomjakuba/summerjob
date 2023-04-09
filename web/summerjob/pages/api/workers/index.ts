@@ -2,7 +2,9 @@ import { APIAccessController } from "lib/api/APIAccessControler";
 import { APIMethodHandler } from "lib/api/MethodHandler";
 import { validateOrSendError } from "lib/api/validator";
 import { createWorker, createWorkers, getWorkers } from "lib/data/workers";
-import { Permission } from "lib/types/auth";
+import logger from "lib/logger/logger";
+import { ExtendedSession, Permission } from "lib/types/auth";
+import { APILogEvent } from "lib/types/logger";
 import {
   WorkerCreateDataInput,
   WorkerCreateSchema,
@@ -23,7 +25,11 @@ async function get(
 }
 
 export type WorkersAPIPostData = WorkerCreateDataInput | WorkersCreateDataInput;
-async function post(req: NextApiRequest, res: NextApiResponse) {
+async function post(
+  req: NextApiRequest,
+  res: NextApiResponse,
+  session: ExtendedSession
+) {
   const singleWorker = WorkerCreateSchema.safeParse(req.body);
   if (singleWorker.success) {
     const worker = await createWorker(singleWorker.data);
@@ -38,6 +44,7 @@ async function post(req: NextApiRequest, res: NextApiResponse) {
   if (!multipleWorkers) {
     return;
   }
+  await logger.apiRequest(APILogEvent.WORKER_CREATE, req.body, session);
   const workers = await createWorkers(multipleWorkers);
   res.status(201).json(workers);
 }

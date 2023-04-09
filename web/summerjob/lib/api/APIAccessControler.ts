@@ -9,7 +9,7 @@ export function APIAccessController(
   return async (req, res) => {
     const session = await getSMJSessionAPI(req, res);
     if (!session) {
-      res.status(401).end();
+      res.status(403).end();
       return;
     }
 
@@ -18,6 +18,6 @@ export function APIAccessController(
       return;
     }
 
-    await handler(req, res);
+    await handler(req, res, session);
   };
 }

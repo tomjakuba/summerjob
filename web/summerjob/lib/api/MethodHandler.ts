@@ -4,8 +4,10 @@ import {
   ApiInternalServerError,
 } from "lib/data/api-error";
 import { InternalError } from "lib/data/internal-error";
+import logger from "lib/logger/logger";
 import { Prisma } from "lib/prisma/client";
 import { APIMethod } from "lib/types/api";
+import { ExtendedSession } from "lib/types/auth";
 import { NextApiRequest, NextApiResponse } from "next";
 
 interface MethodHandlerProps {
@@ -21,29 +23,33 @@ export function APIMethodHandler({
   patch,
   del,
 }: MethodHandlerProps) {
-  return async function (req: NextApiRequest, res: NextApiResponse) {
+  return async function (
+    req: NextApiRequest,
+    res: NextApiResponse,
+    session: ExtendedSession
+  ) {
     switch (req.method) {
       case "GET":
         if (get) {
-          await handle(get, req, res);
+          await handle(get, req, res, session);
           return;
         }
         break;
       case "POST":
         if (post) {
-          await handle(post, req, res);
+          await handle(post, req, res, session);
           return;
         }
         break;
       case "PATCH":
         if (patch) {
-          await handle(patch, req, res);
+          await handle(patch, req, res, session);
           return;
         }
         break;
       case "DELETE":
         if (del) {
-          await handle(del, req, res);
+          await handle(del, req, res, session);
           return;
         }
         break;
@@ -58,10 +64,11 @@ export function APIMethodHandler({
 async function handle(
   func: APIMethod,
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse,
+  session: ExtendedSession
 ) {
   try {
-    await func(req, res);
+    await func(req, res, session);
   } catch (error) {
     if (error instanceof Prisma.PrismaClientInitializationError) {
       res.status(500).json({
@@ -79,17 +86,18 @@ async function handle(
       });
       return;
     } else if (error instanceof InternalError) {
-      // TODO: Replace with logging error
+      // These are internally thrown errors, usually because no active summerjob event is set
+      // or the user is not allowed to do something. The user is informed about these issues through the web interface.
+      // Therefore, these errors should not be logged in production.
       if (process.env.NODE_ENV === "development") {
-        console.error(error);
+        logger.error(error);
       }
       res.status(500).json({
         error: new ApiInternalServerError(error.reason),
       });
       return;
     }
-    // TODO: Replace with logging error
-    console.error(error);
+    logger.error(error);
     res.status(500).json({
       error: new ApiInternalServerError(),
     });

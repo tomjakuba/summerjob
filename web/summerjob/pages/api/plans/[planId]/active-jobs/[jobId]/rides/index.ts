@@ -1,8 +1,11 @@
 import { APIAccessController } from "lib/api/APIAccessControler";
 import { APIMethodHandler } from "lib/api/MethodHandler";
+import { validateOrSendError } from "lib/api/validator";
 import { WrappedError, ApiBadRequestError, ApiError } from "lib/data/api-error";
 import { createRide } from "lib/data/rides";
-import { Permission } from "lib/types/auth";
+import logger from "lib/logger/logger";
+import { ExtendedSession, Permission } from "lib/types/auth";
+import { APILogEvent } from "lib/types/logger";
 import { RideCreateData, RideCreateSchema } from "lib/types/ride";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -10,18 +13,15 @@ export type RidesAPIPostData = RideCreateData;
 export type RidesAPIPostResponse = Awaited<ReturnType<typeof createRide>>;
 async function post(
   req: NextApiRequest,
-  res: NextApiResponse<RidesAPIPostResponse | WrappedError<ApiError>>
+  res: NextApiResponse<RidesAPIPostResponse | WrappedError<ApiError>>,
+  session: ExtendedSession
 ) {
-  const result = RideCreateSchema.safeParse({
-    ...req.body,
-  });
-  if (!result.success) {
-    res.status(400).json({
-      error: new ApiBadRequestError(JSON.stringify(result.error.issues)),
-    });
+  const result = validateOrSendError(RideCreateSchema, req.body, res);
+  if (!result) {
     return;
   }
-  const ride = await createRide(result.data, req.query.jobId as string);
+  await logger.apiRequest(APILogEvent.PLAN_RIDE_ADD, req.body, session);
+  const ride = await createRide(result, req.query.jobId as string);
   res.status(201).json(ride);
 }
 

@@ -3,8 +3,10 @@ import { APIMethodHandler } from "lib/api/MethodHandler";
 import { validateOrSendError } from "lib/api/validator";
 import { WrappedError } from "lib/data/api-error";
 import { createArea, getAreas } from "lib/data/areas";
+import logger from "lib/logger/logger";
 import { AreaCreateData, AreaCreateSchema } from "lib/types/area";
-import { Permission } from "lib/types/auth";
+import { ExtendedSession, Permission } from "lib/types/auth";
+import { APILogEvent } from "lib/types/logger";
 import { NextApiRequest, NextApiResponse } from "next";
 import { ApiError } from "next/dist/server/api-utils";
 
@@ -21,13 +23,15 @@ export type AreasAPIPostData = AreaCreateData;
 export type AreasAPIPostResponse = Awaited<ReturnType<typeof createArea>>;
 async function post(
   req: NextApiRequest,
-  res: NextApiResponse<AreasAPIPostResponse | WrappedError<ApiError>>
+  res: NextApiResponse<AreasAPIPostResponse | WrappedError<ApiError>>,
+  session: ExtendedSession
 ) {
   const result = validateOrSendError(AreaCreateSchema, req.body, res);
   if (!result) {
     return;
   }
   result.summerJobEventId = req.query.eventId as string;
+  await logger.apiRequest(APILogEvent.AREA_CREATE, req.body, session);
   const area = await createArea(result);
   res.status(201).json(area);
 }

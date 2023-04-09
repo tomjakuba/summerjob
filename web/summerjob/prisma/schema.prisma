@@ -167,6 +167,15 @@ model SummerJobEvent {
   jobAvailability    ProposedJobAvailability[]
 }
 
+model Logging {
+  id         String   @id @default(uuid())
+  timestamp  DateTime @default(now())
+  authorId   String
+  authorName String
+  eventType  String
+  message    String
+}
+
 // Next-Auth config
 
 model Account {

@@ -1,7 +1,9 @@
 import { APIAccessController } from "lib/api/APIAccessControler";
 import { APIMethodHandler } from "lib/api/MethodHandler";
 import { deletePlan, getPlanById } from "lib/data/plans";
-import { Permission } from "lib/types/auth";
+import logger from "lib/logger/logger";
+import { ExtendedSession, Permission } from "lib/types/auth";
+import { APILogEvent } from "lib/types/logger";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export type PlanAPIGetResponse = Awaited<ReturnType<typeof getPlanById>>;
@@ -18,19 +20,18 @@ async function get(
   res.status(200).json(plan);
 }
 
-async function patch(req: NextApiRequest, res: NextApiResponse) {
-  // TODO: implement plan update
-  const data = req.body;
-  res.status(204).end();
-}
-
-async function del(req: NextApiRequest, res: NextApiResponse) {
+async function del(
+  req: NextApiRequest,
+  res: NextApiResponse,
+  session: ExtendedSession
+) {
   const id = req.query.planId as string;
+  await logger.apiRequest(APILogEvent.PLAN_DELETE, req.body, session);
   await deletePlan(id);
   res.status(204).end();
 }
 
 export default APIAccessController(
   [Permission.PLANS],
-  APIMethodHandler({ get, patch, del })
+  APIMethodHandler({ get, del })
 );

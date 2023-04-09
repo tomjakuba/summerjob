@@ -3,13 +3,15 @@ import { APIMethodHandler } from "lib/api/MethodHandler";
 import { validateOrSendError } from "lib/api/validator";
 import { createActiveJob, createActiveJobs } from "lib/data/active-jobs";
 import { ApiError, WrappedError } from "lib/data/api-error";
+import logger from "lib/logger/logger";
 import {
   ActiveJobCreateData,
   ActiveJobCreateMultipleData,
   ActiveJobCreateMultipleSchema,
   ActiveJobCreateSchema,
 } from "lib/types/active-job";
-import { Permission } from "lib/types/auth";
+import { ExtendedSession, Permission } from "lib/types/auth";
+import { APILogEvent } from "lib/types/logger";
 import { NextApiRequest, NextApiResponse } from "next";
 
 export type ActiveJobsAPIPostData =
@@ -20,7 +22,8 @@ export type ActiveJobsAPIPostResponse = Awaited<
 >;
 async function post(
   req: NextApiRequest,
-  res: NextApiResponse<ActiveJobsAPIPostResponse | WrappedError<ApiError>>
+  res: NextApiResponse<ActiveJobsAPIPostResponse | WrappedError<ApiError>>,
+  session: ExtendedSession
 ) {
   const createSingle = ActiveJobCreateSchema.safeParse({
     ...req.body,
@@ -40,7 +43,8 @@ async function post(
   if (!createMultiple) {
     return;
   }
-  const jobs = await createActiveJobs(createMultiple);
+  await logger.apiRequest(APILogEvent.PLAN_JOB_ADD, req.body, session);
+  await createActiveJobs(createMultiple);
   res.status(202).end();
 }
 

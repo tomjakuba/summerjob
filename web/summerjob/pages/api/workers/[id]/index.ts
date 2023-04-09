@@ -3,7 +3,9 @@ import { validateOrSendError } from "lib/api/validator";
 import { getSMJSessionAPI, isAccessAllowed } from "lib/auth/auth";
 import { ApiError, WrappedError } from "lib/data/api-error";
 import { deleteWorker, getWorkerById, updateWorker } from "lib/data/workers";
-import { Permission } from "lib/types/auth";
+import logger from "lib/logger/logger";
+import { ExtendedSession, Permission } from "lib/types/auth";
+import { APILogEvent } from "lib/types/logger";
 import { WorkerUpdateDataInput, WorkerUpdateSchema } from "lib/types/worker";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -24,7 +26,8 @@ async function get(
 export type WorkerAPIPatchData = WorkerUpdateDataInput;
 async function patch(req: NextApiRequest, res: NextApiResponse) {
   const id = req.query.id as string;
-  const allowed = await isAllowedToAccessWorker(req, res, id);
+  const session = await getSMJSessionAPI(req, res);
+  const allowed = await isAllowedToAccessWorker(session, id, res);
   if (!allowed) {
     return;
   }
@@ -32,26 +35,28 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
   if (!workerData) {
     return;
   }
+  await logger.apiRequest(APILogEvent.WORKER_MODIFY, req.body, session!);
   await updateWorker(id, workerData);
   res.status(204).end();
 }
 
 async function del(req: NextApiRequest, res: NextApiResponse) {
   const id = req.query.id as string;
-  const allowed = await isAllowedToDeleteWorker(req, res);
+  const session = await getSMJSessionAPI(req, res);
+  const allowed = await isAllowedToDeleteWorker(session, res);
   if (!allowed) {
     return;
   }
+  await logger.apiRequest(APILogEvent.WORKER_DELETE, req.body, session!);
   await deleteWorker(id);
   res.status(204).end();
 }
 
 async function isAllowedToAccessWorker(
-  req: NextApiRequest,
-  res: NextApiResponse,
-  workerId: string
+  session: ExtendedSession | null,
+  workerId: string,
+  res: NextApiResponse
 ) {
-  const session = await getSMJSessionAPI(req, res);
   if (!session) {
     res.status(401).end();
     return;
@@ -69,10 +74,9 @@ async function isAllowedToAccessWorker(
 }
 
 async function isAllowedToDeleteWorker(
-  req: NextApiRequest,
+  session: ExtendedSession | null,
   res: NextApiResponse
 ) {
-  const session = await getSMJSessionAPI(req, res);
   if (!session) {
     res.status(401).end();
     return;

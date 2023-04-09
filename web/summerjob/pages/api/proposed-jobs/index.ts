@@ -1,12 +1,15 @@
 import { APIAccessController } from "lib/api/APIAccessControler";
 import { APIMethodHandler } from "lib/api/MethodHandler";
-import { WrappedError, ApiBadRequestError, ApiError } from "lib/data/api-error";
+import { validateOrSendError } from "lib/api/validator";
+import { WrappedError, ApiError } from "lib/data/api-error";
 import {
   createProposedJob,
   getProposedJobs,
   getProposedJobsAssignableTo,
 } from "lib/data/proposed-jobs";
-import { Permission } from "lib/types/auth";
+import logger from "lib/logger/logger";
+import { ExtendedSession, Permission } from "lib/types/auth";
+import { APILogEvent } from "lib/types/logger";
 import {
   ProposedJobCreateData,
   ProposedJobCreateSchema,
@@ -36,16 +39,15 @@ export type ProposedJobsAPIPostResponse = Awaited<
 >;
 async function post(
   req: NextApiRequest,
-  res: NextApiResponse<ProposedJobsAPIPostResponse | WrappedError<ApiError>>
+  res: NextApiResponse<ProposedJobsAPIPostResponse | WrappedError<ApiError>>,
+  session: ExtendedSession
 ) {
-  const result = ProposedJobCreateSchema.safeParse(req.body);
-  if (!result.success) {
-    res.status(400).json({
-      error: new ApiBadRequestError(JSON.stringify(result.error.issues)),
-    });
+  const result = validateOrSendError(ProposedJobCreateSchema, req.body, res);
+  if (!result) {
     return;
   }
-  const job = await createProposedJob(result.data);
+  await logger.apiRequest(APILogEvent.JOB_CREATE, req.body, session);
+  const job = await createProposedJob(result);
   res.status(201).json(job);
 }
 
