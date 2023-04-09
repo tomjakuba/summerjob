@@ -1,8 +1,18 @@
-import pino from "pino";
+import pino, { Logger } from "pino";
 
-export const pinoLogger = pino({
-  level: process.env.NODE_ENV === "production" ? "info" : "debug",
-  transport: {
-    target: "pino-pretty",
-  },
-});
+let pinoLogger: Logger;
+
+if (process.env.NODE_ENV === "development") {
+  pinoLogger = pino({
+    level: "debug",
+    transport: {
+      target: "pino-pretty",
+    },
+  });
+} else {
+  pinoLogger = pino({
+    level: "info",
+  });
+}
+
+export { pinoLogger };
