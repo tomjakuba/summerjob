@@ -331,12 +331,56 @@ img.smj-nav-logo {
   white-space: pre-wrap;
 }
 
-.pagination {
-  --bs-pagination-active-bg: #f7e122;
-  --bs-pagination-active-border-color: #e6d21f;
-  --bs-pagination-active-color: #000000;
-  --bs-pagination-color: #000000;
-  --bs-pagination-hover-color: #000000;
-  --bs-pagination-focus-color: #000000;
-  --bs-pagination-focus-box-shadow: 0 0 0 0.05rem #f7e122;
+.smj-pagination {
+  display: flex;
+  justify-content: center;
+  list-style: none;
+  padding-left: 0;
+}
+
+.smj-page-item:first-child .smj-page-link {
+  border-top-left-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+}
+
+.smj-page-link.active,
+.active > .smj-page-link {
+  background-color: #f7e122;
+  border-color: #e6d21f;
+  color: #000000;
+}
+
+.smj-page-link {
+  position: relative;
+  display: block;
+  padding: 0.5rem 0.75rem;
+  margin-left: -1px;
+  line-height: 1.25;
+  color: #000000;
+  background-color: #fff;
+  border: 1px solid #dee2e6;
+  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  text-decoration: none;
+}
+
+.smj-page-item:not(:first-child) .smj-page-link {
+  margin-left: -1px;
+}
+
+.smj-page-item:last-child .smj-page-link {
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+
+.smj-page-link:hover {
+  color: #000000;
+  background-color: #e9ecef;
+  border-color: #dee2e6;
+}
+
+.smj-page-link.disabled,
+.disabled > .smj-page-link {
+  color: #888;
+  pointer-events: none;
 }

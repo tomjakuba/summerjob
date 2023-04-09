@@ -11,13 +11,13 @@ interface LogsClientPageProps {
   sLogs: Serialized<FilteredLogs>;
 }
 
-const PAGE_SIZE = 2;
+const PAGE_SIZE = 10;
 
 export default function LogsClientPage({ sLogs }: LogsClientPageProps) {
   const logs = deserializeLogs(sLogs);
   const [filter, setFilter] = useState("");
   const debouncedSearch = useDebounce(filter, 500);
-  const [page, setPage] = useState(2);
+  const [page, setPage] = useState(1);
   const eventTypes = useMemo(() => getEventTypes(), []);
   const [filterEventType, setFilterEventType] = useState<LogsFiltersEventType>(
     eventTypes[0]
@@ -107,7 +107,7 @@ export default function LogsClientPage({ sLogs }: LogsClientPageProps) {
         <div className="row">
           <div className="col-12">
             <nav aria-label="Page navigation">
-              <ul className="pagination d-flex justify-content-center">
+              <ul className="smj-pagination d-flex justify-content-center">
                 {paginationButtons}
               </ul>
             </nav>
@@ -131,11 +131,15 @@ function PaginationButton({
 }) {
   return (
     <li
-      className={`page-item ${active ? "active" : ""} ${
+      className={`smj-page-item ${active ? "active" : ""} ${
         disabled ? "disabled" : ""
       }`}
     >
-      <a className="page-link" href="#" onClick={disabled ? () => {} : onClick}>
+      <a
+        className="smj-page-link"
+        href="#"
+        onClick={disabled ? () => {} : onClick}
+      >
         {page}
       </a>
     </li>
