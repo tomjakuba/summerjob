@@ -31,7 +31,7 @@ async function post(
     return;
   }
   result.summerJobEventId = req.query.eventId as string;
-  await logger.apiRequest(APILogEvent.AREA_CREATE, req.body, session);
+  await logger.apiRequest(APILogEvent.AREA_CREATE, "areas", req.body, session);
   const area = await createArea(result);
   res.status(201).json(area);
 }

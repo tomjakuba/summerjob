@@ -27,7 +27,12 @@ async function post(
   if (!data) {
     return;
   }
-  await logger.apiRequest(APILogEvent.SMJEVENT_CREATE, req.body, session);
+  await logger.apiRequest(
+    APILogEvent.SMJEVENT_CREATE,
+    "summerjob-events",
+    req.body,
+    session
+  );
   const job = await createSummerJobEvent(data);
   res.status(201).json(job);
 }

@@ -44,7 +44,12 @@ async function post(
   if (!multipleWorkers) {
     return;
   }
-  await logger.apiRequest(APILogEvent.WORKER_CREATE, req.body, session);
+  await logger.apiRequest(
+    APILogEvent.WORKER_CREATE,
+    "workers",
+    req.body,
+    session
+  );
   const workers = await createWorkers(multipleWorkers);
   res.status(201).json(workers);
 }

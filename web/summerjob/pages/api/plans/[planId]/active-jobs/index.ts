@@ -43,7 +43,12 @@ async function post(
   if (!createMultiple) {
     return;
   }
-  await logger.apiRequest(APILogEvent.PLAN_JOB_ADD, req.body, session);
+  await logger.apiRequest(
+    APILogEvent.PLAN_JOB_ADD,
+    `plans/${req.query.planId}/active-jobs`,
+    req.body,
+    session
+  );
   await createActiveJobs(createMultiple);
   res.status(202).end();
 }

@@ -172,6 +172,7 @@ model Logging {
   timestamp  DateTime @default(now())
   authorId   String
   authorName String
+  resourceId String
   eventType  String
   message    String
 }

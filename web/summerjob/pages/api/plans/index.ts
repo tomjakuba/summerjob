@@ -37,7 +37,7 @@ async function post(
     res.status(400).json({ error: new ApiBadRequestError("Invalid date.") });
     return;
   }
-  await logger.apiRequest(APILogEvent.PLAN_CREATE, req.body, session);
+  await logger.apiRequest(APILogEvent.PLAN_CREATE, "plans", req.body, session);
   try {
     const plan = await createPlan(date);
     res.status(201).json(plan);

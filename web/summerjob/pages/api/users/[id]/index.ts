@@ -19,7 +19,7 @@ async function patch(
   if (!userData) {
     return;
   }
-  await logger.apiRequest(APILogEvent.USER_MODIFY, req.body, session);
+  await logger.apiRequest(APILogEvent.USER_MODIFY, id, req.body, session);
   logger.info(session);
   await updateUser(id, userData);
   res.status(204).end();

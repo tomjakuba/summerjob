@@ -18,7 +18,7 @@ async function patch(
   if (!carData) {
     return;
   }
-  await logger.apiRequest(APILogEvent.CAR_MODIFY, req.body, session);
+  await logger.apiRequest(APILogEvent.CAR_MODIFY, id, req.body, session);
   await updateCar(id, carData);
   res.status(204).end();
 }
@@ -29,7 +29,7 @@ async function del(
   session: ExtendedSession
 ) {
   const id = req.query.id as string;
-  await logger.apiRequest(APILogEvent.CAR_DELETE, req.body, session);
+  await logger.apiRequest(APILogEvent.CAR_DELETE, id, req.body, session);
   await deleteCar(id);
   res.status(204).end();
 }

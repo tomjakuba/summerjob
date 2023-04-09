@@ -26,7 +26,7 @@ async function patch(
   if (!proposedJobData) {
     return;
   }
-  await logger.apiRequest(APILogEvent.JOB_MODIFY, req.body, session);
+  await logger.apiRequest(APILogEvent.JOB_MODIFY, id, req.body, session);
   await updateProposedJob(id, proposedJobData);
   res.status(204).end();
 }
@@ -37,7 +37,7 @@ async function del(
   session: ExtendedSession
 ) {
   const id = req.query.id as string;
-  await logger.apiRequest(APILogEvent.JOB_DELETE, req.body, session);
+  await logger.apiRequest(APILogEvent.JOB_DELETE, id, req.body, session);
   await deleteProposedJob(id);
   res.status(204).end();
 }

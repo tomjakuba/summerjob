@@ -18,7 +18,7 @@ async function patch(
   if (!data) {
     return;
   }
-  await logger.apiRequest(APILogEvent.PLAN_RIDE_MODIFY, req.body, session);
+  await logger.apiRequest(APILogEvent.PLAN_RIDE_MODIFY, id, req.body, session);
   await updateRide(id, data);
   res.status(204).end();
 }
@@ -29,7 +29,7 @@ async function del(
   session: ExtendedSession
 ) {
   const id = req.query.rideId as string;
-  await logger.apiRequest(APILogEvent.PLAN_RIDE_DELETE, req.body, session);
+  await logger.apiRequest(APILogEvent.PLAN_RIDE_DELETE, id, req.body, session);
   await deleteRide(id);
   res.status(204).end();
 }

@@ -14,7 +14,7 @@ async function del(
   session: ExtendedSession
 ) {
   const id = req.query.areaId as string;
-  await logger.apiRequest(APILogEvent.AREA_DELETE, req.body, session);
+  await logger.apiRequest(APILogEvent.AREA_DELETE, id, req.body, session);
   await deleteArea(id);
   res.status(204).end();
 }
@@ -30,7 +30,7 @@ async function patch(
     return;
   }
   const id = req.query.areaId as string;
-  await logger.apiRequest(APILogEvent.AREA_MODIFY, req.body, session);
+  await logger.apiRequest(APILogEvent.AREA_MODIFY, id, req.body, session);
   await updateArea(id, data);
   res.status(204).end();
 }

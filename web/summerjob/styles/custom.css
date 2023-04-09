@@ -326,3 +326,7 @@ img.smj-nav-logo {
   display: flex;
   align-items: center;
 }
+
+.text-prewrap {
+  white-space: pre-wrap;
+}

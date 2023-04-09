@@ -46,7 +46,12 @@ async function post(
   if (!result) {
     return;
   }
-  await logger.apiRequest(APILogEvent.JOB_CREATE, req.body, session);
+  await logger.apiRequest(
+    APILogEvent.JOB_CREATE,
+    "proposed-jobs",
+    req.body,
+    session
+  );
   const job = await createProposedJob(result);
   res.status(201).json(job);
 }

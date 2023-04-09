@@ -5,17 +5,19 @@ import { ExtendedSession } from "lib/types/auth";
 
 async function apiRequest(
   type: APILogEvent,
-  body: object,
+  resourceId: string,
+  data: object,
   session: ExtendedSession
 ) {
-  const payload = JSON.stringify(body);
+  const payload = JSON.stringify(data);
   await addLogEvent(
     session.userID,
     session.username,
+    resourceId,
     type,
     payload === '""' ? "" : payload
   );
-  pinoLogger.debug({ type, body });
+  pinoLogger.debug({ type, data });
 }
 
 const logger = {

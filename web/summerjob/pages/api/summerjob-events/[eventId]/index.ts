@@ -25,7 +25,7 @@ async function patch(
   if (!data) {
     return;
   }
-  await logger.apiRequest(APILogEvent.SMJEVENT_MODIFY, req.body, session);
+  await logger.apiRequest(APILogEvent.SMJEVENT_MODIFY, id, req.body, session);
   // TODO: Update event instead of only setting active
   await setActiveSummerJobEvent(id);
   res.status(204).end();
@@ -37,7 +37,7 @@ async function del(
   session: ExtendedSession
 ) {
   const id = req.query.eventId as string;
-  await logger.apiRequest(APILogEvent.SMJEVENT_DELETE, req.body, session);
+  await logger.apiRequest(APILogEvent.SMJEVENT_DELETE, id, req.body, session);
   await deleteSummerJobEvent(id);
   res.status(204).end();
 }

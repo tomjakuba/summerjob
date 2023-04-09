@@ -1,3 +1,6 @@
+import { Logging } from "lib/prisma/client";
+import { Serialized } from "./serialize";
+
 export enum APILogEvent {
   WORKER_CREATE = "WORKER_CREATE",
   WORKER_MODIFY = "WORKER_MODIFY",
@@ -25,4 +28,15 @@ export enum APILogEvent {
   AREA_MODIFY = "AREA_MODIFY",
   AREA_DELETE = "AREA_DELETE",
   USER_MODIFY = "USER_MODIFY",
+}
+
+export function serializeLogs(logs: Logging[]): Serialized<Logging[]> {
+  return {
+    data: JSON.stringify(logs),
+  };
+}
+
+export function deserializeLogs(serialized: Serialized<Logging[]>): Logging[] {
+  const data = JSON.parse(serialized.data) as Logging[];
+  return data.map((log) => ({ ...log, timestamp: new Date(log.timestamp) }));
 }

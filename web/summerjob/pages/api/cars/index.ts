@@ -29,7 +29,7 @@ async function post(
   if (!data) {
     return;
   }
-  await logger.apiRequest(APILogEvent.CAR_CREATE, req.body, session);
+  await logger.apiRequest(APILogEvent.CAR_CREATE, "cars", req.body, session);
   const car = await createCar(data);
   res.status(201).json(car);
 }

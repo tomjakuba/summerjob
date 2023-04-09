@@ -35,7 +35,7 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
   if (!workerData) {
     return;
   }
-  await logger.apiRequest(APILogEvent.WORKER_MODIFY, req.body, session!);
+  await logger.apiRequest(APILogEvent.WORKER_MODIFY, id, req.body, session!);
   await updateWorker(id, workerData);
   res.status(204).end();
 }
@@ -47,7 +47,7 @@ async function del(req: NextApiRequest, res: NextApiResponse) {
   if (!allowed) {
     return;
   }
-  await logger.apiRequest(APILogEvent.WORKER_DELETE, req.body, session!);
+  await logger.apiRequest(APILogEvent.WORKER_DELETE, id, req.body, session!);
   await deleteWorker(id);
   res.status(204).end();
 }

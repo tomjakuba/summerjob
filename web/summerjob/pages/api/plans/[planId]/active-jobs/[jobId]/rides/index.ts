@@ -20,7 +20,12 @@ async function post(
   if (!result) {
     return;
   }
-  await logger.apiRequest(APILogEvent.PLAN_RIDE_ADD, req.body, session);
+  await logger.apiRequest(
+    APILogEvent.PLAN_RIDE_ADD,
+    `plans/${req.query.planId}/active-jobs/${req.query.jobId}/rides`,
+    req.body,
+    session
+  );
   const ride = await createRide(result, req.query.jobId as string);
   res.status(201).json(ride);
 }

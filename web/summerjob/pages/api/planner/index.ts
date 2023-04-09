@@ -21,7 +21,12 @@ async function post(
   if (!result) {
     return;
   }
-  await logger.apiRequest(APILogEvent.PLAN_PLANNER_START, req.body, session);
+  await logger.apiRequest(
+    APILogEvent.PLAN_PLANNER_START,
+    "planner",
+    req.body,
+    session
+  );
   await requestPlanner(result.planId);
   res.status(200).json({ success: true });
 }

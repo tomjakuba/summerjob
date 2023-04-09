@@ -26,7 +26,7 @@ async function del(
   session: ExtendedSession
 ) {
   const id = req.query.planId as string;
-  await logger.apiRequest(APILogEvent.PLAN_DELETE, req.body, session);
+  await logger.apiRequest(APILogEvent.PLAN_DELETE, id, req.body, session);
   await deletePlan(id);
   res.status(204).end();
 }
