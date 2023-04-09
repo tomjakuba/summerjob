@@ -1,6 +1,6 @@
 import { APILogEvent } from "lib/types/logger";
 import { pinoLogger } from "./pino";
-import { addLogEvent } from "lib/data/logging";
+import { addLogEvent } from "lib/data/logs";
 import { ExtendedSession } from "lib/types/auth";
 
 async function apiRequest(

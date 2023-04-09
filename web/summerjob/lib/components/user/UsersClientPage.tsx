@@ -55,7 +55,7 @@ export default function UsersClientPage({ sUsers }: UsersClientPageProps) {
   return (
     <section>
       <div className="container">
-        <div className="row gx-3">
+        <div className="row">
           <div className="col">
             <UsersFilters
               search={filter}
@@ -66,7 +66,7 @@ export default function UsersClientPage({ sUsers }: UsersClientPageProps) {
             />
           </div>
         </div>
-        <div className="row gx-3">
+        <div className="row">
           <div className="col-12">
             <UsersTable users={filteredData || []} onWorkerUpdated={mutate} />
           </div>

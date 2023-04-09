@@ -330,3 +330,13 @@ img.smj-nav-logo {
 .text-prewrap {
   white-space: pre-wrap;
 }
+
+.pagination {
+  --bs-pagination-active-bg: #f7e122;
+  --bs-pagination-active-border-color: #e6d21f;
+  --bs-pagination-active-color: #000000;
+  --bs-pagination-color: #000000;
+  --bs-pagination-hover-color: #000000;
+  --bs-pagination-focus-color: #000000;
+  --bs-pagination-focus-box-shadow: 0 0 0 0.05rem #f7e122;
+}

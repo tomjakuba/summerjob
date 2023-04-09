@@ -30,13 +30,28 @@ export enum APILogEvent {
   USER_MODIFY = "USER_MODIFY",
 }
 
-export function serializeLogs(logs: Logging[]): Serialized<Logging[]> {
+export type FilteredLogs = {
+  logs: Logging[];
+  total: number;
+};
+
+export function serializeLogs(logs: FilteredLogs): Serialized<FilteredLogs> {
   return {
     data: JSON.stringify(logs),
   };
 }
 
-export function deserializeLogs(serialized: Serialized<Logging[]>): Logging[] {
-  const data = JSON.parse(serialized.data) as Logging[];
-  return data.map((log) => ({ ...log, timestamp: new Date(log.timestamp) }));
+export function deserializeLogs(
+  serialized: Serialized<FilteredLogs>
+): FilteredLogs {
+  const data = JSON.parse(serialized.data) as FilteredLogs;
+  return deserializeLogsTime(data);
+}
+
+export function deserializeLogsTime(logs: FilteredLogs) {
+  const withTime = logs.logs.map((log) => ({
+    ...log,
+    timestamp: new Date(log.timestamp),
+  }));
+  return { logs: withTime, total: logs.total };
 }

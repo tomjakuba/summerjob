@@ -1,6 +1,6 @@
 import LogsClientPage from "lib/components/logs/LogsClientPage";
 import PageHeader from "lib/components/page-header/PageHeader";
-import { getLogs } from "lib/data/logging";
+import { getLogs } from "lib/data/logs";
 import { serializeLogs } from "lib/types/logger";
 
 export const dynamic = "force-dynamic";
