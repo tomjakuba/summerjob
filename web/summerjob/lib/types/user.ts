@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { Permission } from "./auth";
 import { Serialized } from "./serialize";
+import { SummerJobEvent } from "lib/prisma/client";
 
 export type UserComplete = {
   id: string;
@@ -10,6 +11,7 @@ export type UserComplete = {
   blocked: boolean;
   deleted: boolean;
   permissions: Permission[];
+  registeredIn: SummerJobEvent[];
 };
 
 const PermissionEnum = z.nativeEnum(Permission);

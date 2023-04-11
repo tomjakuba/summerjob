@@ -5,25 +5,6 @@ import { PrismaTransactionClient } from "lib/types/prisma";
 import { UserComplete, UserUpdateData } from "lib/types/user";
 import { cache_getActiveSummerJobEventId } from "./cache";
 
-export async function getUserById(id: string): Promise<UserComplete | null> {
-  const user = await prisma.worker.findUnique({
-    where: {
-      id,
-    },
-    select: {
-      id: true,
-      firstName: true,
-      lastName: true,
-      email: true,
-      blocked: true,
-      deleted: true,
-      permissions: true,
-    },
-  });
-  if (!user) return null;
-  return databaseUserToUserComplete(user);
-}
-
 export async function getUserByEmail(
   email: string
 ): Promise<UserComplete | null> {
@@ -39,6 +20,7 @@ export async function getUserByEmail(
       blocked: true,
       deleted: true,
       permissions: true,
+      registeredIn: true,
     },
   });
   if (!user) return null;
@@ -65,6 +47,7 @@ export async function getUsers(): Promise<UserComplete[]> {
       blocked: true,
       deleted: true,
       permissions: true,
+      registeredIn: true,
     },
   });
   return users.map(databaseUserToUserComplete);
@@ -148,5 +131,6 @@ function databaseUserToUserComplete(user: DBUserComplete): UserComplete {
     blocked: user.blocked,
     deleted: user.deleted,
     permissions: user.permissions.permissions as Permission[],
+    registeredIn: user.registeredIn,
   };
 }
