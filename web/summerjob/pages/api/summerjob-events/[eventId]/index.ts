@@ -1,9 +1,10 @@
 import { APIAccessController } from "lib/api/APIAccessControler";
 import { APIMethodHandler } from "lib/api/MethodHandler";
 import { validateOrSendError } from "lib/api/validator";
+import { ApiBadRequestError } from "lib/data/api-error";
 import {
   deleteSummerJobEvent,
-  setActiveSummerJobEvent,
+  updateSummerJobEvent,
 } from "lib/data/summerjob-event";
 import logger from "lib/logger/logger";
 import { ExtendedSession, Permission } from "lib/types/auth";
@@ -26,8 +27,15 @@ async function patch(
     return;
   }
   await logger.apiRequest(APILogEvent.SMJEVENT_MODIFY, id, req.body, session);
-  // TODO: Update event instead of only setting active
-  await setActiveSummerJobEvent(id);
+  if (!data.isActive) {
+    res.status(400).json({
+      error: new ApiBadRequestError(
+        "Do not set events to inactive. Set another event to active instead."
+      ),
+    });
+    return;
+  }
+  await updateSummerJobEvent(id, data);
   res.status(204).end();
 }
 

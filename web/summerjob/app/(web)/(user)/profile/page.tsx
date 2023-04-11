@@ -15,7 +15,8 @@ export const dynamic = "force-dynamic";
 export default async function MyProfilePage() {
   const session = await getSMJSession();
   const worker = await getWorkerById(session!.userID);
-  if (!worker) {
+
+  if (!worker || !worker.availability) {
     return <ErrorPage404 message="Pracant nenalezen." />;
   }
   const serializedWorker = serializeWorker(worker);

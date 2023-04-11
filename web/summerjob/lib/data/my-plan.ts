@@ -81,6 +81,7 @@ export async function getMyPlans(workerId: string): Promise<MyPlan[]> {
   if (!activeEvent.workers.map((worker) => worker.id).includes(workerId)) {
     throw new WorkerNotRegisteredInEventError();
   }
+
   const plans = await getCompletePlans();
   return plans.map((plan) => getMyPlan(plan, workerId));
 }

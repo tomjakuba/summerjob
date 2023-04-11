@@ -2,8 +2,14 @@ import prisma from "lib/prisma/connection";
 import {
   SummerJobEventComplete,
   SummerJobEventCreateData,
+  SummerJobEventUpdateData,
 } from "lib/types/summerjob-event";
-import { cache_setActiveSummerJobEvent } from "./cache";
+import {
+  cache_getActiveSummerJobEvent,
+  cache_setActiveSummerJobEvent,
+} from "./cache";
+import { InvalidDataError } from "./internal-error";
+import { blockNonAdmins } from "./users";
 
 export async function getSummerJobEventById(
   id: string
@@ -51,6 +57,24 @@ export async function getActiveSummerJobEvent() {
     },
   });
   return events.length > 0 ? events[0] : undefined;
+}
+
+export async function updateSummerJobEvent(
+  id: string,
+  event: SummerJobEventUpdateData
+) {
+  if (!event.isActive) {
+    throw new InvalidDataError(
+      "Cannot set event to inactive, set another to active instead."
+    );
+  }
+  const currentlyActiveEvent = await cache_getActiveSummerJobEvent();
+  if (currentlyActiveEvent && currentlyActiveEvent.id !== id) {
+    const updatedEvent = await setActiveSummerJobEvent(id);
+    await blockNonAdmins();
+    return updatedEvent;
+  }
+  return currentlyActiveEvent;
 }
 
 export async function setActiveSummerJobEvent(id: string) {

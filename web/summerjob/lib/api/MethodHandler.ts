@@ -87,7 +87,7 @@ async function handle(
       return;
     } else if (error instanceof InternalError) {
       // These are internally thrown errors, usually because no active summerjob event is set
-      // or the user is not allowed to do something. The user is informed about these issues through the web interface.
+      // or the user is not registered in the event. The user is informed about these issues through the web interface.
       // Therefore, these errors should not be logged in production.
       if (process.env.NODE_ENV === "development") {
         logger.error(error);

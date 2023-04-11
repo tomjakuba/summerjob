@@ -134,3 +134,42 @@ function databaseUserToUserComplete(user: DBUserComplete): UserComplete {
     registeredIn: user.registeredIn,
   };
 }
+
+export async function blockNonAdmins(
+  prismaClient: PrismaClient | PrismaTransactionClient = prisma
+) {
+  const nonAdmins = await prismaClient.worker.findMany({
+    where: {
+      NOT: {
+        permissions: {
+          permissions: {
+            hasSome: [Permission.ADMIN],
+          },
+        },
+      },
+    },
+    select: {
+      email: true,
+    },
+  });
+  const emails = nonAdmins.map((user) => user.email);
+  await prismaClient.worker.updateMany({
+    where: {
+      email: {
+        in: emails,
+      },
+    },
+    data: {
+      blocked: true,
+    },
+  });
+  await prismaClient.session.deleteMany({
+    where: {
+      user: {
+        email: {
+          in: emails,
+        },
+      },
+    },
+  });
+}

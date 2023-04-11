@@ -25,11 +25,11 @@ export type SummerJobEventCreateData = z.infer<
   typeof SummerJobEventCreateSchema
 >;
 
-export const SummerJobEventUpdateSchema = SummerJobEventCreateSchema.extend({
-  isActive: z.boolean(),
-})
-  .strict()
-  .partial();
+export const SummerJobEventUpdateSchema = z
+  .object({
+    isActive: z.boolean(),
+  })
+  .strict();
 
 export type SummerJobEventUpdateDataInput = z.input<
   typeof SummerJobEventUpdateSchema

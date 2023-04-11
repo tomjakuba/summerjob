@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 export default async function MyPlanPage() {
   const session = await getSMJSession();
   const worker = await getWorkerById(session!.userID);
-  if (!worker) {
+  if (!worker || !worker.availability) {
     return <ErrorPage404 message="Pracant nenalezen." />;
   }
   let plans: MyPlan[] = [];
