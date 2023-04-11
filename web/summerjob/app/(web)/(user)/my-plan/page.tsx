@@ -3,7 +3,7 @@ import ErrorPage404 from "lib/components/404/404";
 import MyPlanClientPage from "lib/components/my-plan/MyPlanClientPage";
 import { getMyPlans } from "lib/data/my-plan";
 import { getWorkerById } from "lib/data/workers";
-import { serializeMyPlans } from "lib/types/my-plan";
+import { MyPlan, serializeMyPlans } from "lib/types/my-plan";
 
 export const metadata = {
   title: "Můj plán",
@@ -17,6 +17,9 @@ export default async function MyPlanPage() {
   if (!worker) {
     return <ErrorPage404 message="Pracant nenalezen." />;
   }
-  const plans = await getMyPlans(worker.id);
+  let plans: MyPlan[] = [];
+  try {
+    plans = await getMyPlans(worker.id);
+  } catch (e) {}
   return <MyPlanClientPage sPlan={serializeMyPlans(plans)} />;
 }
