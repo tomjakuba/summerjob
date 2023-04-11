@@ -250,6 +250,7 @@ export async function createWorker(
       allergies: {
         set: data.allergyIds,
       },
+      blocked: false,
       availability: {
         create: {
           workDays: data.availability.workDays,
