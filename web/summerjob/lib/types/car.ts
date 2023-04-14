@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { Serialized } from "./serialize";
 import { CarSchema, RideSchema, WorkerSchema } from "lib/prisma/zod";
-import extendZodForOpenAPI from "lib/api/extendZodForOpenAPI";
+import useZodOpenApi from "lib/api/useZodOpenApi";
 
-extendZodForOpenAPI;
+useZodOpenApi;
 
 export const CarCompleteSchema = CarSchema.extend({
   owner: WorkerSchema,

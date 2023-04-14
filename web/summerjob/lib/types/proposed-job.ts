@@ -6,14 +6,13 @@ import {
 } from "lib/prisma/client";
 import { z } from "zod";
 import { Serialized } from "./serialize";
+import { AreaSchema, ProposedJobSchema } from "lib/prisma/zod";
 
-export type ProposedJobWithArea = ProposedJob & {
-  area: Area;
-};
+export const ProposedJobWithAreaSchema = ProposedJobSchema.extend({
+  area: AreaSchema,
+});
 
-export type ProposedJobNoActive = ProposedJob & {
-  area: Area;
-};
+export type ProposedJobWithArea = z.infer<typeof ProposedJobWithAreaSchema>;
 
 export type ProposedJobComplete = ProposedJob & {
   area: Area;

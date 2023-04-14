@@ -1,21 +1,22 @@
-import { ActiveJob, Plan, ProposedJob } from "lib/prisma/client";
-import { ProposedJobNoActive } from "./proposed-job";
+import { ActiveJob, Plan } from "lib/prisma/client";
+import { ProposedJobWithArea } from "./proposed-job";
 import type { Worker } from "lib/prisma/client";
-import { RideComplete } from "./ride";
 import { z } from "zod";
 import { WorkerComplete } from "./worker";
 import { Serialized } from "./serialize";
+import {
+  ActiveJobSchema,
+  ProposedJobSchema,
+  WorkerSchema,
+} from "lib/prisma/zod";
+import { ActiveJobNoPlanSchema } from "./_schemas";
+import { RideComplete } from "./ride";
 
-export type ActiveJobNoPlan = ActiveJob & {
-  workers: WorkerComplete[];
-  proposedJob: ProposedJobNoActive;
-  rides: RideComplete[];
-  responsibleWorker: Worker | null;
-};
+export type ActiveJobNoPlan = z.infer<typeof ActiveJobNoPlanSchema>;
 
 export type ActiveJobComplete = ActiveJob & {
   workers: WorkerComplete[];
-  proposedJob: ProposedJobNoActive;
+  proposedJob: ProposedJobWithArea;
   rides: RideComplete[];
   responsibleWorker: Worker | null;
   plan: Plan;
@@ -26,9 +27,11 @@ export type ActiveJobWithWorkersRides = ActiveJob & {
   rides: RideComplete[];
 };
 
-export type ActiveJobWithProposed = ActiveJob & {
-  proposedJob: ProposedJob;
-};
+export const ActiveJobWithProposedSchema = ActiveJobSchema.extend({
+  proposedJob: ProposedJobSchema,
+});
+
+export type ActiveJobWithProposed = z.infer<typeof ActiveJobWithProposedSchema>;
 
 export const ActiveJobCreateSchema = z
   .object({

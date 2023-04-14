@@ -2,14 +2,21 @@ import { z } from "zod";
 import type { Car, Worker, WorkerAvailability } from "../../lib/prisma/client";
 import { Serialized } from "./serialize";
 import { Allergy } from "./allergy";
-import extendZodForOpenAPI from "lib/api/extendZodForOpenAPI";
+import useZodOpenApi from "lib/api/useZodOpenApi";
+import {
+  CarSchema,
+  WorkerAvailabilitySchema,
+  WorkerSchema,
+} from "lib/prisma/zod";
 
-extendZodForOpenAPI;
+useZodOpenApi;
 
-export type WorkerComplete = Worker & {
-  cars: Car[];
-  availability: WorkerAvailability;
-};
+export const WorkerCompleteSchema = WorkerSchema.extend({
+  cars: z.array(CarSchema),
+  availability: WorkerAvailabilitySchema,
+});
+
+export type WorkerComplete = z.infer<typeof WorkerCompleteSchema>;
 
 export const WorkerCreateSchema = z
   .object({

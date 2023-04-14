@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { Serialized } from "./serialize";
-import extendZodForOpenAPI from "lib/api/extendZodForOpenAPI";
+import useZodOpenApi from "lib/api/useZodOpenApi";
 
-extendZodForOpenAPI;
+useZodOpenApi;
 
 export const MyRideSchema = z.object({
   car: z.string().min(1),

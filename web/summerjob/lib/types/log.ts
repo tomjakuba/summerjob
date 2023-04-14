@@ -1,11 +1,11 @@
-import extendZodForOpenAPI from "lib/api/extendZodForOpenAPI";
+import useZodOpenApi from "lib/api/useZodOpenApi";
 import { LoggingSchema } from "lib/prisma/zod";
 import { z } from "zod";
 
-extendZodForOpenAPI;
+useZodOpenApi;
 
 export const LogsResponseSchema = z.object({
-  logs: z.array(LoggingSchema),
+  logs: z.array(LoggingSchema).openapi({ title: "Log" }),
   total: z.number().openapi({
     description: "Total number of logs in the database.",
     example: 500,

@@ -12,6 +12,8 @@ import {
 import { LogsResponseSchema } from "lib/types/log";
 import { APILogEvent } from "lib/types/logger";
 import { MyPlanSchema } from "lib/types/my-plan";
+import { PlanCompleteSchema } from "lib/types/plan";
+import { PlannerSubmitSchema } from "lib/types/planner";
 import { WorkerCreateSchema, WorkersCreateSchema } from "lib/types/worker";
 import { z } from "zod";
 
@@ -19,7 +21,7 @@ const registry = new OpenAPIRegistry();
 
 //#region Allergies
 
-registry.register("Allergy", z.nativeEnum(Allergy));
+const _AllergySchema = registry.register("Allergy", z.nativeEnum(Allergy));
 
 registry.registerPath({
   path: "/api/allergies",
@@ -32,7 +34,7 @@ registry.registerPath({
       description: "List of supported allergies",
       content: {
         "application/json": {
-          schema: z.array(z.nativeEnum(Allergy)),
+          schema: _AllergySchema,
         },
       },
     },
@@ -43,7 +45,7 @@ registry.registerPath({
 
 //#region Cars
 
-registry.register("CarDetails", CarCompleteSchema);
+const _CarCompleteSchema = registry.register("CarDetails", CarCompleteSchema);
 
 registry.registerPath({
   path: "/api/cars",
@@ -57,7 +59,7 @@ registry.registerPath({
       description: "List of available cars",
       content: {
         "application/json": {
-          schema: z.array(CarCompleteSchema),
+          schema: z.array(_CarCompleteSchema),
         },
       },
     },
@@ -67,8 +69,8 @@ registry.registerPath({
   },
 });
 
-registry.register("Car", CarSchema);
-registry.register("CarCreate", CarCreateSchema);
+const _CarSchema = registry.register("Car", CarSchema);
+const _CarCreateSchema = registry.register("CarCreate", CarCreateSchema);
 
 registry.registerPath({
   path: "/api/cars",
@@ -81,7 +83,7 @@ registry.registerPath({
     body: {
       content: {
         "application/json": {
-          schema: CarCreateSchema,
+          schema: _CarCreateSchema,
         },
       },
     },
@@ -91,7 +93,7 @@ registry.registerPath({
       description: "Car created successfully. Returns the created car.",
       content: {
         "application/json": {
-          schema: CarSchema,
+          schema: _CarSchema,
         },
       },
     },
@@ -101,7 +103,7 @@ registry.registerPath({
   },
 });
 
-registry.register("CarUpdate", CarUpdateSchema);
+const _CarUpdateSchema = registry.register("CarUpdate", CarUpdateSchema);
 
 registry.registerPath({
   path: "/api/cars/{id}",
@@ -125,7 +127,7 @@ registry.registerPath({
     body: {
       content: {
         "application/json": {
-          schema: CarUpdateSchema,
+          schema: _CarUpdateSchema,
         },
       },
     },
@@ -166,9 +168,15 @@ registry.registerPath({
 
 //#region Logs
 
-registry.register("Log", LoggingSchema);
-registry.register("LogsSummary", LogsResponseSchema);
-registry.register("LogEventType", z.nativeEnum(APILogEvent));
+const _LoggingSchema = registry.register("Log", LoggingSchema);
+const _LogsResponseSchema = registry.register(
+  "LogsSummary",
+  LogsResponseSchema
+);
+const _LogEventType = registry.register(
+  "LogEventType",
+  z.nativeEnum(APILogEvent)
+);
 
 registry.registerPath({
   path: "/api/logs",
@@ -222,7 +230,7 @@ registry.registerPath({
       description: "List of logs",
       content: {
         "application/json": {
-          schema: LogsResponseSchema,
+          schema: _LogsResponseSchema,
         },
       },
     },
@@ -233,7 +241,7 @@ registry.registerPath({
 
 //#region My Plans
 
-registry.register("MyPlan", MyPlanSchema);
+const _MyPlanSchema = registry.register("MyPlan", MyPlanSchema);
 
 registry.registerPath({
   path: "/api/my-plans",
@@ -246,7 +254,70 @@ registry.registerPath({
       description: "List of worker's plans",
       content: {
         "application/json": {
-          schema: z.array(MyPlanSchema),
+          schema: z.array(_MyPlanSchema),
+        },
+      },
+    },
+    409: {
+      description: "No active SummerJob event is set.",
+    },
+  },
+});
+
+//#endregion
+
+//#region Planner
+
+const _PlannerSubmitSchema = registry.register(
+  "PlannerSubmitPlan",
+  PlannerSubmitSchema
+);
+
+registry.registerPath({
+  path: "/api/planner",
+  method: "post",
+  description:
+    "Submits a plan for automatic planning. Permissions required (at least one): ADMIN, PLANS.",
+  summary: "Submit a plan for automatic planning",
+  tags: ["Planner"],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: _PlannerSubmitSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: {
+      description: "Plan submitted successfully.",
+    },
+  },
+});
+
+//#endregion
+
+//#region Plans
+
+const _PlanCompleteSchema = registry.register(
+  "PlanDetails",
+  PlanCompleteSchema
+);
+
+registry.registerPath({
+  path: "/api/plans",
+  method: "get",
+  description:
+    "Gets a list of plans for the currently active event. Permissions required (at least one): ADMIN, PLANS.",
+  summary: "List all plans",
+  tags: ["Plans"],
+  responses: {
+    200: {
+      description: "List of plans",
+      content: {
+        "application/json": {
+          schema: z.array(_PlanCompleteSchema).openapi({ title: "Plans" }),
         },
       },
     },
@@ -260,8 +331,15 @@ registry.registerPath({
 
 //#region Workers
 
-registry.register("WorkerCreate", WorkerCreateSchema);
-registry.register("WorkersCreate", WorkersCreateSchema);
+const _WorkerCreateSchema = registry.register(
+  "WorkerCreate",
+  WorkerCreateSchema
+);
+const _WorkersCreateSchema = registry.register(
+  "WorkersCreate",
+  WorkersCreateSchema
+);
+const _WorkerSchema = registry.register("Worker", WorkerSchema);
 
 registry.registerPath({
   path: "/api/workers",
@@ -274,7 +352,7 @@ registry.registerPath({
     body: {
       content: {
         "application/json": {
-          schema: WorkerCreateSchema.or(WorkersCreateSchema),
+          schema: _WorkerCreateSchema.or(_WorkersCreateSchema),
         },
       },
     },
@@ -285,7 +363,7 @@ registry.registerPath({
         "Worker(s) created successfully. Returns the created worker(s).",
       content: {
         "application/json": {
-          schema: WorkerSchema,
+          schema: _WorkerSchema,
         },
       },
     },

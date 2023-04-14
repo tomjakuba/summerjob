@@ -1,12 +1,19 @@
 import { ActiveJob, Plan } from "lib/prisma/client";
 import { z } from "zod";
-import { ActiveJobNoPlan } from "./active-job";
 import { Serialized } from "./serialize";
 import { deserializeWorkerAvailability } from "./worker";
+import { ActiveJobSchema, PlanSchema } from "lib/prisma/zod";
+import { ActiveJobNoPlanSchema } from "./_schemas";
 
-export type PlanComplete = Plan & {
-  jobs: ActiveJobNoPlan[];
-};
+export const PlanCompleteSchema = PlanSchema.extend({
+  jobs: z.array(ActiveJobNoPlanSchema),
+});
+
+export type PlanComplete = z.infer<typeof PlanCompleteSchema>;
+
+export const PlanWithJobsSchema = PlanSchema.extend({
+  jobs: z.array(ActiveJobSchema),
+});
 
 export type PlanWithJobs = Plan & {
   jobs: ActiveJob[];

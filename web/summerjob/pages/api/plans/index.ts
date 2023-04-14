@@ -1,6 +1,5 @@
 import { createPlan, getPlans } from "lib/data/plans";
 import { NextApiRequest, NextApiResponse } from "next";
-
 import { Prisma } from "lib/prisma/client";
 import { ApiBadRequestError, WrappedError } from "lib/data/api-error";
 import { InvalidDataError } from "lib/data/internal-error";
@@ -9,13 +8,16 @@ import { APIMethodHandler } from "lib/api/MethodHandler";
 import { ExtendedSession, Permission } from "lib/types/auth";
 import logger from "lib/logger/logger";
 import { APILogEvent } from "lib/types/logger";
-import { cache_getActiveSummerJobEvent } from "lib/data/cache";
+import { getActiveEventOrSendError } from "lib/api/validator";
 
 export type PlansAPIGetResponse = Awaited<ReturnType<typeof getPlans>>;
 async function get(
   req: NextApiRequest,
   res: NextApiResponse<PlansAPIGetResponse>
 ) {
+  if (!(await getActiveEventOrSendError(res))) {
+    return;
+  }
   const plans = await getPlans();
   res.status(200).json(plans);
 }
@@ -28,12 +30,11 @@ async function post(
   session: ExtendedSession
 ) {
   const date = new Date(req.body.date);
-  const activeEvent = await cache_getActiveSummerJobEvent();
-  if (
-    !activeEvent ||
-    date < activeEvent.startDate ||
-    date > activeEvent.endDate
-  ) {
+  const activeEvent = await getActiveEventOrSendError(res);
+  if (!activeEvent) {
+    return;
+  }
+  if (date < activeEvent.startDate || date > activeEvent.endDate) {
     res.status(400).json({ error: new ApiBadRequestError("Invalid date.") });
     return;
   }
