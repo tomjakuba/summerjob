@@ -2,9 +2,13 @@ import {
   OpenAPIGenerator,
   OpenAPIRegistry,
 } from "@asteasolutions/zod-to-openapi";
-import { WorkerSchema } from "lib/prisma/zod";
+import { CarSchema, WorkerSchema } from "lib/prisma/zod";
 import { Allergy } from "lib/types/allergy";
-import { CarCompleteSchema } from "lib/types/car";
+import {
+  CarCompleteSchema,
+  CarCreateSchema,
+  CarUpdateSchema,
+} from "lib/types/car";
 import { WorkerCreateSchema, WorkersCreateSchema } from "lib/types/worker";
 import { z } from "zod";
 
@@ -36,7 +40,7 @@ registry.registerPath({
 
 //#region Cars
 
-registry.register("Car", CarCompleteSchema);
+registry.register("CarDetails", CarCompleteSchema);
 
 registry.registerPath({
   path: "/api/cars",
@@ -60,10 +64,105 @@ registry.registerPath({
   },
 });
 
+registry.register("Car", CarSchema);
+registry.register("CarCreate", CarCreateSchema);
+
+registry.registerPath({
+  path: "/api/cars",
+  method: "post",
+  description:
+    "Creates a new car in the current event. The owner must be registered in the event. Permissions required (at least one): ADMIN, CARS, PLANS.",
+  summary: "Create a new car",
+  tags: ["Cars"],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: CarCreateSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: "Car created successfully. Returns the created car.",
+      content: {
+        "application/json": {
+          schema: CarSchema,
+        },
+      },
+    },
+    409: {
+      description: "No active SummerJob event is set.",
+    },
+  },
+});
+
+registry.register("CarUpdate", CarUpdateSchema);
+
+registry.registerPath({
+  path: "/api/cars/{id}",
+  method: "put",
+  description:
+    "Updates a car. Permissions required (at least one): ADMIN, CARS, PLANS.",
+  summary: "Update a car",
+  tags: ["Cars"],
+  parameters: [
+    {
+      name: "id",
+      in: "path",
+      required: true,
+      description: "The ID of the car to update.",
+      schema: {
+        type: "string",
+      },
+    },
+  ],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: CarUpdateSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: {
+      description: "Car updated successfully.",
+    },
+  },
+});
+
+registry.registerPath({
+  path: "/api/cars/{id}",
+  method: "delete",
+  description:
+    "Deletes a car. Permissions required (at least one): ADMIN, CARS, PLANS.",
+  summary: "Delete a car",
+  tags: ["Cars"],
+  parameters: [
+    {
+      name: "id",
+      in: "path",
+      required: true,
+      description: "The ID of the car to delete.",
+      schema: {
+        type: "string",
+      },
+    },
+  ],
+  responses: {
+    204: {
+      description: "Car deleted successfully.",
+    },
+  },
+});
+
 //#endregion
 
-registry.register("WorkerCreateData", WorkerCreateSchema);
-registry.register("WorkersCreateData", WorkersCreateSchema);
+registry.register("WorkerCreate", WorkerCreateSchema);
+registry.register("WorkersCreate", WorkersCreateSchema);
 
 registry.registerPath({
   path: "/api/workers",

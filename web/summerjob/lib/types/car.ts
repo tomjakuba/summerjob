@@ -1,6 +1,9 @@
 import { z } from "zod";
 import { Serialized } from "./serialize";
 import { CarSchema, RideSchema, WorkerSchema } from "lib/prisma/zod";
+import extendZodForOpenAPI from "lib/api/extendZodForOpenAPI";
+
+extendZodForOpenAPI;
 
 export const CarCompleteSchema = CarSchema.extend({
   owner: WorkerSchema,
@@ -26,10 +29,10 @@ export const CarCreateSchema = z
     ownerId: z.string().min(1),
     name: z.string().min(3),
     description: z.string(),
-    seats: z.number().positive(),
+    seats: z.number().positive().openapi({ example: 4 }),
     odometerStart: z.number(),
     odometerEnd: z.number().optional(),
-    reimbursed: z.boolean().optional(),
+    reimbursed: z.boolean().optional().openapi({ example: false }),
     reimbursementAmount: z.number().optional(),
   })
   .strict();
