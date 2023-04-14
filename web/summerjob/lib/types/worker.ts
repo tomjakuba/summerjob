@@ -2,6 +2,9 @@ import { z } from "zod";
 import type { Car, Worker, WorkerAvailability } from "../../lib/prisma/client";
 import { Serialized } from "./serialize";
 import { Allergy } from "./allergy";
+import extendZodForOpenAPI from "lib/api/extendZodForOpenAPI";
+
+extendZodForOpenAPI;
 
 export type WorkerComplete = Worker & {
   cars: Car[];
@@ -17,10 +20,24 @@ export const WorkerCreateSchema = z
     strong: z.boolean(),
     allergyIds: z.array(z.nativeEnum(Allergy)),
     availability: z.object({
-      workDays: z.array(z.date().or(z.string().min(1).pipe(z.coerce.date()))),
-      adorationDays: z.array(
-        z.date().or(z.string().min(1).pipe(z.coerce.date()))
-      ),
+      workDays: z
+        .array(z.date().or(z.string().min(1).pipe(z.coerce.date())))
+        .openapi({
+          type: "array",
+          items: {
+            type: "string",
+            format: "date",
+          },
+        }),
+      adorationDays: z
+        .array(z.date().or(z.string().min(1).pipe(z.coerce.date())))
+        .openapi({
+          type: "array",
+          items: {
+            type: "string",
+            format: "date",
+          },
+        }),
     }),
   })
   .strict();

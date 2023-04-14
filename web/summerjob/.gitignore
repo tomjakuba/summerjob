@@ -40,6 +40,7 @@ next-env.d.ts
 
 # prisma generated files
 lib/prisma/client
+lib/prisma/zod
 
 # other files
 prisma/clear-active.ts
