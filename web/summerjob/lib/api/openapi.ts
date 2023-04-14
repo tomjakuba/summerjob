@@ -2,13 +2,16 @@ import {
   OpenAPIGenerator,
   OpenAPIRegistry,
 } from "@asteasolutions/zod-to-openapi";
-import { CarSchema, WorkerSchema } from "lib/prisma/zod";
+import { CarSchema, LoggingSchema, WorkerSchema } from "lib/prisma/zod";
 import { Allergy } from "lib/types/allergy";
 import {
   CarCompleteSchema,
   CarCreateSchema,
   CarUpdateSchema,
 } from "lib/types/car";
+import { LogsResponseSchema } from "lib/types/log";
+import { APILogEvent } from "lib/types/logger";
+import { MyPlanSchema } from "lib/types/my-plan";
 import { WorkerCreateSchema, WorkersCreateSchema } from "lib/types/worker";
 import { z } from "zod";
 
@@ -161,6 +164,102 @@ registry.registerPath({
 
 //#endregion
 
+//#region Logs
+
+registry.register("Log", LoggingSchema);
+registry.register("LogsSummary", LogsResponseSchema);
+registry.register("LogEventType", z.nativeEnum(APILogEvent));
+
+registry.registerPath({
+  path: "/api/logs",
+  method: "get",
+  description: "Gets a list of logs. Permission required: ADMIN.",
+  summary: "List all logs",
+  tags: ["Logs"],
+  parameters: [
+    {
+      name: "search",
+      in: "query",
+      required: false,
+      description: "Search for a specific log entry.",
+      schema: {
+        type: "string",
+      },
+    },
+    {
+      name: "eventType",
+      in: "query",
+      required: false,
+      description: "Filter by event type.",
+      schema: {
+        type: "string",
+        enum: Object.values(APILogEvent),
+      },
+    },
+    {
+      name: "limit",
+      in: "query",
+      required: false,
+      description: "Limit the number of returned logs (max 100).",
+      schema: {
+        type: "number",
+        maximum: 100,
+      },
+    },
+    {
+      name: "offset",
+      in: "query",
+      required: false,
+      description:
+        "Offset for the returned logs. Skips the first *n* logs and returns the next *limit* logs.",
+      schema: {
+        type: "number",
+      },
+    },
+  ],
+  responses: {
+    200: {
+      description: "List of logs",
+      content: {
+        "application/json": {
+          schema: LogsResponseSchema,
+        },
+      },
+    },
+  },
+});
+
+//#endregion
+
+//#region My Plans
+
+registry.register("MyPlan", MyPlanSchema);
+
+registry.registerPath({
+  path: "/api/my-plans",
+  method: "get",
+  description: "Gets the current user's plans. Permissions required: none.",
+  summary: "List my plans",
+  tags: ["My Plans"],
+  responses: {
+    200: {
+      description: "List of worker's plans",
+      content: {
+        "application/json": {
+          schema: z.array(MyPlanSchema),
+        },
+      },
+    },
+    409: {
+      description: "No active SummerJob event is set.",
+    },
+  },
+});
+
+//#endregion
+
+//#region Workers
+
 registry.register("WorkerCreate", WorkerCreateSchema);
 registry.register("WorkersCreate", WorkersCreateSchema);
 
@@ -195,6 +294,8 @@ registry.registerPath({
     },
   },
 });
+
+//#endregion
 
 const generator = new OpenAPIGenerator(registry.definitions, "3.0.0");
 let openApiDocument = {};

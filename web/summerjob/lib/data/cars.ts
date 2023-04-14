@@ -67,11 +67,7 @@ export async function updateCar(carId: string, car: CarUpdateData) {
   });
 }
 
-export async function createCar(carData: CarCreateData) {
-  const activeEventId = await cache_getActiveSummerJobEventId();
-  if (!activeEventId) {
-    throw new NoActiveEventError();
-  }
+export async function createCar(carData: CarCreateData, eventId: string) {
   // Make sure the odometer start is not greater than the odometer end
   if (!carData.odometerEnd) {
     carData.odometerEnd = carData.odometerStart;
@@ -92,7 +88,7 @@ export async function createCar(carData: CarCreateData) {
       reimbursed: carData.reimbursed,
       reimbursementAmount: carData.reimbursementAmount,
       ownerId: carData.ownerId,
-      forEventId: activeEventId,
+      forEventId: eventId,
     },
   });
   return car;

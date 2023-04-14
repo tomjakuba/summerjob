@@ -1,5 +1,6 @@
 import { Prisma } from "lib/prisma/client";
 import prisma from "lib/prisma/connection";
+import { LogsResponse } from "lib/types/log";
 import { APILogEvent } from "lib/types/logger";
 
 export async function addLogEvent(
@@ -26,7 +27,12 @@ type LogsSearchParams = {
   limit?: number;
   offset?: number;
 };
-export async function getLogs({ text, type, limit, offset }: LogsSearchParams) {
+export async function getLogs({
+  text,
+  type,
+  limit,
+  offset,
+}: LogsSearchParams): Promise<LogsResponse> {
   offset ??= 0;
   limit ??= 5;
 

@@ -1,12 +1,10 @@
 import { APIAccessController } from "lib/api/APIAccessControler";
 import { APIMethodHandler } from "lib/api/MethodHandler";
-import { validateOrSendError } from "lib/api/validator";
 import {
-  ApiError,
-  ApiNoActiveEventError,
-  WrappedError,
-} from "lib/data/api-error";
-import { cache_getActiveSummerJobEventId } from "lib/data/cache";
+  getActiveEventOrSendError,
+  validateOrSendError,
+} from "lib/api/validator";
+import { ApiError, WrappedError } from "lib/data/api-error";
 import { createCar, getCars } from "lib/data/cars";
 import logger from "lib/logger/logger";
 import { ExtendedSession, Permission } from "lib/types/auth";
@@ -19,9 +17,8 @@ async function get(
   req: NextApiRequest,
   res: NextApiResponse<CarsAPIGetResponse | WrappedError<ApiError>>
 ) {
-  const activeEventId = await cache_getActiveSummerJobEventId();
-  if (!activeEventId) {
-    res.status(409).json({ error: new ApiNoActiveEventError() });
+  const summerJobEvent = await getActiveEventOrSendError(res);
+  if (!summerJobEvent) {
     return;
   }
   const cars = await getCars();
@@ -35,12 +32,16 @@ async function post(
   res: NextApiResponse<CarsAPIPostResponse | WrappedError<ApiError>>,
   session: ExtendedSession
 ) {
+  const summerJobEvent = await getActiveEventOrSendError(res);
+  if (!summerJobEvent) {
+    return;
+  }
   const data = validateOrSendError(CarCreateSchema, req.body, res);
   if (!data) {
     return;
   }
   await logger.apiRequest(APILogEvent.CAR_CREATE, "cars", req.body, session);
-  const car = await createCar(data);
+  const car = await createCar(data, summerJobEvent.id);
   res.status(201).json(car);
 }
 

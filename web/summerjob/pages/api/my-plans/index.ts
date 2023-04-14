@@ -1,6 +1,6 @@
 import { APIAccessController } from "lib/api/APIAccessControler";
 import { APIMethodHandler } from "lib/api/MethodHandler";
-import { cache_getActiveSummerJobEventId } from "lib/data/cache";
+import { getActiveEventOrSendError } from "lib/api/validator";
 import { getMyPlans } from "lib/data/my-plan";
 import { ExtendedSession } from "lib/types/auth";
 import { NextApiRequest, NextApiResponse } from "next";
@@ -11,9 +11,8 @@ async function get(
   res: NextApiResponse<MyPlansAPIGetResponse>,
   session: ExtendedSession
 ) {
-  const summerJobEvent = await cache_getActiveSummerJobEventId();
+  const summerJobEvent = await getActiveEventOrSendError(res);
   if (!summerJobEvent) {
-    res.status(500).end();
     return;
   }
   const plans = await getMyPlans(session!.userID);

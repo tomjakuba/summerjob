@@ -1,4 +1,6 @@
-import { ApiBadRequestError } from "lib/data/api-error";
+import { ApiBadRequestError, ApiNoActiveEventError } from "lib/data/api-error";
+import { cache_getActiveSummerJobEvent } from "lib/data/cache";
+import { SummerJobEvent } from "lib/prisma/zod";
 import { NextApiResponse } from "next";
 import { z } from "zod";
 
@@ -21,4 +23,17 @@ export function validateOrSendError<T extends z.ZodTypeAny>(
     return undefined;
   }
   return parsed.data;
+}
+
+export async function getActiveEventOrSendError(
+  res: NextApiResponse
+): Promise<SummerJobEvent | undefined> {
+  const activeEvent = await cache_getActiveSummerJobEvent();
+  if (activeEvent === undefined) {
+    res.status(409).json({
+      error: new ApiNoActiveEventError(),
+    });
+    return undefined;
+  }
+  return activeEvent;
 }
