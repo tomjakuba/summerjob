@@ -38,8 +38,17 @@ export async function getCars(): Promise<CarComplete[]> {
             isActive: true,
           },
         },
+        blocked: false,
+        deleted: false,
       },
       deleted: false,
+      odometers: {
+        some: {
+          event: {
+            isActive: true,
+          },
+        },
+      },
     },
     include: {
       owner: true,

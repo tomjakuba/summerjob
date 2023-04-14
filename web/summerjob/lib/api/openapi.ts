@@ -2,11 +2,60 @@ import {
   OpenAPIGenerator,
   OpenAPIRegistry,
 } from "@asteasolutions/zod-to-openapi";
+import { CarSchema } from "lib/prisma/zod";
 import { Allergy } from "lib/types/allergy";
 import { WorkerCreateSchema } from "lib/types/worker";
 import { z } from "zod";
 
 const registry = new OpenAPIRegistry();
+
+//#region Allergies
+
+registry.register("Allergy", z.nativeEnum(Allergy));
+
+registry.registerPath({
+  path: "/api/allergies",
+  method: "get",
+  description: "Gets a list of supported allergies.",
+  summary: "List all supported allergies",
+  tags: ["Allergies"],
+  responses: {
+    200: {
+      description: "List of supported allergies",
+      content: {
+        "application/json": {
+          schema: z.array(z.nativeEnum(Allergy)),
+        },
+      },
+    },
+  },
+});
+
+//#endregion
+
+//#region Cars
+
+registry.register("Car", CarSchema);
+
+registry.registerPath({
+  path: "/api/cars",
+  method: "get",
+  description: "Gets a list of available cars for the current event.",
+  summary: "List all available cars",
+  tags: ["Cars"],
+  responses: {
+    200: {
+      description: "List of available cars",
+      content: {
+        "application/json": {
+          schema: z.array(CarSchema),
+        },
+      },
+    },
+  },
+});
+
+//#endregion
 
 registry.register("WorkerCreateData", WorkerCreateSchema);
 
@@ -28,26 +77,6 @@ registry.registerPath({
   responses: {
     204: {
       description: "Worker created",
-    },
-  },
-});
-
-registry.register("Allergy", z.nativeEnum(Allergy));
-
-registry.registerPath({
-  path: "/api/allergies",
-  method: "get",
-  description: "Description of the endpoint",
-  summary: "Summary of the endpoint",
-  tags: ["Allergies"],
-  responses: {
-    200: {
-      description: "List of supported allergies",
-      content: {
-        "application/json": {
-          schema: z.array(z.nativeEnum(Allergy)),
-        },
-      },
     },
   },
 });
