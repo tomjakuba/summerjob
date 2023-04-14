@@ -25,12 +25,6 @@ export default function CarCreateForm({
     resolver: zodResolver(CarCreateSchema),
     defaultValues: {
       seats: 4,
-      odometer: {
-        start: 0,
-        end: 0,
-        reimbursed: false,
-        reimbursementAmount: 0,
-      },
     },
   });
 
@@ -110,11 +104,11 @@ export default function CarCreateForm({
               type="number"
               placeholder="Počáteční stav kilometrů"
               min="0"
-              {...register("odometer.start", { valueAsNumber: true })}
+              {...register("odometerStart", { valueAsNumber: true })}
             />
-            {errors.odometer?.start?.message && (
+            {errors.odometerStart?.message && (
               <p className="text-danger">
-                {errors.odometer.start.message as string}
+                {errors.odometerStart.message as string}
               </p>
             )}
 

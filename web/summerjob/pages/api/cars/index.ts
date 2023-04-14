@@ -1,7 +1,12 @@
 import { APIAccessController } from "lib/api/APIAccessControler";
 import { APIMethodHandler } from "lib/api/MethodHandler";
 import { validateOrSendError } from "lib/api/validator";
-import { ApiError, WrappedError } from "lib/data/api-error";
+import {
+  ApiError,
+  ApiNoActiveEventError,
+  WrappedError,
+} from "lib/data/api-error";
+import { cache_getActiveSummerJobEventId } from "lib/data/cache";
 import { createCar, getCars } from "lib/data/cars";
 import logger from "lib/logger/logger";
 import { ExtendedSession, Permission } from "lib/types/auth";
@@ -12,8 +17,13 @@ import { NextApiRequest, NextApiResponse } from "next";
 export type CarsAPIGetResponse = Awaited<ReturnType<typeof getCars>>;
 async function get(
   req: NextApiRequest,
-  res: NextApiResponse<CarsAPIGetResponse>
+  res: NextApiResponse<CarsAPIGetResponse | WrappedError<ApiError>>
 ) {
+  const activeEventId = await cache_getActiveSummerJobEventId();
+  if (!activeEventId) {
+    res.status(409).json({ error: new ApiNoActiveEventError() });
+    return;
+  }
   const cars = await getCars();
   res.status(200).json(cars);
 }

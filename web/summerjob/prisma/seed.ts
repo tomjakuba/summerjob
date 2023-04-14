@@ -68,7 +68,7 @@ async function createWorkers(
   };
   const withCar = (worker: any) => {
     const odometerValue = between(10000, 100000);
-    return {
+    return Prisma.validator<Prisma.WorkerCreateInput>()({
       ...worker,
       cars: {
         create: [
@@ -76,19 +76,13 @@ async function createWorkers(
             name: faker.vehicle.vehicle() + ", " + faker.vehicle.vrm(),
             description: faker.color.human(),
             seats: between(4, 5),
-            odometers: {
-              create: [
-                {
-                  start: odometerValue,
-                  end: odometerValue,
-                  event: { connect: { id: eventId } },
-                },
-              ],
-            },
+            odometerStart: odometerValue,
+            odometerEnd: odometerValue + between(100, 1000),
+            forEventId: eventId,
           },
         ],
       },
-    };
+    });
   };
   const numWorkersWithCar = Math.floor(WORKERS_COUNT * HAS_CAR_PERCENTAGE);
   for (let i = 0; i < WORKERS_COUNT - numWorkersWithCar; i++) {

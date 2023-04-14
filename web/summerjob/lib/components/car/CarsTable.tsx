@@ -80,13 +80,13 @@ function formatCarRow(
   isBeingDeleted: boolean,
   deleteCar: (carId: string) => void
 ) {
-  const drivenKm = car.odometer.end - car.odometer.start;
+  const drivenKm = car.odometerEnd - car.odometerStart;
   return [
     car.name,
     `${car.owner.firstName} ${car.owner.lastName}`,
     car.seats,
     drivenKm,
-    car.odometer.reimbursed ? "Ano" : "Ne",
+    car.reimbursed ? "Ano" : "Ne",
     <span key={car.id} className="d-flex align-items-center gap-3">
       <Link
         key={car.id}

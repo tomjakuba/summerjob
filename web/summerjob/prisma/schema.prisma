@@ -57,29 +57,20 @@ model WorkerAvailability {
 }
 
 model Car {
-  id          String        @id @default(uuid())
-  name        String        @db.VarChar(64)
-  description String        @default("")
-  seats       Int
-  owner       Worker        @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  ownerId     String
-  rides       Ride[]
-  odometers   CarOdometer[]
-  deleted     Boolean       @default(false)
-}
-
-model CarOdometer {
   id                  String         @id @default(uuid())
-  car                 Car            @relation(fields: [carId], references: [id], onDelete: Cascade)
-  carId               String
-  start               Int
-  end                 Int
+  name                String         @db.VarChar(64)
+  description         String         @default("")
+  seats               Int
+  owner               Worker         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId             String
+  rides               Ride[]
+  odometerStart       Int
+  odometerEnd         Int
   reimbursementAmount Int            @default(0)
   reimbursed          Boolean        @default(false)
-  event               SummerJobEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  eventId             String
-
-  @@unique([carId, eventId])
+  deleted             Boolean        @default(false)
+  forEvent            SummerJobEvent @relation(fields: [forEventId], references: [id])
+  forEventId          String
 }
 
 model ProposedJob {
@@ -171,9 +162,9 @@ model SummerJobEvent {
   areas              Area[]
   plans              Plan[]
   workers            Worker[]
-  carOdometers       CarOdometer[]
   workerAvailability WorkerAvailability[]
   jobAvailability    ProposedJobAvailability[]
+  cars               Car[]
 }
 
 model Logging {

@@ -1,17 +1,13 @@
-import { Car, CarOdometer, Ride } from "lib/prisma/client";
-import type { Worker } from "lib/prisma/client";
 import { z } from "zod";
 import { Serialized } from "./serialize";
+import { CarSchema, RideSchema, WorkerSchema } from "lib/prisma/zod";
 
-export type CarWithOwner = Car & {
-  owner: Worker;
-};
+export const CarCompleteSchema = CarSchema.extend({
+  owner: WorkerSchema,
+  rides: z.array(RideSchema),
+});
 
-export type CarComplete = Car & {
-  owner: Worker;
-  odometer: CarOdometer;
-  rides: Ride[];
-};
+export type CarComplete = z.infer<typeof CarCompleteSchema>;
 
 export function serializeCars(cars: CarComplete[]): Serialized<CarComplete[]> {
   return {
@@ -25,25 +21,23 @@ export function deserializeCars(
   return JSON.parse(cars.data);
 }
 
-export const CarUpdateSchema = z
+export const CarCreateSchema = z
   .object({
+    ownerId: z.string().min(1),
     name: z.string().min(3),
     description: z.string(),
     seats: z.number().positive(),
-    odometer: z.object({
-      start: z.number(),
-      end: z.number(),
-      reimbursed: z.boolean(),
-      reimbursementAmount: z.number(),
-    }),
+    odometerStart: z.number(),
+    odometerEnd: z.number().optional(),
+    reimbursed: z.boolean().optional(),
+    reimbursementAmount: z.number().optional(),
   })
-  .strict()
-  .partial();
-
-export type CarUpdateData = z.infer<typeof CarUpdateSchema>;
-
-export const CarCreateSchema = CarUpdateSchema.merge(
-  z.object({ ownerId: z.string().min(1) })
-).required();
+  .strict();
 
 export type CarCreateData = z.infer<typeof CarCreateSchema>;
+
+export const CarUpdateSchema = CarCreateSchema.omit({
+  ownerId: true,
+}).partial();
+
+export type CarUpdateData = z.infer<typeof CarUpdateSchema>;

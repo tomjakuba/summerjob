@@ -1,4 +1,3 @@
-import { Car, CarOdometer, Ride } from "lib/prisma/client";
 import prisma from "lib/prisma/connection";
 import { CarComplete, CarCreateData, CarUpdateData } from "lib/types/car";
 import { cache_getActiveSummerJobEventId } from "./cache";
@@ -6,30 +5,21 @@ import type { Worker } from "lib/prisma/client";
 import { NoActiveEventError } from "./internal-error";
 
 export async function getCarById(id: string): Promise<CarComplete | null> {
-  const activeEventId = await cache_getActiveSummerJobEventId();
   const car = await prisma.car.findUnique({
     where: {
       id,
     },
     include: {
       owner: true,
-      odometers: {
-        where: {
-          eventId: activeEventId,
-        },
-        take: 1,
-      },
       rides: true,
     },
   });
-  if (!car) {
-    return null;
-  }
-  const carWithOdometer = databaseCarToCarComplete(car);
-  return carWithOdometer;
+  return car;
 }
 
-export async function getCars(): Promise<CarComplete[]> {
+export async function getCars(
+  summerjobEventId?: string
+): Promise<CarComplete[]> {
   const cars = await prisma.car.findMany({
     where: {
       owner: {
@@ -42,24 +32,10 @@ export async function getCars(): Promise<CarComplete[]> {
         deleted: false,
       },
       deleted: false,
-      odometers: {
-        some: {
-          event: {
-            isActive: true,
-          },
-        },
-      },
+      ...(summerjobEventId && { forEventId: summerjobEventId }),
     },
     include: {
       owner: true,
-      odometers: {
-        where: {
-          event: {
-            isActive: true,
-          },
-        },
-        take: 1,
-      },
       rides: {
         where: {
           job: {
@@ -73,52 +49,21 @@ export async function getCars(): Promise<CarComplete[]> {
       },
     },
   });
-  const carsWithOdometers = cars.map(databaseCarToCarComplete);
-  return carsWithOdometers;
-}
-
-type CarWithOdometers = Car & {
-  owner: Worker;
-  rides: Ride[];
-  odometers: CarOdometer[];
-};
-
-function databaseCarToCarComplete(car: CarWithOdometers) {
-  const odometer = car.odometers[0];
-  const { odometers, ...carWithoutOdometers } = car;
-  return {
-    ...carWithoutOdometers,
-    odometer,
-  };
+  return cars;
 }
 
 export async function updateCar(carId: string, car: CarUpdateData) {
-  const activeEventId = await cache_getActiveSummerJobEventId();
-  const carOdometer = car.odometer;
-  await prisma.$transaction(async (tx) => {
-    await tx.car.update({
-      where: {
-        id: carId,
-      },
-      data: {
-        name: car.name,
-        description: car.description,
-        seats: car.seats,
-      },
-    });
-    if (carOdometer && activeEventId) {
-      await tx.carOdometer.update({
-        where: {
-          carId_eventId: {
-            carId,
-            eventId: activeEventId,
-          },
-        },
-        data: {
-          ...carOdometer,
-        },
-      });
-    }
+  await prisma.car.update({
+    where: {
+      id: carId,
+    },
+    data: {
+      name: car.name,
+      description: car.description,
+      seats: car.seats,
+      reimbursed: car.reimbursed,
+      reimbursementAmount: car.reimbursementAmount,
+    },
   });
 }
 
@@ -127,17 +72,27 @@ export async function createCar(carData: CarCreateData) {
   if (!activeEventId) {
     throw new NoActiveEventError();
   }
-  const { odometer, ...carWithoutOdometer } = carData;
-  odometer.end = odometer.end < odometer.start ? odometer.start : odometer.end;
+  // Make sure the odometer start is not greater than the odometer end
+  if (!carData.odometerEnd) {
+    carData.odometerEnd = carData.odometerStart;
+  } else {
+    carData.odometerEnd =
+      carData.odometerEnd < carData.odometerStart
+        ? carData.odometerStart
+        : carData.odometerEnd;
+  }
+
   const car = await prisma.car.create({
     data: {
-      ...carWithoutOdometer,
-      odometers: {
-        create: {
-          ...odometer,
-          eventId: activeEventId,
-        },
-      },
+      name: carData.name,
+      description: carData.description,
+      seats: carData.seats,
+      odometerStart: carData.odometerStart,
+      odometerEnd: carData.odometerEnd,
+      reimbursed: carData.reimbursed,
+      reimbursementAmount: carData.reimbursementAmount,
+      ownerId: carData.ownerId,
+      forEventId: activeEventId,
     },
   });
   return car;

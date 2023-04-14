@@ -24,12 +24,10 @@ export default function CarEditForm({
       name: car.name,
       description: car.description ?? "",
       seats: car.seats,
-      odometer: {
-        start: car.odometer.start,
-        end: car.odometer.end,
-        reimbursed: car.odometer.reimbursed,
-        reimbursementAmount: car.odometer.reimbursementAmount,
-      },
+      odometerStart: car.odometerStart,
+      odometerEnd: car.odometerEnd,
+      reimbursed: car.reimbursed,
+      reimbursementAmount: car.reimbursementAmount,
     },
   });
 
@@ -91,11 +89,11 @@ export default function CarEditForm({
               type="number"
               placeholder="Počáteční stav kilometrů"
               min="0"
-              {...register("odometer.start", { valueAsNumber: true })}
+              {...register("odometerStart", { valueAsNumber: true })}
             />
-            {errors.odometer?.start?.message && (
+            {errors.odometerStart?.message && (
               <p className="text-danger">
-                {errors.odometer.start.message as string}
+                {errors.odometerStart.message as string}
               </p>
             )}
             <label className="form-label fw-bold mt-4" htmlFor="odometer-end">
@@ -107,11 +105,11 @@ export default function CarEditForm({
               type="number"
               placeholder="Konečný stav kilometrů"
               min="0"
-              {...register("odometer.end", { valueAsNumber: true })}
+              {...register("odometerEnd", { valueAsNumber: true })}
             />
-            {errors.odometer?.end?.message && (
+            {errors.odometerEnd?.message && (
               <p className="text-danger">
-                {errors.odometer.end.message as string}
+                {errors.odometerEnd.message as string}
               </p>
             )}
             <label
@@ -126,7 +124,7 @@ export default function CarEditForm({
               type="number"
               placeholder="Částka k proplacení"
               min="0"
-              {...register("odometer.reimbursementAmount", {
+              {...register("reimbursementAmount", {
                 valueAsNumber: true,
               })}
             />
@@ -135,7 +133,7 @@ export default function CarEditForm({
                 className="form-check-input me-2"
                 type="checkbox"
                 id="odometer-reimbursed"
-                {...register("odometer.reimbursed")}
+                {...register("reimbursed")}
               />
               <label
                 className="form-check-label form-label fw-bold"

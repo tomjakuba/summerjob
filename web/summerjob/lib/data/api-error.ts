@@ -62,3 +62,12 @@ export class ApiInternalServerError extends ApiError {
     );
   }
 }
+
+export class ApiNoActiveEventError extends ApiError {
+  constructor() {
+    super(
+      "No active SummerJob event is set.",
+      ApiErrorType.INTERNAL_SERVER_ERROR
+    );
+  }
+}
