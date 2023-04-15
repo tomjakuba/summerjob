@@ -28,7 +28,7 @@ Následně je možné sestavit docker image pro web a pro pomocné nástroje (na
 
 Přejmenujte soubor `.env.sample` na `.env` a nastavte všechny potřebné údaje stejné jako v předchozím kroku.
 
-Následně je možné sestavit docker image pro web a pro pomocné nástroje (nastavení databáze):
+Následně je možné sestavit docker image pro Plánovač:
 
 ```console
 [repo/planner]$ docker build -t summerjob/planner .
