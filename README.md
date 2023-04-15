@@ -26,7 +26,7 @@ Následně je možné sestavit docker image pro web a pro pomocné nástroje (na
 
 ### Složka `planner`
 
-Přejmenujte soubor `.env.sample` na `.env` a nastavte všechny potřebné údaje stejné jako v předchozím kroku.
+
 
 Následně je možné sestavit docker image pro Plánovač:
 
@@ -159,6 +159,7 @@ Potřebné nástroje navíc:
 
 - [Node.js](https://nodejs.org/en/)
 - Databáze (může být v Dockeru)
+- Fronta AMQP (např. RabbitMQ v Dockeru)
 
 Stejným způsobem jako výše nastavíme všechny potřebné údaje v souboru `.env`.
 Alternativně je možné použít např. soubor `.env.local` [a další](https://nextjs.org/docs/basic-features/environment-variables), aby nebylo nutné měnit soubor `.env`.
@@ -172,7 +173,7 @@ Následně nainstalujeme závislosti pomocí `npm` a spustíme aplikaci:
 
 Tento příkaz spustí aplikaci v režimu vývoje, který automaticky restartuje aplikaci po každé změně v kódu. Aplikace je dostupná na adrese `http://localhost:3000`.
 
-Obdobně je možné spustit i Plánovač:
+Obdobně je možné spustit i Plánovač. Ve složce `planner` přejmenujte `.env.sample` na `.env` a nastavte všechny potřebné údaje stejné jako v `web/summerjob/.env`. Následně je možné program spustit:
 
 ```console
 [web/planner]$ npm install
