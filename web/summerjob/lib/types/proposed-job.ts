@@ -1,12 +1,14 @@
-import {
-  ActiveJob,
-  Area,
-  ProposedJob,
-  ProposedJobAvailability,
-} from "lib/prisma/client";
 import { z } from "zod";
 import { Serialized } from "./serialize";
-import { AreaSchema, ProposedJobSchema } from "lib/prisma/zod";
+import {
+  ActiveJobSchema,
+  AreaSchema,
+  ProposedJobAvailabilitySchema,
+  ProposedJobSchema,
+} from "lib/prisma/zod";
+import useZodOpenApi from "lib/api/useZodOpenApi";
+
+useZodOpenApi;
 
 export const ProposedJobWithAreaSchema = ProposedJobSchema.extend({
   area: AreaSchema,
@@ -14,11 +16,13 @@ export const ProposedJobWithAreaSchema = ProposedJobSchema.extend({
 
 export type ProposedJobWithArea = z.infer<typeof ProposedJobWithAreaSchema>;
 
-export type ProposedJobComplete = ProposedJob & {
-  area: Area;
-  activeJobs: ActiveJob[];
-  availability: ProposedJobAvailability;
-};
+export const ProposedJobCompleteSchema = ProposedJobSchema.extend({
+  area: AreaSchema,
+  activeJobs: z.array(ActiveJobSchema),
+  availability: ProposedJobAvailabilitySchema,
+});
+
+export type ProposedJobComplete = z.infer<typeof ProposedJobCompleteSchema>;
 
 export const ProposedJobCreateSchema = z
   .object({
@@ -35,7 +39,15 @@ export const ProposedJobCreateSchema = z
     requiredDays: z.number().min(1),
     hasFood: z.boolean(),
     hasShower: z.boolean(),
-    availability: z.array(z.date().or(z.string().min(1).pipe(z.coerce.date()))),
+    availability: z
+      .array(z.date().or(z.string().min(1).pipe(z.coerce.date())))
+      .openapi({
+        type: "array",
+        items: {
+          type: "string",
+          format: "date",
+        },
+      }),
   })
   .strict();
 

@@ -1,13 +1,10 @@
 "use client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAPIAreaCreate, useAPIAreaUpdate } from "lib/fetcher/area";
+import { useAPIAreaUpdate } from "lib/fetcher/area";
 import {
-  AreaComplete,
-  AreaCreateData,
-  AreaCreateSchema,
   AreaUpdateData,
   AreaUpdateSchema,
-  deserializeArea,
+  deserializeAreaComp,
 } from "lib/types/area";
 import { Serialized } from "lib/types/serialize";
 import { useRouter } from "next/navigation";
@@ -15,13 +12,14 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
 import SuccessProceedModal from "../modal/SuccessProceedModal";
+import { Area } from "lib/prisma/zod";
 
 interface EditAreaProps {
-  sArea: Serialized<AreaComplete>;
+  sArea: Serialized<Area>;
 }
 
 export default function EditAreaForm({ sArea }: EditAreaProps) {
-  const area = deserializeArea(sArea);
+  const area = deserializeAreaComp(sArea);
   const { trigger, error, isMutating, reset } = useAPIAreaUpdate(area);
   const [saved, setSaved] = useState(false);
   const {

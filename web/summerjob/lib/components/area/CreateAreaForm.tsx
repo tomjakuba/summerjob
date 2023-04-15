@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
 import SuccessProceedModal from "../modal/SuccessProceedModal";
+import { z } from "zod";
 
 interface CreateAreaProps {
   eventId: string;
@@ -20,13 +21,10 @@ export default function CreateAreaForm({ eventId }: CreateAreaProps) {
     handleSubmit,
     formState: { errors },
   } = useForm<AreaCreateData>({
-    resolver: zodResolver(AreaCreateSchema),
-    defaultValues: {
-      summerJobEventId: eventId,
-    },
+    resolver: zodResolver(schema),
   });
 
-  const onSubmit = (data: AreaCreateData) => {
+  const onSubmit = (data: FormData) => {
     trigger(data, {
       onSuccess: () => {
         setSaved(true);
@@ -50,7 +48,6 @@ export default function CreateAreaForm({ eventId }: CreateAreaProps) {
       <div className="row">
         <div className="col">
           <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
-            <input type="hidden" {...register("summerJobEventId")} />
             <label className="form-label fw-bold mt-4" htmlFor="name">
               Název oblasti
             </label>
@@ -73,6 +70,19 @@ export default function CreateAreaForm({ eventId }: CreateAreaProps) {
               <label className="form-check-label" htmlFor="requiresCar">
                 <i className="fa fa-car ms-2 me-2"></i>
                 Do oblasti je nutné dojet autem
+              </label>
+            </div>
+
+            <div className="form-check mt-2">
+              <input
+                className="form-check-input"
+                type="checkbox"
+                id="supportsAdoration"
+                {...register("supportsAdoration")}
+              />
+              <label className="form-check-label" htmlFor="supportsAdoration">
+                <i className="fa fa-church ms-2 me-2"></i>V oblasti je možné
+                adorovat
               </label>
             </div>
 
@@ -99,3 +109,6 @@ export default function CreateAreaForm({ eventId }: CreateAreaProps) {
     </>
   );
 }
+
+const schema = AreaCreateSchema.omit({ summerJobEventId: true });
+type FormData = z.infer<typeof schema>;

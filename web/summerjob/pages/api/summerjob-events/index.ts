@@ -33,8 +33,8 @@ async function post(
     req.body,
     session
   );
-  const job = await createSummerJobEvent(data);
-  res.status(201).json(job);
+  const event = await createSummerJobEvent(data);
+  res.status(201).json(event);
 }
 
 type SummerJobEventsAPIGetResponse = Awaited<

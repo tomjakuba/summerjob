@@ -19,19 +19,28 @@ async function get(
   res.status(200).json(areas);
 }
 
-export type AreasAPIPostData = AreaCreateData;
+export type AreasAPIPostData = Omit<AreaCreateData, "summerJobEventId">;
 export type AreasAPIPostResponse = Awaited<ReturnType<typeof createArea>>;
 async function post(
   req: NextApiRequest,
   res: NextApiResponse<AreasAPIPostResponse | WrappedError<ApiError>>,
   session: ExtendedSession
 ) {
-  const result = validateOrSendError(AreaCreateSchema, req.body, res);
+  const summerJobEventId = req.query.eventId as string;
+  const result = validateOrSendError(
+    AreaCreateSchema,
+    { ...req.body, summerJobEventId },
+    res
+  );
   if (!result) {
     return;
   }
-  result.summerJobEventId = req.query.eventId as string;
-  await logger.apiRequest(APILogEvent.AREA_CREATE, "areas", req.body, session);
+  await logger.apiRequest(
+    APILogEvent.AREA_CREATE,
+    `summerjob-events/${summerJobEventId}/areas`,
+    req.body,
+    session
+  );
   const area = await createArea(result);
   res.status(201).json(area);
 }

@@ -4,10 +4,13 @@ import {
 } from "@asteasolutions/zod-to-openapi";
 import {
   ActiveJobSchema,
+  AreaSchema,
   CarSchema,
   LoggingSchema,
   PlanSchema,
+  ProposedJobSchema,
   RideSchema,
+  SummerJobEventSchema,
   WorkerSchema,
 } from "lib/prisma/zod";
 import {
@@ -21,6 +24,7 @@ import {
 } from "lib/types/active-job";
 import { Allergy } from "lib/types/allergy";
 import { WrappedApiErrorSchema } from "lib/types/api-error";
+import { AreaCreateSchema, AreaUpdateSchema } from "lib/types/area";
 import {
   CarCompleteSchema,
   CarCreateSchema,
@@ -31,7 +35,17 @@ import { APILogEvent } from "lib/types/logger";
 import { MyPlanSchema } from "lib/types/my-plan";
 import { PlanCompleteSchema, PlanCreateSchema } from "lib/types/plan";
 import { PlannerSubmitSchema } from "lib/types/planner";
+import {
+  ProposedJobCompleteSchema,
+  ProposedJobCreateSchema,
+  ProposedJobUpdateSchema,
+} from "lib/types/proposed-job";
 import { RideCreateSchema, RideUpdateSchema } from "lib/types/ride";
+import {
+  SummerJobEventCompleteSchema,
+  SummerJobEventCreateSchema,
+  SummerJobEventUpdateSchema,
+} from "lib/types/summerjob-event";
 import { WorkerCreateSchema, WorkersCreateSchema } from "lib/types/worker";
 import { z } from "zod";
 
@@ -804,6 +818,440 @@ registry.registerPath({
   responses: {
     204: {
       description: "Ride deleted successfully.",
+    },
+  },
+});
+
+//#endregion
+
+//#region Proposed jobs
+
+const _ProposedJobComplete = registry.register(
+  "ProposedJobDetails",
+  ProposedJobCompleteSchema
+);
+
+registry.registerPath({
+  path: "/api/proposed-jobs",
+  method: "get",
+  description:
+    "Gets all proposed jobs in the currently active event. Permissions required (at least one): ADMIN, JOBS.",
+  summary: "Get all proposed jobs",
+  tags: ["Proposed jobs"],
+  parameters: [
+    {
+      name: "assignableToPlan",
+      in: "query",
+      required: false,
+      description:
+        "If ID of a plan is provided, only proposed jobs that can be assigned to a given plan are returned. Returned jobs are not planned in the given plan yet, are available that day, and are not completed nor hidden.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+  ],
+  responses: {
+    200: {
+      description: "Proposed jobs retrieved successfully.",
+      content: {
+        "application/json": {
+          schema: z.array(_ProposedJobComplete),
+        },
+      },
+    },
+  },
+});
+
+const _ProposedJobCreateSchema = registry.register(
+  "ProposedJobCreate",
+  ProposedJobCreateSchema
+);
+const _ProposedJobSchema = registry.register("ProposedJob", ProposedJobSchema);
+
+registry.registerPath({
+  path: "/api/proposed-jobs",
+  method: "post",
+  description:
+    "Creates a new proposed job in the currently active event. Permissions required (at least one): ADMIN, JOBS.",
+  summary: "Create a new proposed job",
+  tags: ["Proposed jobs"],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: _ProposedJobCreateSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: "Proposed job created successfully.",
+      content: {
+        "application/json": {
+          schema: _ProposedJobSchema,
+        },
+      },
+    },
+  },
+});
+
+const _ProposedJobUpdateSchema = registry.register(
+  "ProposedJobUpdate",
+  ProposedJobUpdateSchema
+);
+
+registry.registerPath({
+  path: "/api/proposed-jobs/{proposedJobId}",
+  method: "patch",
+  description:
+    "Updates a proposed job by ID. Permissions required (at least one): ADMIN, JOBS.",
+  summary: "Update a proposed job by ID",
+  tags: ["Proposed jobs"],
+  parameters: [
+    {
+      name: "proposedJobId",
+      in: "path",
+      required: true,
+      description: "ID of the proposed job to update.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+  ],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: _ProposedJobUpdateSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: {
+      description: "Proposed job updated successfully.",
+    },
+  },
+});
+
+registry.registerPath({
+  path: "/api/proposed-jobs/{proposedJobId}",
+  method: "delete",
+  description:
+    "Deletes a proposed job by ID. This should not be performed if a job has already been planned. Considering hiding it or marking it as completed instead. Permissions required (at least one): ADMIN, JOBS.",
+  summary: "Delete a proposed job by ID",
+  tags: ["Proposed jobs"],
+  parameters: [
+    {
+      name: "proposedJobId",
+      in: "path",
+      required: true,
+      description: "ID of the proposed job to delete.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+  ],
+  responses: {
+    204: {
+      description: "Proposed job deleted successfully.",
+    },
+  },
+});
+
+//#endregion
+
+//#region SummerJob events
+
+const _SummerJobEventCompleteSchema = registry.register(
+  "SummerJobEventDetails",
+  SummerJobEventCompleteSchema
+);
+
+registry.registerPath({
+  path: "/api/summerjob-events",
+  method: "get",
+  description:
+    "Gets all SummerJob events. Permissions required (at least one): ADMIN.",
+  summary: "Get all SummerJob events",
+  tags: ["SummerJob events"],
+  responses: {
+    200: {
+      description: "SummerJob events retrieved successfully.",
+      content: {
+        "application/json": {
+          schema: z.array(_SummerJobEventCompleteSchema),
+        },
+      },
+    },
+  },
+});
+
+const _SummerJobEventCreateSchema = registry.register(
+  "SummerJobEventCreate",
+  SummerJobEventCreateSchema
+);
+const _SummerJobEventSchema = registry.register(
+  "SummerJobEvent",
+  SummerJobEventSchema
+);
+
+registry.registerPath({
+  path: "/api/summerjob-events",
+  method: "post",
+  description:
+    "Creates a new SummerJob event. Permissions required (at least one): ADMIN.",
+  summary: "Create a new SummerJob event",
+  tags: ["SummerJob events"],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: _SummerJobEventCreateSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: "SummerJob event created successfully.",
+      content: {
+        "application/json": {
+          schema: _SummerJobEventSchema,
+        },
+      },
+    },
+  },
+});
+
+const _SummerJobEventUpdateSchema = registry.register(
+  "SummerJobEventUpdate",
+  SummerJobEventUpdateSchema
+);
+
+registry.registerPath({
+  path: "/api/summerjob-events/{summerJobEventId}",
+  method: "patch",
+  description:
+    "Updates a SummerJob event by ID. Changing one event to active automatically changes all other events to inactive and locks accounts of all non-admin users. Do not set events as inactive - instead, set another one as active. Permissions required (at least one): ADMIN.",
+  summary: "Update a SummerJob event by ID",
+  tags: ["SummerJob events"],
+  parameters: [
+    {
+      name: "summerJobEventId",
+      in: "path",
+      required: true,
+      description: "ID of the SummerJob event to update.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+  ],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: _SummerJobEventUpdateSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: {
+      description: "SummerJob event updated successfully.",
+    },
+  },
+});
+
+registry.registerPath({
+  path: "/api/summerjob-events/{summerJobEventId}",
+  method: "delete",
+  description:
+    "Deletes a SummerJob event by ID. Permissions required (at least one): ADMIN.",
+  summary: "Delete a SummerJob event by ID",
+  tags: ["SummerJob events"],
+  parameters: [
+    {
+      name: "summerJobEventId",
+      in: "path",
+      required: true,
+      description: "ID of the SummerJob event to delete.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+  ],
+  responses: {
+    204: {
+      description: "SummerJob event deleted successfully.",
+    },
+  },
+});
+
+//#endregion
+
+//#region Areas
+
+const _AreaSchema = registry.register("Area", AreaSchema);
+
+registry.registerPath({
+  path: "/api/summerjob-events/{summerJobEventId}/areas",
+  method: "get",
+  description:
+    "Gets all areas for a SummerJob event. Permissions required (at least one): ADMIN, JOBS.",
+  summary: "Get all areas for a SummerJob event",
+  tags: ["Areas"],
+  parameters: [
+    {
+      name: "summerJobEventId",
+      in: "path",
+      required: true,
+      description: "ID of the SummerJob event to get areas for.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+  ],
+  responses: {
+    200: {
+      description: "Areas retrieved successfully.",
+      content: {
+        "application/json": {
+          schema: z.array(_AreaSchema),
+        },
+      },
+    },
+  },
+});
+
+const _AreaCreateSchema = registry.register("AreaCreate", AreaCreateSchema);
+
+registry.registerPath({
+  path: "/api/summerjob-events/{summerJobEventId}/areas",
+  method: "post",
+  description:
+    "Creates a new area for a SummerJob event. Permissions required (at least one): ADMIN.",
+  summary: "Create a new area for a SummerJob event",
+  tags: ["Areas"],
+  parameters: [
+    {
+      name: "summerJobEventId",
+      in: "path",
+      required: true,
+      description: "ID of the SummerJob event to create an area for.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+  ],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: _AreaCreateSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: "Area created successfully.",
+      content: {
+        "application/json": {
+          schema: _AreaSchema,
+        },
+      },
+    },
+  },
+});
+
+const _AreaUpdateSchema = registry.register("AreaUpdate", AreaUpdateSchema);
+
+registry.registerPath({
+  path: "/api/summerjob-events/{summerJobEventId}/areas/{areaId}",
+  method: "patch",
+  description:
+    "Updates an area for a SummerJob event by ID. Permissions required (at least one): ADMIN.",
+  summary: "Update an area for a SummerJob event by ID",
+  tags: ["Areas"],
+  parameters: [
+    {
+      name: "summerJobEventId",
+      in: "path",
+      required: true,
+      description: "ID of the SummerJob event to update an area for.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+    {
+      name: "areaId",
+      in: "path",
+      required: true,
+      description: "ID of the area to update.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+  ],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: _AreaUpdateSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: {
+      description: "Area updated successfully.",
+    },
+  },
+});
+
+registry.registerPath({
+  path: "/api/summerjob-events/{summerJobEventId}/areas/{areaId}",
+  method: "delete",
+  description:
+    "Deletes an area for a SummerJob event by ID. Permissions required (at least one): ADMIN.",
+  summary: "Delete an area for a SummerJob event by ID",
+  tags: ["Areas"],
+  parameters: [
+    {
+      name: "summerJobEventId",
+      in: "path",
+      required: true,
+      description: "ID of the SummerJob event to delete an area for.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+    {
+      name: "areaId",
+      in: "path",
+      required: true,
+      description: "ID of the area to delete.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+  ],
+  responses: {
+    204: {
+      description: "Area deleted successfully.",
     },
   },
 });

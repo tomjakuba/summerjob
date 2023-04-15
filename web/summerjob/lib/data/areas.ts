@@ -1,7 +1,7 @@
 import prisma from "lib/prisma/connection";
-import { AreaCreateData, AreaUpdateData } from "lib/types/area";
+import { AreaComplete, AreaCreateData, AreaUpdateData } from "lib/types/area";
 
-export async function getAreaById(id: string) {
+export async function getAreaById(id: string): Promise<AreaComplete | null> {
   return await prisma.area.findUnique({
     where: {
       id,
@@ -18,9 +18,6 @@ export async function getAreas() {
       summerJobEvent: {
         isActive: true,
       },
-    },
-    include: {
-      jobs: true,
     },
   });
 }

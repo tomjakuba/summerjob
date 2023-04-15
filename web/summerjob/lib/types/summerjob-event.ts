@@ -1,19 +1,33 @@
 import { Plan, SummerJobEvent } from "lib/prisma/client";
 import { z } from "zod";
-import { AreaComplete } from "./area";
+import { AreaComplete, AreaCompleteSchema } from "./area";
 import { deserializePlanDate } from "./plan";
 import { Serialized } from "./serialize";
+import { PlanSchema, SummerJobEventSchema } from "lib/prisma/zod";
+import useZodOpenApi from "lib/api/useZodOpenApi";
 
-export type SummerJobEventComplete = SummerJobEvent & {
-  areas: AreaComplete[];
-  plans: Plan[];
-};
+useZodOpenApi;
+
+export const SummerJobEventCompleteSchema = SummerJobEventSchema.extend({
+  areas: z.array(AreaCompleteSchema),
+  plans: z.array(PlanSchema),
+});
+
+export type SummerJobEventComplete = z.infer<
+  typeof SummerJobEventCompleteSchema
+>;
 
 export const SummerJobEventCreateSchema = z
   .object({
     name: z.string().min(1),
-    startDate: z.date().or(z.string().min(1).pipe(z.coerce.date())),
-    endDate: z.date().or(z.string().min(1).pipe(z.coerce.date())),
+    startDate: z
+      .date()
+      .or(z.string().min(1).pipe(z.coerce.date()))
+      .openapi({ type: "string", format: "date" }),
+    endDate: z
+      .date()
+      .or(z.string().min(1).pipe(z.coerce.date()))
+      .openapi({ type: "string", format: "date" }),
   })
   .strict();
 
