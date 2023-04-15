@@ -15,6 +15,11 @@ async function get(
   res: NextApiResponse<WorkerAPIGetResponse | WrappedError<ApiError>>
 ) {
   const id = req.query.id as string;
+  const session = await getSMJSessionAPI(req, res);
+  const allowed = await isAllowedToAccessWorker(session, id, res);
+  if (!allowed) {
+    return;
+  }
   const user = await getWorkerById(id);
   if (!user) {
     res.status(404).end();

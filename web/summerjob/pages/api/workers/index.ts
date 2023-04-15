@@ -18,9 +18,10 @@ async function get(
   req: NextApiRequest,
   res: NextApiResponse<WorkersAPIGetResponse>
 ) {
-  const { withoutJob, planId } = req.query;
-  const hasJob = !Boolean(withoutJob);
-  const users = await getWorkers(planId as string, hasJob);
+  const { withoutJobInPlan } = req.query;
+  const planId =
+    typeof withoutJobInPlan === "string" ? withoutJobInPlan : undefined;
+  const users = await getWorkers(planId);
   res.status(200).json(users);
 }
 

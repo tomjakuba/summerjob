@@ -49,7 +49,7 @@ export const authOptions: NextAuthOptions = {
     async signIn(params) {
       if (!params.user.email) return false;
       const user = await getUserByEmail(params.user.email);
-      if (!user || user.deleted) return false;
+      if (!user) return false;
       const isAdmin = user.permissions.includes(Permission.ADMIN);
       // Admins can sign in even if they are blocked to prevent accidental self-lockout
       if (isAdmin) return true;

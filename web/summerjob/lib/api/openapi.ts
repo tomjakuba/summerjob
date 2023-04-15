@@ -25,6 +25,7 @@ import {
 import { Allergy } from "lib/types/allergy";
 import { WrappedApiErrorSchema } from "lib/types/api-error";
 import { AreaCreateSchema, AreaUpdateSchema } from "lib/types/area";
+import { Permission } from "lib/types/auth";
 import {
   CarCompleteSchema,
   CarCreateSchema,
@@ -46,12 +47,19 @@ import {
   SummerJobEventCreateSchema,
   SummerJobEventUpdateSchema,
 } from "lib/types/summerjob-event";
-import { WorkerCreateSchema, WorkersCreateSchema } from "lib/types/worker";
+import { UserCompleteSchema, UserUpdateSchema } from "lib/types/user";
+import {
+  WorkerCompleteSchema,
+  WorkerCreateSchema,
+  WorkerUpdateSchema,
+  WorkersCreateSchema,
+} from "lib/types/worker";
 import { z } from "zod";
 
 const registry = new OpenAPIRegistry();
 
 const _ApiErrorSchema = registry.register("ApiError", WrappedApiErrorSchema);
+const _Permissions = registry.register("Permissions", z.nativeEnum(Permission));
 
 //#region Allergies
 
@@ -1258,7 +1266,109 @@ registry.registerPath({
 
 //#endregion
 
+//#region Users
+
+const _UserCompleteSchema = registry.register(
+  "UserDetails",
+  UserCompleteSchema
+);
+
+registry.registerPath({
+  path: "/api/users",
+  method: "get",
+  description:
+    "Gets all users registered in the currently active event. Add new workers to the event and they will automatically appear as users here. Permissions required (at least one): ADMIN.",
+  summary: "Get all users",
+  tags: ["Users"],
+  responses: {
+    200: {
+      description: "Users retrieved successfully.",
+      content: {
+        "application/json": {
+          schema: z.array(_UserCompleteSchema),
+        },
+      },
+    },
+  },
+});
+
+const _UserUpdateSchema = registry.register("UserUpdate", UserUpdateSchema);
+
+registry.registerPath({
+  path: "/api/users/{userId}",
+  method: "patch",
+  description:
+    "Updates a user by ID. Blocked users are signed out and cannot sign in (except for Admins). Users can be unblocked to revert this. Permissions required (at least one): ADMIN.",
+  summary: "Update a user by ID",
+  tags: ["Users"],
+  parameters: [
+    {
+      name: "userId",
+      in: "path",
+      required: true,
+      description: "ID of the user to update.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+  ],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: _UserUpdateSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: {
+      description: "User updated successfully.",
+    },
+  },
+});
+
+//#endregion
+
 //#region Workers
+
+const _WorkerCompleteSchema = registry.register(
+  "WorkerDetails",
+  WorkerCompleteSchema
+);
+
+registry.registerPath({
+  path: "/api/workers",
+  method: "get",
+  description:
+    "Gets all workers registered in the currently active event. Permissions required (at least one): ADMIN, WORKERS, PLANS.",
+  summary: "Get all workers",
+  tags: ["Workers"],
+  parameters: [
+    {
+      name: "withoutJobInPlan",
+      in: "query",
+      required: false,
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+      description:
+        "If plan ID is provided, only workers without a job in the given plan will be returned. This includes workers that are NOT available that day.",
+    },
+  ],
+  responses: {
+    200: {
+      description: "Workers retrieved successfully.",
+      content: {
+        "application/json": {
+          schema: z.array(_WorkerCompleteSchema),
+        },
+      },
+    },
+  },
+});
 
 const _WorkerCreateSchema = registry.register(
   "WorkerCreate",
@@ -1292,12 +1402,109 @@ registry.registerPath({
         "Worker(s) created successfully. Returns the created worker(s).",
       content: {
         "application/json": {
-          schema: _WorkerSchema,
+          schema: _WorkerSchema.or(z.array(_WorkerSchema)),
         },
       },
     },
     409: {
       description: "No active SummerJob event is set.",
+    },
+  },
+});
+
+registry.registerPath({
+  path: "/api/workers/{workerId}",
+  method: "get",
+  description:
+    "Gets a worker by ID. Permissions required (at least one): ADMIN, WORKERS, or being logged in as the requested worker.",
+  summary: "Get a worker by ID",
+  tags: ["Workers"],
+  parameters: [
+    {
+      name: "workerId",
+      in: "path",
+      required: true,
+      description: "ID of the worker to get.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+  ],
+  responses: {
+    200: {
+      description: "Worker retrieved successfully.",
+      content: {
+        "application/json": {
+          schema: _WorkerCompleteSchema,
+        },
+      },
+    },
+  },
+});
+
+const _WorkerUpdateSchema = registry.register(
+  "WorkerUpdate",
+  WorkerUpdateSchema
+);
+
+registry.registerPath({
+  path: "/api/workers/{workerId}",
+  method: "patch",
+  description:
+    "Updates a worker by ID. Permissions required (at least one): ADMIN, WORKERS, or being logged in as the requested worker.",
+  summary: "Update a worker by ID",
+  tags: ["Workers"],
+  parameters: [
+    {
+      name: "workerId",
+      in: "path",
+      required: true,
+      description: "ID of the worker to update.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+  ],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: _WorkerUpdateSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: {
+      description: "Worker updated successfully.",
+    },
+  },
+});
+
+registry.registerPath({
+  path: "/api/workers/{workerId}",
+  method: "delete",
+  description:
+    "Deletes a worker by ID. Worker's cars are also deleted. If the worker participated in any active job, they are anonymized instead to maintain history integrity. Permissions required (at least one): ADMIN, WORKERS.",
+  summary: "Delete a worker by ID",
+  tags: ["Workers"],
+  parameters: [
+    {
+      name: "workerId",
+      in: "path",
+      required: true,
+      description: "ID of the worker to delete.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+  ],
+  responses: {
+    204: {
+      description: "Worker deleted successfully.",
     },
   },
 });

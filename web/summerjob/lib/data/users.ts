@@ -23,7 +23,7 @@ export async function getUserByEmail(
       registeredIn: true,
     },
   });
-  if (!user) return null;
+  if (!user || user.deleted) return null;
   return databaseUserToUserComplete(user);
 }
 
@@ -45,7 +45,6 @@ export async function getUsers(): Promise<UserComplete[]> {
       lastName: true,
       email: true,
       blocked: true,
-      deleted: true,
       permissions: true,
       registeredIn: true,
     },
@@ -129,7 +128,6 @@ function databaseUserToUserComplete(user: DBUserComplete): UserComplete {
     lastName: user.lastName,
     email: user.email,
     blocked: user.blocked,
-    deleted: user.deleted,
     permissions: user.permissions.permissions as Permission[],
     registeredIn: user.registeredIn,
   };

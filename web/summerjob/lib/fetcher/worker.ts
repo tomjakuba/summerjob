@@ -29,7 +29,7 @@ export function useAPIWorkers(options?: any) {
 export function useAPIWorkersWithoutJob(planId: string, options?: any) {
   const opts = Object.assign({ refreshInterval: 1000 }, options);
   const res = useData<WorkersAPIGetResponse>(
-    `/api/workers?withoutJob=true&planId=${planId}`,
+    `/api/workers?withoutJobInPlan=${planId}`,
     opts
   );
 

@@ -2,17 +2,21 @@ import { z } from "zod";
 import { Permission } from "./auth";
 import { Serialized } from "./serialize";
 import { SummerJobEvent } from "lib/prisma/client";
+import { SummerJobEventSchema } from "lib/prisma/zod";
 
-export type UserComplete = {
-  id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  blocked: boolean;
-  deleted: boolean;
-  permissions: Permission[];
-  registeredIn: SummerJobEvent[];
-};
+export const UserCompleteSchema = z
+  .object({
+    id: z.string().min(1).uuid(),
+    firstName: z.string().min(1),
+    lastName: z.string().min(1),
+    email: z.string().email(),
+    blocked: z.boolean().default(false),
+    permissions: z.array(z.nativeEnum(Permission)),
+    registeredIn: z.array(SummerJobEventSchema),
+  })
+  .strict();
+
+export type UserComplete = z.infer<typeof UserCompleteSchema>;
 
 const PermissionEnum = z.nativeEnum(Permission);
 type PermissionEnum = z.infer<typeof PermissionEnum>;

@@ -12,42 +12,26 @@ import { NoActiveEventError, WorkerAlreadyExistsError } from "./internal-error";
 import { deleteUserSessions } from "./users";
 
 export async function getWorkers(
-  planId: string | undefined = undefined,
-  hasJob: boolean | undefined = undefined
+  withoutJobInPlanId: string | undefined = undefined
 ): Promise<WorkerComplete[]> {
-  let whereClause: any = {
+  const users = await prisma.worker.findMany({
     where: {
+      deleted: false,
       registeredIn: {
         some: {
           isActive: true,
         },
       },
-      deleted: false,
-    },
-  };
-  if (planId) {
-    let inPlan: any = {
-      jobs: {
-        some: {
-          planId,
+      ...(withoutJobInPlanId && {
+        NOT: {
+          jobs: {
+            some: {
+              planId: withoutJobInPlanId,
+            },
+          },
         },
-      },
-    };
-    if (!hasJob) {
-      inPlan = {
-        NOT: inPlan,
-      };
-    }
-    whereClause = {
-      where: {
-        ...whereClause.where,
-        ...inPlan,
-      },
-    };
-  }
-
-  const users = await prisma.worker.findMany({
-    ...whereClause,
+      }),
+    },
     include: {
       cars: {
         where: {

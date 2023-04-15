@@ -15,7 +15,7 @@ export default async function PlanPage({ params }: PathProps) {
   const plan = await getPlanById(params.id);
   if (!plan) return <ErrorPage404 message="Plán nenalezen." />;
   const serialized = serializePlan(plan);
-  const jobless = await getWorkers(plan.id, false);
+  const jobless = await getWorkers(plan.id);
   const joblessSerialized = serializeWorkers(jobless);
 
   return (
