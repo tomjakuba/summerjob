@@ -2,8 +2,25 @@ import {
   OpenAPIGenerator,
   OpenAPIRegistry,
 } from "@asteasolutions/zod-to-openapi";
-import { CarSchema, LoggingSchema, WorkerSchema } from "lib/prisma/zod";
+import {
+  ActiveJobSchema,
+  CarSchema,
+  LoggingSchema,
+  PlanSchema,
+  RideSchema,
+  WorkerSchema,
+} from "lib/prisma/zod";
+import {
+  ActiveJobCompleteSchema,
+  ActiveJobNoPlanSchema,
+} from "lib/types/_schemas";
+import {
+  ActiveJobCreateMultipleSchema,
+  ActiveJobCreateSchema,
+  ActiveJobUpdateSchema,
+} from "lib/types/active-job";
 import { Allergy } from "lib/types/allergy";
+import { WrappedApiErrorSchema } from "lib/types/api-error";
 import {
   CarCompleteSchema,
   CarCreateSchema,
@@ -12,12 +29,15 @@ import {
 import { LogsResponseSchema } from "lib/types/log";
 import { APILogEvent } from "lib/types/logger";
 import { MyPlanSchema } from "lib/types/my-plan";
-import { PlanCompleteSchema } from "lib/types/plan";
+import { PlanCompleteSchema, PlanCreateSchema } from "lib/types/plan";
 import { PlannerSubmitSchema } from "lib/types/planner";
+import { RideCreateSchema, RideUpdateSchema } from "lib/types/ride";
 import { WorkerCreateSchema, WorkersCreateSchema } from "lib/types/worker";
 import { z } from "zod";
 
 const registry = new OpenAPIRegistry();
+
+const _ApiErrorSchema = registry.register("ApiError", WrappedApiErrorSchema);
 
 //#region Allergies
 
@@ -107,7 +127,7 @@ const _CarUpdateSchema = registry.register("CarUpdate", CarUpdateSchema);
 
 registry.registerPath({
   path: "/api/cars/{id}",
-  method: "put",
+  method: "patch",
   description:
     "Updates a car. Permissions required (at least one): ADMIN, CARS, PLANS.",
   summary: "Update a car",
@@ -305,6 +325,11 @@ const _PlanCompleteSchema = registry.register(
   PlanCompleteSchema
 );
 
+const _ActiveJobNoPlanSchema = registry.register(
+  "ActiveJobNoPlan",
+  ActiveJobNoPlanSchema
+);
+
 registry.registerPath({
   path: "/api/plans",
   method: "get",
@@ -323,6 +348,462 @@ registry.registerPath({
     },
     409: {
       description: "No active SummerJob event is set.",
+    },
+  },
+});
+
+const _PlanCreateSchema = registry.register("PlanCreate", PlanCreateSchema);
+const _PlanSchema = registry.register("Plan", PlanSchema);
+
+registry.registerPath({
+  path: "/api/plans",
+  method: "post",
+  description:
+    "Creates a new plan for the currently active event. Permissions required (at least one): ADMIN, PLANS.",
+  summary: "Create a new plan",
+  tags: ["Plans"],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: _PlanCreateSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: "Plan created successfully.",
+      content: {
+        "application/json": {
+          schema: _PlanSchema,
+        },
+      },
+    },
+    400: {
+      description:
+        "Invalid plan data. This is usually caused by one of the following: Invalid date supplied, Plan with this date already exists. Error message is specified.",
+      content: {
+        "application/json": {
+          schema: _ApiErrorSchema,
+        },
+      },
+    },
+    409: {
+      description: "No active SummerJob event is set.",
+    },
+  },
+});
+
+registry.registerPath({
+  path: "/api/plans/{planId}",
+  method: "get",
+  description:
+    "Gets a plan by ID. Permissions required (at least one): ADMIN, PLANS.",
+  summary: "Get a plan by ID",
+  tags: ["Plans"],
+  parameters: [
+    {
+      name: "planId",
+      in: "path",
+      required: true,
+      description: "ID of the plan to get.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+  ],
+  responses: {
+    200: {
+      description: "Plan",
+      content: {
+        "application/json": {
+          schema: _PlanCompleteSchema,
+        },
+      },
+    },
+    404: {
+      description: "Plan not found.",
+    },
+  },
+});
+
+registry.registerPath({
+  path: "/api/plans/{planId}",
+  method: "delete",
+  description:
+    "Deletes a plan by ID. Permissions required (at least one): ADMIN, PLANS.",
+  summary: "Delete a plan by ID",
+  tags: ["Plans"],
+  parameters: [
+    {
+      name: "planId",
+      in: "path",
+      required: true,
+      description: "ID of the plan to delete.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+  ],
+  responses: {
+    204: {
+      description: "Plan deleted successfully.",
+    },
+  },
+});
+
+const _ActiveJobSchema = registry.register("ActiveJob", ActiveJobSchema);
+const _ActiveJobCreateSchema = registry.register(
+  "ActiveJobCreate",
+  ActiveJobCreateSchema.omit({ planId: true })
+);
+const _ActiveJobsCreateSchema = registry.register(
+  "ActiveJobsCreate",
+  ActiveJobCreateMultipleSchema.omit({ planId: true })
+);
+
+registry.registerPath({
+  path: "/api/plans/{planId}/active-jobs",
+  method: "post",
+  description:
+    "Adds one or more jobs to the specified plan. Permissions required (at least one): ADMIN, PLANS.",
+  summary: "Add jobs to a plan",
+  tags: ["Plans"],
+  parameters: [
+    {
+      name: "planId",
+      in: "path",
+      required: true,
+      description: "ID of the plan to add the active job to.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+  ],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: _ActiveJobCreateSchema.or(_ActiveJobsCreateSchema),
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: "Active job created successfully.",
+      content: {
+        "application/json": {
+          schema: _ActiveJobSchema,
+        },
+      },
+    },
+    202: {
+      description: "Active jobs created successfully.",
+    },
+    400: {
+      description:
+        "Invalid active job data. This is usually caused by one of the following: Active job is already planned in this plan, Invalid *planId*. Error message is specified.",
+      content: {
+        "application/json": {
+          schema: _ApiErrorSchema,
+        },
+      },
+    },
+  },
+});
+
+const _ActiveJobComplete = registry.register(
+  "ActiveJobDetails",
+  ActiveJobCompleteSchema
+);
+
+registry.registerPath({
+  path: "/api/plans/{planId}/active-jobs/{activeJobId}",
+  method: "get",
+  description:
+    "Gets an active job by ID. Permissions required (at least one): ADMIN, PLANS.",
+  summary: "Get an active job by ID",
+  tags: ["Plans"],
+  parameters: [
+    {
+      name: "planId",
+      in: "path",
+      required: true,
+      description: "ID of the plan to get the active job from.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+    {
+      name: "activeJobId",
+      in: "path",
+      required: true,
+      description: "ID of the active job to get.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+  ],
+  responses: {
+    200: {
+      description: "Active job",
+      content: {
+        "application/json": {
+          schema: _ActiveJobComplete,
+        },
+      },
+    },
+    404: {
+      description: "Active job not found.",
+    },
+  },
+});
+
+const _ActiveJobUpdateSchema = registry.register(
+  "ActiveJobUpdate",
+  ActiveJobUpdateSchema
+);
+
+registry.registerPath({
+  path: "/api/plans/{planId}/active-jobs/{activeJobId}",
+  method: "patch",
+  description:
+    "Updates an active job. Permissions required (at least one): ADMIN, PLANS.",
+  summary: "Update an active job",
+  tags: ["Plans"],
+  parameters: [
+    {
+      name: "planId",
+      in: "path",
+      required: true,
+      description: "ID of the plan to update the active job in.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+    {
+      name: "activeJobId",
+      in: "path",
+      required: true,
+      description: "ID of the active job to update.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+  ],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: _ActiveJobUpdateSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: {
+      description: "Active job updated successfully.",
+    },
+  },
+});
+
+registry.registerPath({
+  path: "/api/plans/{planId}/active-jobs/{activeJobId}",
+  method: "delete",
+  description:
+    "Deletes an active job by ID. Permissions required (at least one): ADMIN, PLANS.",
+  summary: "Delete an active job by ID",
+  tags: ["Plans"],
+  parameters: [
+    {
+      name: "planId",
+      in: "path",
+      required: true,
+      description: "ID of the plan to delete the active job from.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+    {
+      name: "activeJobId",
+      in: "path",
+      required: true,
+      description: "ID of the active job to delete.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+  ],
+  responses: {
+    204: {
+      description: "Active job deleted successfully.",
+    },
+  },
+});
+
+export const _RideCreate = registry.register("RideCreate", RideCreateSchema);
+export const _RideSchema = registry.register("Ride", RideSchema);
+
+registry.registerPath({
+  path: "/api/plans/{planId}/active-jobs/{activeJobId}/rides",
+  method: "post",
+  description:
+    "Adds a ride to the specified active job. *driverId* should usually be the ID of the owner of the car. Permissions required (at least one): ADMIN, PLANS.",
+  summary: "Add a ride to an active job",
+  tags: ["Plans"],
+  parameters: [
+    {
+      name: "planId",
+      in: "path",
+      required: true,
+      description: "ID of the plan to add the rides to.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+    {
+      name: "activeJobId",
+      in: "path",
+      required: true,
+      description: "ID of the active job to add the rides to.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+  ],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: _RideCreate,
+        },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: "Rides created successfully.",
+      content: {
+        "application/json": {
+          schema: _RideSchema,
+        },
+      },
+    },
+  },
+});
+
+const _RideUpdateSchema = registry.register("RideUpdate", RideUpdateSchema);
+
+registry.registerPath({
+  path: "/api/plans/{planId}/active-jobs/{activeJobId}/rides/{rideId}",
+  method: "patch",
+  description:
+    "Updates a ride. Only passengers can be changed. If a passenger is added to this ride, they are automatically removed from all other rides in the same plan. If a new passenger is currently a driver for another ride, that ride is deleted. Permissions required (at least one): ADMIN, PLANS.",
+  summary: "Update a ride",
+  tags: ["Plans"],
+  parameters: [
+    {
+      name: "planId",
+      in: "path",
+      required: true,
+      description: "ID of the plan to update the ride in.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+    {
+      name: "activeJobId",
+      in: "path",
+      required: true,
+      description: "ID of the active job to update the ride in.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+    {
+      name: "rideId",
+      in: "path",
+      required: true,
+      description: "ID of the ride to update.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+  ],
+  request: {
+    body: {
+      content: {
+        "application/json": {
+          schema: _RideUpdateSchema,
+        },
+      },
+    },
+  },
+  responses: {
+    204: {
+      description: "Ride updated successfully.",
+    },
+  },
+});
+
+registry.registerPath({
+  path: "/api/plans/{planId}/active-jobs/{activeJobId}/rides/{rideId}",
+  method: "delete",
+  description:
+    "Deletes a ride by ID. Permissions required (at least one): ADMIN, PLANS.",
+  summary: "Delete a ride by ID",
+  tags: ["Plans"],
+  parameters: [
+    {
+      name: "planId",
+      in: "path",
+      required: true,
+      description: "ID of the plan to delete the ride from.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+    {
+      name: "activeJobId",
+      in: "path",
+      required: true,
+      description: "ID of the active job to delete the ride from.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+    {
+      name: "rideId",
+      in: "path",
+      required: true,
+      description: "ID of the ride to delete.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+  ],
+  responses: {
+    204: {
+      description: "Ride deleted successfully.",
     },
   },
 });

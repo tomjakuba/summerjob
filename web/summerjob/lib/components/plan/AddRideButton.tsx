@@ -43,7 +43,6 @@ export default function AddRideButton({ job }: AddRideButtonProps) {
       carId: car.id,
       driverId: car.ownerId,
       passengerIds: [],
-      description: "",
     };
     trigger(payload);
   };

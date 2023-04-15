@@ -1,7 +1,7 @@
 import { APIAccessController } from "lib/api/APIAccessControler";
 import { APIMethodHandler } from "lib/api/MethodHandler";
 import { validateOrSendError } from "lib/api/validator";
-import { WrappedError, ApiError } from "lib/data/api-error";
+import { WrappedError, ApiError } from "lib/types/api-error";
 import {
   createProposedJob,
   getProposedJobs,

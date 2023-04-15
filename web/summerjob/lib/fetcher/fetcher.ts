@@ -1,4 +1,4 @@
-import { ApiError, ApiErrorSchema } from "lib/data/api-error";
+import { ApiError, ApiErrorSchema } from "lib/types/api-error";
 import useSWR, { Key } from "swr";
 import useSWRMutation from "swr/mutation";
 

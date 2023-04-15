@@ -2,8 +2,8 @@ import {
   ApiBadRequestError,
   ApiDbError,
   ApiInternalServerError,
-} from "lib/data/api-error";
-import { InternalError } from "lib/data/internal-error";
+} from "lib/types/api-error";
+import { InternalError, InvalidDataError } from "lib/data/internal-error";
 import logger from "lib/logger/logger";
 import { Prisma } from "lib/prisma/client";
 import { APIMethod } from "lib/types/api";
@@ -83,6 +83,11 @@ async function handle(
     } else if (error instanceof Prisma.PrismaClientValidationError) {
       res.status(400).json({
         error: new ApiBadRequestError(),
+      });
+      return;
+    } else if (error instanceof InvalidDataError) {
+      res.status(400).json({
+        error: new ApiBadRequestError(error.reason),
       });
       return;
     } else if (error instanceof InternalError) {

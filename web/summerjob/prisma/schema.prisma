@@ -124,15 +124,14 @@ model ActiveJob {
 }
 
 model Ride {
-  id          String    @id @default(uuid())
-  description String    @default("")
-  driver      Worker    @relation("Driver", fields: [driverId], references: [id])
-  driverId    String
-  car         Car       @relation(fields: [carId], references: [id])
-  carId       String
-  passengers  Worker[]
-  job         ActiveJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  jobId       String
+  id         String    @id @default(uuid())
+  driver     Worker    @relation("Driver", fields: [driverId], references: [id])
+  driverId   String
+  car        Car       @relation(fields: [carId], references: [id])
+  carId      String
+  passengers Worker[]
+  job        ActiveJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId      String
 }
 
 model Plan {

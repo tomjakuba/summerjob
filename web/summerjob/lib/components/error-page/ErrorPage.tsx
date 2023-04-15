@@ -1,6 +1,6 @@
 "use client";
 
-import { ApiError } from "lib/data/api-error";
+import { ApiError } from "lib/types/api-error";
 import { default as t } from "lib/localization/cs-cz";
 import { useEffect, useState } from "react";
 

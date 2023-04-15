@@ -2,6 +2,9 @@ import { Car, Ride, Worker } from "lib/prisma/client";
 import { z } from "zod";
 import { CarSchema, RideSchema, WorkerSchema } from "lib/prisma/zod";
 import { ActiveJobWithProposed } from "./active-job";
+import useZodOpenApi from "lib/api/useZodOpenApi";
+
+useZodOpenApi;
 
 export const NO_RIDE = "NO_RIDE";
 
@@ -29,10 +32,9 @@ export type RidesForJob = {
 
 export const RideCreateSchema = z
   .object({
-    driverId: z.string(),
-    carId: z.string(),
-    description: z.string().optional(),
-    passengerIds: z.array(z.string()),
+    driverId: z.string().uuid(),
+    carId: z.string().uuid(),
+    passengerIds: z.array(z.string().uuid()),
   })
   .strict();
 

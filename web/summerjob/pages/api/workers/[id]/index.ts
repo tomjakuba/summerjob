@@ -1,7 +1,7 @@
 import { APIMethodHandler } from "lib/api/MethodHandler";
 import { validateOrSendError } from "lib/api/validator";
 import { getSMJSessionAPI, isAccessAllowed } from "lib/auth/auth";
-import { ApiError, WrappedError } from "lib/data/api-error";
+import { ApiError, WrappedError } from "lib/types/api-error";
 import { deleteWorker, getWorkerById, updateWorker } from "lib/data/workers";
 import logger from "lib/logger/logger";
 import { ExtendedSession, Permission } from "lib/types/auth";

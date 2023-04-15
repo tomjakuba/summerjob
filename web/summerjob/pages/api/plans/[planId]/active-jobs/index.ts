@@ -2,7 +2,7 @@ import { APIAccessController } from "lib/api/APIAccessControler";
 import { APIMethodHandler } from "lib/api/MethodHandler";
 import { validateOrSendError } from "lib/api/validator";
 import { createActiveJob, createActiveJobs } from "lib/data/active-jobs";
-import { ApiError, WrappedError } from "lib/data/api-error";
+import { ApiError, WrappedError } from "lib/types/api-error";
 import logger from "lib/logger/logger";
 import {
   ActiveJobCreateData,

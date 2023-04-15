@@ -2,6 +2,7 @@
 import { useAPIPlansCreate } from "lib/fetcher/plan";
 import { useState } from "react";
 import SimpleDatePicker from "../date-picker/date-picker";
+import { PlanCreateSchema } from "lib/types/plan";
 
 interface NewPlanFormProps {
   initialDate: Date;
@@ -25,14 +26,16 @@ export default function NewPlanForm({
 
   const onSubmit = () => {
     reset();
-    trigger(
-      { date: date.toUTCString() },
-      {
-        onSuccess: () => {
-          onCompleted();
-        },
-      }
-    );
+    const parsed = PlanCreateSchema.safeParse({ day: date.toJSON() });
+    if (!parsed.success) {
+      // This should never happen, because the user is picking from a date picker.
+      return;
+    }
+    trigger(parsed.data, {
+      onSuccess: () => {
+        onCompleted();
+      },
+    });
   };
 
   return (

@@ -1,7 +1,11 @@
 import { APIAccessController } from "lib/api/APIAccessControler";
 import { APIMethodHandler } from "lib/api/MethodHandler";
 import { validateOrSendError } from "lib/api/validator";
-import { WrappedError, ApiBadRequestError, ApiError } from "lib/data/api-error";
+import {
+  WrappedError,
+  ApiBadRequestError,
+  ApiError,
+} from "lib/types/api-error";
 import { createRide } from "lib/data/rides";
 import logger from "lib/logger/logger";
 import { ExtendedSession, Permission } from "lib/types/auth";

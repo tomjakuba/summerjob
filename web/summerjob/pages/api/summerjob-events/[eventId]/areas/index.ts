@@ -1,7 +1,7 @@
 import { APIAccessController } from "lib/api/APIAccessControler";
 import { APIMethodHandler } from "lib/api/MethodHandler";
 import { validateOrSendError } from "lib/api/validator";
-import { WrappedError } from "lib/data/api-error";
+import { WrappedError } from "lib/types/api-error";
 import { createArea, getAreas } from "lib/data/areas";
 import logger from "lib/logger/logger";
 import { AreaCreateData, AreaCreateSchema } from "lib/types/area";

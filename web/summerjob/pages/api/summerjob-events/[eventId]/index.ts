@@ -1,7 +1,7 @@
 import { APIAccessController } from "lib/api/APIAccessControler";
 import { APIMethodHandler } from "lib/api/MethodHandler";
 import { validateOrSendError } from "lib/api/validator";
-import { ApiBadRequestError } from "lib/data/api-error";
+import { ApiBadRequestError } from "lib/types/api-error";
 import {
   deleteSummerJobEvent,
   updateSummerJobEvent,

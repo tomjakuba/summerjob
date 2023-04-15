@@ -1,14 +1,18 @@
 import { createPlan, getPlans } from "lib/data/plans";
 import { NextApiRequest, NextApiResponse } from "next";
 import { Prisma } from "lib/prisma/client";
-import { ApiBadRequestError, WrappedError } from "lib/data/api-error";
+import { ApiBadRequestError, WrappedError } from "lib/types/api-error";
 import { InvalidDataError } from "lib/data/internal-error";
 import { APIAccessController } from "lib/api/APIAccessControler";
 import { APIMethodHandler } from "lib/api/MethodHandler";
 import { ExtendedSession, Permission } from "lib/types/auth";
 import logger from "lib/logger/logger";
 import { APILogEvent } from "lib/types/logger";
-import { getActiveEventOrSendError } from "lib/api/validator";
+import {
+  getActiveEventOrSendError,
+  validateOrSendError,
+} from "lib/api/validator";
+import { PlanCreateDataInput, PlanCreateSchema } from "lib/types/plan";
 
 export type PlansAPIGetResponse = Awaited<ReturnType<typeof getPlans>>;
 async function get(
@@ -22,14 +26,18 @@ async function get(
   res.status(200).json(plans);
 }
 
-export type PlansAPIPostData = { date: string };
+export type PlansAPIPostData = PlanCreateDataInput;
 export type PlansAPIPostResponse = Awaited<ReturnType<typeof createPlan>>;
 async function post(
   req: NextApiRequest,
   res: NextApiResponse<PlansAPIPostResponse | WrappedError<ApiBadRequestError>>,
   session: ExtendedSession
 ) {
-  const date = new Date(req.body.date);
+  const parsed = validateOrSendError(PlanCreateSchema, req.body, res);
+  if (!parsed) {
+    return;
+  }
+  const date = parsed.day;
   const activeEvent = await getActiveEventOrSendError(res);
   if (!activeEvent) {
     return;

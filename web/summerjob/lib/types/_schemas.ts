@@ -3,6 +3,7 @@ import {
   WorkerSchema,
   CarSchema,
   ActiveJobSchema,
+  PlanSchema,
 } from "lib/prisma/zod";
 import { z } from "zod";
 import { ActiveJobWithProposedSchema } from "./active-job";
@@ -28,4 +29,12 @@ export const ActiveJobNoPlanSchema = ActiveJobSchema.extend({
   responsibleWorker: WorkerSchema.or(z.null()),
 }).openapi({
   title: "ActiveJobNoPlan",
+});
+
+export const ActiveJobCompleteSchema = ActiveJobSchema.extend({
+  workers: z.array(WorkerCompleteSchema),
+  proposedJob: ProposedJobWithAreaSchema,
+  rides: z.array(RideCompleteSchema),
+  responsibleWorker: WorkerSchema.optional(),
+  plan: PlanSchema,
 });

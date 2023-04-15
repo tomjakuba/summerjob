@@ -7,7 +7,7 @@ import {
 } from "lib/types/active-job";
 import type { Worker, Prisma } from "lib/prisma/client";
 import { cache_getActiveSummerJobEventId } from "./cache";
-import { NoActiveEventError } from "./internal-error";
+import { InvalidDataError, NoActiveEventError } from "./internal-error";
 import { databaseWorkerToWorkerComplete } from "./workers";
 
 export async function getActiveJobById(
@@ -286,7 +286,7 @@ export async function createActiveJob(job: ActiveJobCreateData) {
       },
     });
     if (existingActiveJob) {
-      throw new Error("Active job already exists in this plan");
+      throw new InvalidDataError("Active job already exists in this plan");
     }
     const activeJob = await tx.activeJob.create({
       data: {

@@ -26,6 +26,10 @@ export const ApiErrorSchema = z.object({
   issues: ApiErrorReasonsSchema.optional(),
 });
 
+export const WrappedApiErrorSchema = z.object({
+  error: ApiErrorSchema,
+});
+
 export class ApiError extends Error {
   readonly type: ApiErrorType;
   readonly reason: string;

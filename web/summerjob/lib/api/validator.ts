@@ -1,4 +1,4 @@
-import { ApiBadRequestError, ApiNoActiveEventError } from "lib/data/api-error";
+import { ApiBadRequestError, ApiNoActiveEventError } from "lib/types/api-error";
 import { cache_getActiveSummerJobEvent } from "lib/data/cache";
 import { SummerJobEvent } from "lib/prisma/zod";
 import { NextApiResponse } from "next";

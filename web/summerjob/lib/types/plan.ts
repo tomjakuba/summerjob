@@ -4,6 +4,19 @@ import { Serialized } from "./serialize";
 import { deserializeWorkerAvailability } from "./worker";
 import { ActiveJobSchema, PlanSchema } from "lib/prisma/zod";
 import { ActiveJobNoPlanSchema } from "./_schemas";
+import useZodOpenApi from "lib/api/useZodOpenApi";
+
+useZodOpenApi;
+
+export const PlanCreateSchema = z.object({
+  day: z.date().or(z.string().min(1).pipe(z.coerce.date())).openapi({
+    type: "string",
+    format: "date",
+  }),
+});
+
+export type PlanCreateDataInput = z.input<typeof PlanCreateSchema>;
+export type PlanCreateData = z.infer<typeof PlanCreateSchema>;
 
 export const PlanCompleteSchema = PlanSchema.extend({
   jobs: z.array(ActiveJobNoPlanSchema),

@@ -4,7 +4,7 @@ import {
   getActiveEventOrSendError,
   validateOrSendError,
 } from "lib/api/validator";
-import { ApiError, WrappedError } from "lib/data/api-error";
+import { ApiError, WrappedError } from "lib/types/api-error";
 import { createCar, getCars } from "lib/data/cars";
 import logger from "lib/logger/logger";
 import { ExtendedSession, Permission } from "lib/types/auth";
