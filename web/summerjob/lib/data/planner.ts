@@ -2,7 +2,7 @@ import amqp from "amqplib";
 
 export async function requestPlanner(planId: string) {
   const connection = await amqp.connect(
-    process.env.AMPQ_URL || "amqp://localhost"
+    process.env.AMQP_URL || "amqp://localhost"
   );
 
   const channel = await connection.createChannel();

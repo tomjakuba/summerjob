@@ -4,55 +4,68 @@ Webová aplikace pro organizaci SummerJob, vyvíjená jako diplomová práce na 
 
 ## Instalace a první spuštění
 
-Tato aplikace je stále ve fázi vývoje a proces instalace se může změnit.
-
 Potřebné nástroje:
 
 - [Docker](https://www.docker.com/)
 - [Docker Compose](https://docs.docker.com/compose/)
 
-Po naklonování repozitáře je potřeba nastavit connection string pro připojení k databázi. Aplikace využívá databázi PostgreSQL, ale mělo by být možné použít i další SQL databáze. Přejmenujte soubor `.env.sample` na `.env` a zvolte libovolné uživatelské jméno a heslo pro připojení k databázi:
+Po naklonování repozitáře je potřeba nastavit connection string pro připojení k databázi. Aplikace využívá databázi PostgreSQL.
 
-Ukázka možného nastavení:
+Použitý framework Next.js využívá soubor `.env` pro nastavení proměnných prostředí a proměnné vkládá do kódu [během kompilace](https://nextjs.org/docs/basic-features/environment-variables), je tedy nutné je nastavit před sestavením kontejneru a není možné je specifikovat později při spouštění kontejneru.
 
-```console
-[web/summerjob]$ cat .env
-DATABASE_URL="postgresql://username:password@summerjob-db:5432/summerjob?schema=public"
-```
+### Složka `web/summerjob`
+
+Přejmenujte soubor `.env.sample` na `.env` a nastavte všechny potřebné údaje podle instrukcí v souboru. Zvolte libovolné jméno a heslo pro připojení k databázi.
 
 Následně je možné sestavit docker image pro web a pro pomocné nástroje (nastavení databáze):
 
 ```console
-[web/summerjob]$ docker build -t summerjob/web .
-[web/summerjob]$ docker build -t summerjob/scripts -f Dockerfile.scripts .
+[repo/web/summerjob]$ docker build -t summerjob/web .
+[repo/web/summerjob]$ docker build -t summerjob/scripts -f Dockerfile.scripts .
 ```
 
-Vytvoříme si docker síť, do které budeme připojovat kontejnery:
+### Složka `planner`
+
+Přejmenujte soubor `.env.sample` na `.env` a nastavte všechny potřebné údaje stejné jako v předchozím kroku.
+
+Následně je možné sestavit docker image pro web a pro pomocné nástroje (nastavení databáze):
 
 ```console
-[web/summerjob]$ docker network create summerjob-network
+[repo/planner]$ docker build -t summerjob/planner .
 ```
 
-Upravíme soubor `web/docker-compose.yaml` a nastavíme uživatelské jméno a heslo pro připojení k databázi (stejné jako v `.env`) a jméno sítě:
+### Kořenová složka projektu
+
+Vytvořte docker síť, do které budou připojeny kontejnery:
 
 ```console
-[web]$ cat docker-compose.yaml
+[repo]$ docker network create summerjob-network
+```
+
+Upravte soubor `docker-compose.yaml` a nastavte uživatelské jméno a heslo pro připojení k databázi (stejné jako v `.env`), parametry pro připojení Plánovače (`summerjob-planner`) a jméno sítě, pokud je jiné než `summerjob-network`:
+
+```dockerfile
 version: "3"
 
 services:
   summerjob-web:
   ...
     networks:
-      - summerjob-network
+      - summerjob-network      # stejné jako vytvořená síť
 
   summerjob-db:
     ...
     environment:
-      POSTGRES_USER: username
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: summerjob
-    networks:
-      - summerjob-network
+      POSTGRES_USER: username       # uživatelské jméno pro připojení k databázi, stejné jako v .env
+      POSTGRES_PASSWORD: password   # heslo pro připojení k databázi, stejné jako v .env
+      POSTGRES_DB: summerjob        # jméno databáze, jako v .env
+
+  summerjob-planner:
+    ...
+    environment:
+      - AMQP_URL=amqp://summerjob-amqp     # stejné jako v .env
+      - QUEUE_NAME=planner                 # stejné jako v .env
+      - DATABASE_URL=postgresql://username:password@summerjob-db:5432/summerjob?schema=public   # stejné jako v .env
 
 networks:
   summerjob-network:
@@ -67,12 +80,17 @@ Nyní je možné spustit kontejnery pomocí docker-compose:
 [web]$ docker compose up -d
 ```
 
-Do databáze je nutné propsat schéma. Vytvoříme si kontejner pomocí image `summerjob/scripts` a spustíme příkaz na vytvoření schématu. Volitelně je možné vložit do databáze i testovací data:
+### Nastavení databáze
+
+Do databáze je nutné propsat schéma a vytvořit první administrátorský účet. Vytvořte kontejner pomocí image `summerjob/scripts` a spustťe příkaz na vytvoření schématu. Následně spusťte příkaz na vytvoření prvního administrátorského účtu:
 
 ```console
 [web]$ docker run --rm --network summerjob-network -it summerjob/scripts
 root@<container-id>:/app# npx prisma db push
-root@<container-id>:/app# npm run seed
+root@<container-id>:/app# npm run create-admin
+Průvodce vytvořením prvního administrátorského účtu
+Zadejte ...
+
 root@<container-id>:/app# exit
 ```
 
@@ -82,7 +100,7 @@ Aplikace je nyní dostupná na adrese `http://localhost:3000`.
 
 ## Spouštění a zastavování
 
-Pro spuštění a zastavování aplikace je možné použít příkazy docker-compose:
+Pro spuštění a zastavování aplikace je možné použít příkazy `docker compose`:
 
 ```console
 [web]$ docker compose up -d
@@ -101,6 +119,7 @@ Pro inspekci databáze je možné použít například aplikaci pgAdmin. Pokud c
 ```console
 [web]$ docker run --rm --network summerjob-network -it -p 5555:5555 summerjob/scripts
 root@<container-id>:/app# npx prisma studio
+Prisma Studio is running at http://localhost:5555 ...
 ```
 
 Prisma Studio je nyní dostupné na adrese `http://localhost:5555`.
@@ -109,16 +128,40 @@ Pokud běží aplikace na vzdáleném systému, kde není vhodné otevírat port
 
 ```console
 [local]$ ssh -L 5555:<remote-host>:5555 <remote-user>@<remote-host>
+[remote]$ docker run --rm --network summerjob-network -it -p 5555:5555 summerjob/scripts
+root@<container-id>:/app# npx prisma studio
+Prisma Studio is running at http://localhost:5555 ...
 ```
 
-## Spuštění pro vývoj
+## Troubleshooting
+
+### Poskytovatel e-mailů zablokoval odesílání
+
+Při odesílání většího množství e-mailů může dojít k dosažení limitu poskytovatele a následnému dočasnému zablokování odesílání. V takovém případě se není možné přihlásit do aplikace přes webové rozhraní a v logu kontejneru se objeví chyba odesílání, typicky `451`.
+
+Aby se tomuto problému předešlo, nastavuje se platnost přihlášení na 30 dní, což pokryje celé trvání ročníku SummerJobu.
+
+Pokud by však bylo nutné přihlásit administrátora či člena týmu a není možné počkat na uvolnění limitu (obvykle desítky minut až jednotky hodin), je možné provést nouzové vygenerování nové session cookie:
+
+```console
+[web]$ docker run --rm --network summerjob-network -it -p 5555:5555 summerjob/scripts
+root@<container-id>:/app# npm run create-session
+Zadejte email: admin@example.cz
+Session token vytvořen:
+  Název cookie: session-token
+  Hodnota cookie: <session-token>
+  ...
+```
+
+## Vývoj
 
 Potřebné nástroje navíc:
 
 - [Node.js](https://nodejs.org/en/)
 - Databáze (může být v Dockeru)
 
-Stejným způsobem jako výše nastavíme connection string pro připojení k databázi.
+Stejným způsobem jako výše nastavíme všechny potřebné údaje v souboru `.env`.
+Alternativně je možné použít např. soubor `.env.local` [a další](https://nextjs.org/docs/basic-features/environment-variables), aby nebylo nutné měnit soubor `.env`.
 
 Následně nainstalujeme závislosti pomocí `npm` a spustíme aplikaci:
 
@@ -128,3 +171,41 @@ Následně nainstalujeme závislosti pomocí `npm` a spustíme aplikaci:
 ```
 
 Tento příkaz spustí aplikaci v režimu vývoje, který automaticky restartuje aplikaci po každé změně v kódu. Aplikace je dostupná na adrese `http://localhost:3000`.
+
+Obdobně je možné spustit i Plánovač:
+
+```console
+[web/planner]$ npm install
+[web/planner]$ npm run start
+```
+
+### Smazání a seedování databáze
+
+Pro smazání databáze je možné použít připravený skript:
+
+```console
+[web/summerjob]$ npm run delete-db
+```
+
+Pro seedování jsou k dispozici následující skripty:
+
+- `seed` - Vytvoří 100 uživatelů a přibližně 70 jobů a další potřebná data.
+- `seed-mini` - Vytvoří 5 uživatelů, malé množství jobů a další potřebná data.
+
+```console
+[web/summerjob]$ npm run seed
+```
+
+### Úprava dat v databázi
+
+Pro úpravu dat v databázi je možné použít nástroj [Prisma Studio](https://www.prisma.io/studio).
+
+```console
+[web/summerjob]$ npx prisma studio
+```
+
+### Přihlašování
+
+Během vývoje je zablokováno odesílání e-mailů a uživateli je povoleno přihlášení na libovolnou e-mailovou adresu.
+
+Session cookies se nastavují jako Http Only a není je tedy možné odstranit automaticky, pokud dojde například ke změně dat v databázi. Před přihlášením je tedy nutné smazat cookie `next-auth.session-token` v prohlížeči.
