@@ -217,3 +217,21 @@ export async function addAdminsToEvent(
     });
   }
 }
+
+export async function unblockRegisteredUsers(
+  eventId: string,
+  transaction: PrismaTransactionClient
+) {
+  await transaction.worker.updateMany({
+    where: {
+      availability: {
+        some: {
+          eventId,
+        },
+      },
+    },
+    data: {
+      blocked: false,
+    },
+  });
+}

@@ -10,7 +10,11 @@ import {
   cache_setActiveSummerJobEvent,
 } from "./cache";
 import { InvalidDataError } from "./internal-error";
-import { blockNonAdmins, addAdminsToEvent } from "./users";
+import {
+  blockNonAdmins,
+  addAdminsToEvent,
+  unblockRegisteredUsers,
+} from "./users";
 import { PrismaTransactionClient } from "lib/types/prisma";
 
 export async function getSummerJobEventById(
@@ -81,6 +85,7 @@ export async function updateSummerJobEvent(
       await blockNonAdmins(transaction);
       await addAdminsToEvent(newEvent.id, transaction);
       const updatedEvent = await setActiveSummerJobEvent(id, transaction);
+      await unblockRegisteredUsers(newEvent.id, transaction);
       return updatedEvent;
     });
   }
