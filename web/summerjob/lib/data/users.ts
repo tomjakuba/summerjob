@@ -133,10 +133,8 @@ function databaseUserToUserComplete(user: DBUserComplete): UserComplete {
   };
 }
 
-export async function blockNonAdmins(
-  prismaClient: PrismaClient | PrismaTransactionClient = prisma
-) {
-  const nonAdmins = await prismaClient.worker.findMany({
+export async function blockNonAdmins(transaction: PrismaTransactionClient) {
+  const nonAdmins = await transaction.worker.findMany({
     where: {
       NOT: {
         permissions: {
@@ -151,7 +149,7 @@ export async function blockNonAdmins(
     },
   });
   const emails = nonAdmins.map((user) => user.email);
-  await prismaClient.worker.updateMany({
+  await transaction.worker.updateMany({
     where: {
       email: {
         in: emails,
@@ -161,7 +159,7 @@ export async function blockNonAdmins(
       blocked: true,
     },
   });
-  await prismaClient.session.deleteMany({
+  await transaction.session.deleteMany({
     where: {
       user: {
         email: {
@@ -170,4 +168,49 @@ export async function blockNonAdmins(
       },
     },
   });
+}
+
+export async function addAdminsToEvent(
+  eventId: string,
+  transaction: PrismaTransactionClient
+) {
+  const admins = await transaction.worker.findMany({
+    where: {
+      permissions: {
+        permissions: {
+          hasSome: [Permission.ADMIN],
+        },
+      },
+    },
+    select: {
+      email: true,
+      registeredIn: true,
+    },
+  });
+  for (const admin of admins) {
+    const alreadyRegistered = admin.registeredIn
+      .map((event) => event.id)
+      .includes(eventId);
+    if (alreadyRegistered) {
+      continue;
+    }
+
+    await transaction.worker.update({
+      where: {
+        email: admin.email,
+      },
+      data: {
+        availability: {
+          create: {
+            eventId,
+            workDays: [],
+            adorationDays: [],
+          },
+        },
+        registeredIn: {
+          connect: [{ id: eventId }],
+        },
+      },
+    });
+  }
 }

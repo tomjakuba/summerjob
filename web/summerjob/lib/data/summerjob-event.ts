@@ -6,10 +6,12 @@ import {
 } from "lib/types/summerjob-event";
 import {
   cache_getActiveSummerJobEvent,
+  cache_getActiveSummerJobEventId,
   cache_setActiveSummerJobEvent,
 } from "./cache";
 import { InvalidDataError } from "./internal-error";
-import { blockNonAdmins } from "./users";
+import { blockNonAdmins, addAdminsToEvent } from "./users";
+import { PrismaTransactionClient } from "lib/types/prisma";
 
 export async function getSummerJobEventById(
   id: string
@@ -69,41 +71,42 @@ export async function updateSummerJobEvent(
     );
   }
   const currentlyActiveEvent = await cache_getActiveSummerJobEvent();
-  if (currentlyActiveEvent && currentlyActiveEvent.id !== id) {
-    const updatedEvent = await setActiveSummerJobEvent(id);
-    await blockNonAdmins();
-    return updatedEvent;
+  if (!currentlyActiveEvent || currentlyActiveEvent.id !== id) {
+    return await prisma.$transaction(async (transaction) => {
+      const newEvent = await transaction.summerJobEvent.findUniqueOrThrow({
+        where: {
+          id,
+        },
+      });
+      await blockNonAdmins(transaction);
+      await addAdminsToEvent(newEvent.id, transaction);
+      const updatedEvent = await setActiveSummerJobEvent(id, transaction);
+      return updatedEvent;
+    });
   }
   return currentlyActiveEvent;
 }
 
-export async function setActiveSummerJobEvent(id: string) {
-  const [_1, _2, event] = await prisma.$transaction([
-    // FIXME: This first query is a workaround for a missing feature in Prisma
-    // Providing an invalid ID would set all events to inactive
-    // This can be avoided once prisma adds `updateOrThrow` or similar
-    // https://github.com/prisma/prisma/issues/10142
-    prisma.summerJobEvent.findUniqueOrThrow({
-      where: {
-        id,
-      },
-    }),
-    prisma.summerJobEvent.updateMany({
-      data: {
-        isActive: false,
-      },
-    }),
-    prisma.summerJobEvent.update({
-      where: {
-        id,
-      },
-      data: {
-        isActive: true,
-      },
-    }),
-  ]);
-  cache_setActiveSummerJobEvent(event);
-  return event;
+export async function setActiveSummerJobEvent(
+  id: string,
+  transaction: PrismaTransactionClient
+) {
+  await transaction.summerJobEvent.updateMany({
+    data: {
+      isActive: false,
+    },
+  });
+  const newEvent = await transaction.summerJobEvent.update({
+    where: {
+      id,
+    },
+    data: {
+      isActive: true,
+    },
+  });
+
+  cache_setActiveSummerJobEvent(newEvent);
+  return newEvent;
 }
 
 export async function createSummerJobEvent(event: SummerJobEventCreateData) {
@@ -114,6 +117,12 @@ export async function createSummerJobEvent(event: SummerJobEventCreateData) {
 }
 
 export async function deleteSummerJobEvent(id: string) {
+  const activeEventId = await cache_getActiveSummerJobEventId();
+  if (activeEventId === id) {
+    throw new InvalidDataError(
+      "Cannot delete active event, set another to active and then delete."
+    );
+  }
   const event = await prisma.summerJobEvent.delete({
     where: {
       id,
