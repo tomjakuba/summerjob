@@ -65,10 +65,10 @@ export default function ProposedJobRow({
   };
 
   const availableDays = useMemo(() => {
-    const days = [...job.availability.days];
+    const days = [...job.availability];
     days.sort((a, b) => a.getTime() - b.getTime());
     return days.map(formatDateShort).map(capitalizeFirstLetter).join(", ");
-  }, [job.availability.days]);
+  }, [job.availability]);
 
   return (
     <ExpandableRow
@@ -166,7 +166,7 @@ function formatJobRow(
     job.contact,
     job.address,
     `${job.activeJobs.length} / ${job.requiredDays}`,
-    datesAfterDate(job.availability.days, now).length,
+    datesAfterDate(job.availability, now).length,
     `${job.minWorkers} - ${job.maxWorkers}`,
     <span key={job.id} className="d-flex align-items-center gap-3">
       {markJobAsCompletedIcon(job, setCompleted)}

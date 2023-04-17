@@ -1,11 +1,6 @@
 import { z } from "zod";
 import { Serialized } from "./serialize";
-import {
-  ActiveJobSchema,
-  AreaSchema,
-  ProposedJobAvailabilitySchema,
-  ProposedJobSchema,
-} from "lib/prisma/zod";
+import { ActiveJobSchema, AreaSchema, ProposedJobSchema } from "lib/prisma/zod";
 import useZodOpenApi from "lib/api/useZodOpenApi";
 
 useZodOpenApi;
@@ -19,7 +14,7 @@ export type ProposedJobWithArea = z.infer<typeof ProposedJobWithAreaSchema>;
 export const ProposedJobCompleteSchema = ProposedJobSchema.extend({
   area: AreaSchema,
   activeJobs: z.array(ActiveJobSchema),
-  availability: ProposedJobAvailabilitySchema,
+  availability: z.array(z.date()),
 });
 
 export type ProposedJobComplete = z.infer<typeof ProposedJobCompleteSchema>;
@@ -97,6 +92,6 @@ export function deserializeProposedJob(job: Serialized<ProposedJobComplete>) {
 }
 
 export function deserializeProposedJobAvailability(job: ProposedJobComplete) {
-  job.availability.days = job.availability.days.map((date) => new Date(date));
+  job.availability = job.availability.map((date) => new Date(date));
   return job;
 }

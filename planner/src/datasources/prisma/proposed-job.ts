@@ -1,4 +1,4 @@
-import { PrismaClient, ProposedJobAvailability } from "../../../prisma/client";
+import { PrismaClient } from "../../../prisma/client";
 import { ProposedJobComplete } from "../DataSource";
 
 export async function getProposedJobs(
@@ -13,28 +13,11 @@ export async function getProposedJobs(
           id: eventId,
         },
       },
-      availability: {
-        some: {
-          event: {
-            id: eventId,
-          },
-          days: {
-            has: day.toJSON(),
-          },
-        },
-      },
+      availability: { has: day.toJSON() },
     },
     include: {
       area: true,
       activeJobs: true,
-      availability: {
-        where: {
-          event: {
-            id: eventId,
-          },
-        },
-        take: 1,
-      },
     },
     orderBy: [
       {
@@ -42,14 +25,5 @@ export async function getProposedJobs(
       },
     ],
   });
-  return jobs.map(databaseProposedJobToProposedJobComplete);
-}
-
-export function databaseProposedJobToProposedJobComplete(
-  proposedJob: Omit<ProposedJobComplete, "availability"> & {
-    availability: ProposedJobAvailability[];
-  }
-): ProposedJobComplete {
-  const { availability, ...rest } = proposedJob;
-  return { ...rest, availability: availability[0] };
+  return jobs as ProposedJobComplete[];
 }

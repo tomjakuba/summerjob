@@ -78,7 +78,11 @@ export async function getMyPlans(workerId: string): Promise<MyPlan[]> {
   if (!activeEvent) {
     throw new NoActiveEventError();
   }
-  if (!activeEvent.workers.map((worker) => worker.id).includes(workerId)) {
+  if (
+    !activeEvent.workerAvailability
+      .map((avail) => avail.workerId)
+      .includes(workerId)
+  ) {
     throw new WorkerNotRegisteredInEventError();
   }
 

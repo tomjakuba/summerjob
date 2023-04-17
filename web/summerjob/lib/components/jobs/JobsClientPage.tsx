@@ -63,7 +63,7 @@ export default function ProposedJobsClientPage({
       fulltextData.get(job.id)?.includes(filter.toLowerCase()) ?? false;
     const day =
       selectedDay.id === days[0].id ||
-      job.availability.days
+      job.availability
         .map((d) => d.getTime())
         .includes(selectedDay.day.getTime());
     return area && fulltext && day;

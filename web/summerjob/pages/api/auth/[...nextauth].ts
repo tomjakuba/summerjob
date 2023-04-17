@@ -57,7 +57,7 @@ export const authOptions: NextAuthOptions = {
       // Non-admins can only sign in if they are registered in the active event
       const activeEventId = await cache_getActiveSummerJobEventId();
       if (!activeEventId) return false;
-      if (user.registeredIn.some((event) => event.id === activeEventId))
+      if (user.availability.some((av) => av.eventId === activeEventId))
         return true;
 
       return false;

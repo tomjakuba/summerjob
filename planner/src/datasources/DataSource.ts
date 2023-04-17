@@ -7,7 +7,6 @@ import {
   Ride,
   WorkerAvailability,
   Worker,
-  ProposedJobAvailability,
 } from "../../prisma/client";
 
 export interface DataSource {
@@ -51,7 +50,6 @@ export type ActiveJobWithProposed = ActiveJob & {
 export type ProposedJobComplete = ProposedJob & {
   area: Area;
   activeJobs: ActiveJob[];
-  availability: ProposedJobAvailability;
 };
 
 export type JobToBePlanned = {

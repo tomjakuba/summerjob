@@ -13,6 +13,7 @@ export default async function SummerJobEventsPage() {
       <section>
         <div className="container">
           <div className="list-group">
+            {events.length === 0 && <center>Žádné ročníky.</center>}
             {events.map((event) => (
               <Link
                 className="list-group-item list-group-item-action"

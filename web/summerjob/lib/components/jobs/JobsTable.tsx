@@ -154,7 +154,7 @@ function sortJobs(data: ProposedJobComplete[], sortOrder: SortOrder) {
     area: (job) => job.area.name,
     address: (job) => job.address,
     daysPlanned: (job) => job.activeJobs.length,
-    daysLeft: (job) => job.availability.days.length,
+    daysLeft: (job) => job.availability.length,
     workers: (job) => job.minWorkers,
   };
 

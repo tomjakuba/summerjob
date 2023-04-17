@@ -57,7 +57,7 @@ export default function EditProposedJobForm({
       strongWorkers: job.strongWorkers,
       hasFood: job.hasFood,
       hasShower: job.hasShower,
-      availability: job.availability.days.map((day) => day.toJSON()),
+      availability: job.availability.map((day) => day.toJSON()),
     },
   });
 

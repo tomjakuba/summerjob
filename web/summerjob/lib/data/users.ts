@@ -1,4 +1,8 @@
-import { PrismaClient, WorkerPermissions } from "lib/prisma/client";
+import {
+  PrismaClient,
+  WorkerAvailability,
+  WorkerPermissions,
+} from "lib/prisma/client";
 import prisma from "lib/prisma/connection";
 import { Permission } from "lib/types/auth";
 import { PrismaTransactionClient } from "lib/types/prisma";
@@ -20,7 +24,7 @@ export async function getUserByEmail(
       blocked: true,
       deleted: true,
       permissions: true,
-      registeredIn: true,
+      availability: true,
     },
   });
   if (!user || user.deleted) return null;
@@ -33,9 +37,11 @@ export async function getUsers(): Promise<UserComplete[]> {
   const users = await prisma.worker.findMany({
     where: {
       deleted: false,
-      registeredIn: {
+      availability: {
         some: {
-          id: activeEventId,
+          event: {
+            id: activeEventId,
+          },
         },
       },
     },
@@ -46,7 +52,7 @@ export async function getUsers(): Promise<UserComplete[]> {
       email: true,
       blocked: true,
       permissions: true,
-      registeredIn: true,
+      availability: true,
     },
   });
   return users.map(databaseUserToUserComplete);
@@ -129,7 +135,7 @@ function databaseUserToUserComplete(user: DBUserComplete): UserComplete {
     email: user.email,
     blocked: user.blocked,
     permissions: user.permissions.permissions as Permission[],
-    registeredIn: user.registeredIn,
+    availability: user.availability,
   };
 }
 
@@ -184,12 +190,12 @@ export async function addAdminsToEvent(
     },
     select: {
       email: true,
-      registeredIn: true,
+      availability: true,
     },
   });
   for (const admin of admins) {
-    const alreadyRegistered = admin.registeredIn
-      .map((event) => event.id)
+    const alreadyRegistered = admin.availability
+      .map((av) => av.eventId)
       .includes(eventId);
     if (alreadyRegistered) {
       continue;
@@ -206,9 +212,6 @@ export async function addAdminsToEvent(
             workDays: [],
             adorationDays: [],
           },
-        },
-        registeredIn: {
-          connect: [{ id: eventId }],
         },
       },
     });

@@ -53,8 +53,14 @@ export default function SetEventActiveButton({
           onReject={() => setIsSetActiveEventModalOpen(false)}
         >
           <p>
-            Nastavit ročník <b>{smjEvent.name}</b> jako aktivní?
+            Změnou aktivního ročníku dojde k odhlášení ostatních uživatelů.
+            Pouze uživatelé s administrátorským přístupem budou mít možnost se
+            přihlásit. Nastavit ročník <b>{smjEvent.name}</b> jako aktivní?
           </p>
+          <small className="text-muted">
+            Pokud se po přenastavení aktivního ročníku zobrazují staré údaje,
+            obnovte stránku.
+          </small>
         </ConfirmationModal>
       )}
     </>

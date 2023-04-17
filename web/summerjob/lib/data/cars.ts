@@ -23,9 +23,11 @@ export async function getCars(
   const cars = await prisma.car.findMany({
     where: {
       owner: {
-        registeredIn: {
+        availability: {
           some: {
-            isActive: true,
+            event: {
+              isActive: true,
+            },
           },
         },
         blocked: false,

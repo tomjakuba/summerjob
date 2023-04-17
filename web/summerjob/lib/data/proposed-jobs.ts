@@ -1,4 +1,3 @@
-import { ProposedJobAvailability } from "lib/prisma/client";
 import prisma from "lib/prisma/connection";
 import {
   ProposedJobCreateData,
@@ -22,17 +21,12 @@ export async function getProposedJobById(
     include: {
       area: true,
       activeJobs: true,
-      availability: {
-        where: {
-          eventId: activeEventId,
-        },
-      },
     },
   });
   if (!job) {
     return null;
   }
-  return databaseProposedJobToProposedJobComplete(job);
+  return job;
 }
 
 export async function getProposedJobs(): Promise<ProposedJobComplete[]> {
@@ -47,14 +41,6 @@ export async function getProposedJobs(): Promise<ProposedJobComplete[]> {
     include: {
       area: true,
       activeJobs: true,
-      availability: {
-        where: {
-          event: {
-            isActive: true,
-          },
-        },
-        take: 1,
-      },
     },
     orderBy: [
       {
@@ -62,7 +48,7 @@ export async function getProposedJobs(): Promise<ProposedJobComplete[]> {
       },
     ],
   });
-  return jobs.map(databaseProposedJobToProposedJobComplete);
+  return jobs;
 }
 
 /**
@@ -93,24 +79,12 @@ export async function getProposedJobsAssignableTo(
       completed: false,
       hidden: false,
       availability: {
-        some: {
-          days: {
-            has: planDay?.day,
-          },
-        },
+        has: planDay?.day,
       },
     },
     include: {
       area: true,
       activeJobs: true,
-      availability: {
-        where: {
-          event: {
-            isActive: true,
-          },
-        },
-        take: 1,
-      },
     },
     orderBy: [
       {
@@ -118,7 +92,7 @@ export async function getProposedJobsAssignableTo(
       },
     ],
   });
-  return jobs.map(databaseProposedJobToProposedJobComplete);
+  return jobs;
 }
 
 export async function updateProposedJob(
@@ -129,7 +103,7 @@ export async function updateProposedJob(
   if (!activeEventId) {
     throw new NoActiveEventError();
   }
-  const { allergens, availability, ...rest } = proposedJobData;
+  const { allergens, ...rest } = proposedJobData;
   const allergyUpdate = allergens ? { allergens: { set: allergens } } : {};
 
   const proposedJob = await prisma.proposedJob.update({
@@ -139,47 +113,14 @@ export async function updateProposedJob(
     data: {
       ...rest,
       ...allergyUpdate,
-      availability: {
-        update: {
-          where: {
-            jobId_eventId: {
-              jobId: id,
-              eventId: activeEventId,
-            },
-          },
-          data: {
-            days: availability,
-          },
-        },
-      },
     },
   });
   return proposedJob;
 }
 
 export async function createProposedJob(data: ProposedJobCreateData) {
-  const { allergens, availability, ...proposedJobDataWithoutAllergens } = data;
-  const area = await prisma.area.findUnique({
-    where: {
-      id: proposedJobDataWithoutAllergens.areaId,
-    },
-  });
-  if (!area) {
-    throw new InvalidDataError("Area not found");
-  }
   const proposedJob = await prisma.proposedJob.create({
-    data: {
-      ...proposedJobDataWithoutAllergens,
-      allergens: {
-        set: allergens,
-      },
-      availability: {
-        create: {
-          eventId: area?.summerJobEventId,
-          days: availability,
-        },
-      },
-    },
+    data: data,
   });
   return proposedJob;
 }
@@ -190,13 +131,4 @@ export async function deleteProposedJob(id: string) {
       id,
     },
   });
-}
-
-export function databaseProposedJobToProposedJobComplete(
-  proposedJob: Omit<ProposedJobComplete, "availability"> & {
-    availability: ProposedJobAvailability[];
-  }
-): ProposedJobComplete {
-  const { availability, ...rest } = proposedJob;
-  return { ...rest, availability: availability[0] };
 }

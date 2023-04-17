@@ -55,7 +55,7 @@ export async function getActiveSummerJobEvent() {
       isActive: true,
     },
     include: {
-      workers: true,
+      workerAvailability: true,
     },
   });
   return events.length > 0 ? events[0] : undefined;

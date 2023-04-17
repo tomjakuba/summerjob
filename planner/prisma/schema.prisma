@@ -20,7 +20,6 @@ model Worker {
   jobs           ActiveJob[]
   driving        Ride[]               @relation("Driver")
   passengerIn    Ride[]
-  registeredIn   SummerJobEvent[]
   responsibleFor ActiveJob[]          @relation("ResponsibleWorker")
   deleted        Boolean              @default(false)
   availability   WorkerAvailability[]
@@ -60,42 +59,31 @@ model Car {
   reimbursementAmount Int            @default(0)
   reimbursed          Boolean        @default(false)
   deleted             Boolean        @default(false)
-  forEvent            SummerJobEvent @relation(fields: [forEventId], references: [id])
+  forEvent            SummerJobEvent @relation(fields: [forEventId], references: [id], onDelete: Cascade)
   forEventId          String
 }
 
 model ProposedJob {
-  id                 String                    @id @default(uuid())
+  id                 String      @id @default(uuid())
   name               String
-  publicDescription  String                    @default("")
-  privateDescription String                    @default("")
+  publicDescription  String      @default("")
+  privateDescription String      @default("")
   requiredDays       Int
-  completed          Boolean                   @default(false)
-  pinned             Boolean                   @default(false)
-  hidden             Boolean                   @default(false)
+  completed          Boolean     @default(false)
+  pinned             Boolean     @default(false)
+  hidden             Boolean     @default(false)
   minWorkers         Int
   maxWorkers         Int
   strongWorkers      Int
   address            String
   contact            String
-  hasFood            Boolean                   @default(false)
-  hasShower          Boolean                   @default(false)
-  area               Area                      @relation(fields: [areaId], references: [id], onDelete: Cascade)
+  hasFood            Boolean     @default(false)
+  hasShower          Boolean     @default(false)
+  area               Area        @relation(fields: [areaId], references: [id], onDelete: Cascade)
   areaId             String
   activeJobs         ActiveJob[]
   allergens          String[]
-  availability       ProposedJobAvailability[]
-}
-
-model ProposedJobAvailability {
-  id      String         @id @default(uuid())
-  job     ProposedJob    @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  jobId   String
-  event   SummerJobEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  eventId String
-  days    DateTime[]     @db.Date
-
-  @@unique([jobId, eventId])
+  availability       DateTime[]  @db.Date
 }
 
 model ActiveJob {
@@ -115,15 +103,14 @@ model ActiveJob {
 }
 
 model Ride {
-  id          String    @id @default(uuid())
-  description String    @default("")
-  driver      Worker    @relation("Driver", fields: [driverId], references: [id])
-  driverId    String
-  car         Car       @relation(fields: [carId], references: [id])
-  carId       String
-  passengers  Worker[]
-  job         ActiveJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  jobId       String
+  id         String    @id @default(uuid())
+  driver     Worker    @relation("Driver", fields: [driverId], references: [id], onDelete: Cascade)
+  driverId   String
+  car        Car       @relation(fields: [carId], references: [id], onDelete: Cascade)
+  carId      String
+  passengers Worker[]
+  job        ActiveJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId      String
 }
 
 model Plan {
@@ -145,16 +132,14 @@ model Area {
 }
 
 model SummerJobEvent {
-  id                 String                    @id @default(uuid())
-  name               String                    @db.VarChar(64)
-  startDate          DateTime                  @db.Date
-  endDate            DateTime                  @db.Date
-  isActive           Boolean                   @default(false)
+  id                 String               @id @default(uuid())
+  name               String               @db.VarChar(64)
+  startDate          DateTime             @db.Date
+  endDate            DateTime             @db.Date
+  isActive           Boolean              @default(false)
   areas              Area[]
   plans              Plan[]
-  workers            Worker[]
   workerAvailability WorkerAvailability[]
-  jobAvailability    ProposedJobAvailability[]
   cars               Car[]
 }
 

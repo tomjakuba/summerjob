@@ -51,7 +51,6 @@ async function createWorkers(
       phone: faker.phone.number("### ### ###"),
       email: faker.internet.email(firstName, lastName).toLocaleLowerCase(),
       isStrong: Math.random() > 0.75,
-      registeredIn: { connect: { id: eventId } },
       availability: {
         create: {
           eventId: eventId,
@@ -184,12 +183,7 @@ async function createProposedJobs(
     await prisma.proposedJob.create({
       data: {
         ...createProposedJob(title),
-        availability: {
-          create: {
-            eventId: eventId,
-            days: chooseWithProbability(days, 0.5),
-          },
-        },
+        availability: chooseWithProbability(days, 0.5),
         allergens: {
           set: choose(allergens, between(0, 2)),
         },

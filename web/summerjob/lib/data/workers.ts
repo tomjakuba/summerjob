@@ -17,9 +17,11 @@ export async function getWorkers(
   const users = await prisma.worker.findMany({
     where: {
       deleted: false,
-      registeredIn: {
+      availability: {
         some: {
-          isActive: true,
+          event: {
+            isActive: true,
+          },
         },
       },
       ...(withoutJobInPlanId && {
@@ -246,11 +248,6 @@ export async function createWorker(
           },
         },
       },
-      registeredIn: {
-        connect: {
-          id: activeEventId,
-        },
-      },
     },
     create: {
       firstName: data.firstName,
@@ -270,11 +267,6 @@ export async function createWorker(
               id: activeEventId,
             },
           },
-        },
-      },
-      registeredIn: {
-        connect: {
-          id: activeEventId,
         },
       },
       permissions: {

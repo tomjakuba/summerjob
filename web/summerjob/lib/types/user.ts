@@ -1,8 +1,7 @@
 import { z } from "zod";
 import { Permission } from "./auth";
 import { Serialized } from "./serialize";
-import { SummerJobEvent } from "lib/prisma/client";
-import { SummerJobEventSchema } from "lib/prisma/zod";
+import { WorkerAvailabilitySchema } from "lib/prisma/zod";
 
 export const UserCompleteSchema = z
   .object({
@@ -12,7 +11,7 @@ export const UserCompleteSchema = z
     email: z.string().email(),
     blocked: z.boolean().default(false),
     permissions: z.array(z.nativeEnum(Permission)),
-    registeredIn: z.array(SummerJobEventSchema),
+    availability: z.array(WorkerAvailabilitySchema),
   })
   .strict();
 
