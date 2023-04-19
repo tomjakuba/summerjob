@@ -9,6 +9,14 @@ services:
     networks:
       - summerjob-network
       # - additional networks for reverse proxy or specify open ports below
+    environment:
+      - DATABASE_URL=postgresql://username:password@summerjob-db:5432/summerjob?schema=public
+      - EMAIL_SERVER=smtps://email@example.cz:emailpassword@smtp.example.cz:465
+      - EMAIL_FROM=email@example.cz
+      - NEXTAUTH_URL=https://planner.summerjob.eu # Domain of the deployed web app, or http://localhost:3000 if running locally
+      - NEXTAUTH_SECRET=FP2xh2YUBE8wa13VTeEkGTjmKMQUF/xWrxBqRlilAgw= # Generate a random string with `openssl rand -base64 32`
+      - AMQP_URL=amqp://summerjob-amqp
+      - QUEUE_NAME=planner
     ports:
       - 3000:3000
     depends_on:
@@ -20,8 +28,8 @@ services:
     hostname: summerjob-db
     image: postgres:15
     environment:
-      - POSTGRES_USER=myusername
-      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_USER=username
+      - POSTGRES_PASSWORD=password
       - POSTGRES_DB=summerjob
     networks:
       - summerjob-network
@@ -37,20 +45,27 @@ services:
     environment:
       - AMQP_URL=amqp://summerjob-amqp
       - QUEUE_NAME=planner
-      - DATABASE_URL=postgresql://myusername:mypassword@summerjob-db:5432/summerjob?schema=public
+      - DATABASE_URL=postgresql://username:password@summerjob-db:5432/summerjob?schema=public
     networks:
       - summerjob-network
     depends_on:
-      - summerjob-db
-      - summerjob-amqp
+      summerjob-db:
+        condition: service_started
+      summerjob-amqp:
+        condition: service_healthy
 
   summerjob-amqp:
     container_name: summerjob-amqp
     hostname: summerjob-amqp
-    image: rabbitmq:3.11-management
+    image: rabbitmq:3.11
     restart: unless-stopped
     networks:
       - summerjob-network
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 15s
+      timeout: 10s
+      retries: 10
 
 networks:
   summerjob-network:

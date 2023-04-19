@@ -1,0 +1,17 @@
+version: "3"
+
+services:
+  summerjob-scripts:
+    container_name: summerjob-scripts
+    hostname: summerjob-scripts
+    image: summerjob/scripts
+    networks:
+      - summerjob-network
+    environment:
+      - DATABASE_URL=postgresql://username:password@summerjob-db:5432/summerjob?schema=public
+    stdin_open: true
+    tty: true
+
+networks:
+  summerjob-network:
+    external: true
