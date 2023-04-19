@@ -13,22 +13,20 @@ Po naklonování repozitáře je potřeba nastavit connection string pro připoj
 
 Použitý framework Next.js využívá soubor `.env` pro nastavení proměnných prostředí a proměnné vkládá do kódu [během kompilace](https://nextjs.org/docs/basic-features/environment-variables), je tedy nutné je nastavit před sestavením kontejneru a není možné je specifikovat později při spouštění kontejneru.
 
-### Složka `web/summerjob`
+### Složka `web`
 
 Přejmenujte soubor `.env.sample` na `.env` a nastavte všechny potřebné údaje podle instrukcí v souboru. Zvolte libovolné jméno a heslo pro připojení k databázi.
 
 Následně je možné sestavit docker image pro web a pro pomocné nástroje (nastavení databáze):
 
 ```console
-[repo/web/summerjob]$ docker build -t summerjob/web .
-[repo/web/summerjob]$ docker build -t summerjob/scripts -f Dockerfile.scripts .
+[repo/web]$ docker build -t summerjob/web .
+[repo/web]$ docker build -t summerjob/scripts -f Dockerfile.scripts .
 ```
 
 ### Složka `planner`
 
-
-
-Následně je možné sestavit docker image pro Plánovač:
+Sestavte docker image pro Plánovač:
 
 ```console
 [repo/planner]$ docker build -t summerjob/planner .
@@ -42,37 +40,20 @@ Vytvořte docker síť, do které budou připojeny kontejnery:
 [repo]$ docker network create summerjob-network
 ```
 
-Upravte soubor `docker-compose.yaml` a nastavte uživatelské jméno a heslo pro připojení k databázi (stejné jako v `.env`), parametry pro připojení Plánovače (`summerjob-planner`) a jméno sítě, pokud je jiné než `summerjob-network`:
+Upravte soubor `docker-compose.yaml` a nastavte všechny potřebné proměnné prostředí, parametry pro připojení Plánovače (`summerjob-planner`) a jméno sítě, pokud je jiné než `summerjob-network`. Zejména se jedná o změny následujících proměnných:
 
-```dockerfile
-version: "3"
-
-services:
-  summerjob-web:
-  ...
-    networks:
-      - summerjob-network      # stejné jako vytvořená síť
-
-  summerjob-db:
-    ...
-    environment:
-      POSTGRES_USER: username       # uživatelské jméno pro připojení k databázi, stejné jako v .env
-      POSTGRES_PASSWORD: password   # heslo pro připojení k databázi, stejné jako v .env
-      POSTGRES_DB: summerjob        # jméno databáze, jako v .env
-
-  summerjob-planner:
-    ...
-    environment:
-      - AMQP_URL=amqp://summerjob-amqp     # stejné jako v .env
-      - QUEUE_NAME=planner                 # stejné jako v .env
-      - DATABASE_URL=postgresql://username:password@summerjob-db:5432/summerjob?schema=public   # stejné jako v .env
-
-networks:
-  summerjob-network:
-    external: true
-
-...
-```
+- summerjob-web
+  - `DATABASE_URL` - connection string pro připojení k databázi, nahraďte `username` a `password` libovolným uživatelským jménem a heslem pro připojení k databázi
+  - `EMAIL_SERVER` - connection string SMTP serveru pro odesílání e-mailů
+  - `EMAIL_USER` - uživatelské jméno použité k odesílání e-mailů
+  - `NEXTAUTH_URL` - Webová adresa, na které bude aplikace dostupná (nebo `http://localhost:3000` v případě lokálního spuštění)
+  - `NEXTAUTH_SECRET` - libovolný řetězec, který slouží jako tajný klíč pro generování tokenů, `openssl rand -base64 32`
+- summerjob-db
+  - `POSTGRES_USER` - uživatelské jméno pro připojení k databázi, stejné jako v connection string pro web
+  - `POSTGRES_PASSWORD` - heslo pro připojení k databázi, stejné jako v connection string pro web
+  - `POSTGRES_DB` - jméno databáze, stejné jako v connection string pro web
+- summerjob-planner
+  - `DATABASE_URL` - connection string pro připojení k databázi, stejný jako connection string pro web
 
 Nyní je možné spustit kontejnery pomocí docker-compose:
 
@@ -167,17 +148,17 @@ Alternativně je možné použít např. soubor `.env.local` [a další](https:/
 Následně nainstalujeme závislosti pomocí `npm` a spustíme aplikaci:
 
 ```console
-[web/summerjob]$ npm install
-[web/summerjob]$ npm run dev
+[web]$ npm install
+[web]$ npm run dev
 ```
 
 Tento příkaz spustí aplikaci v režimu vývoje, který automaticky restartuje aplikaci po každé změně v kódu. Aplikace je dostupná na adrese `http://localhost:3000`.
 
-Obdobně je možné spustit i Plánovač. Ve složce `planner` přejmenujte `.env.sample` na `.env` a nastavte všechny potřebné údaje stejné jako v `web/summerjob/.env`. Následně je možné program spustit:
+Obdobně je možné spustit i Plánovač. Ve složce `planner` přejmenujte `.env.sample` na `.env` a nastavte všechny potřebné údaje stejné jako v `docker-compose.yaml`. Následně je možné program spustit:
 
 ```console
-[web/planner]$ npm install
-[web/planner]$ npm run start
+[planner]$ npm install
+[planner]$ npm run start
 ```
 
 ### Smazání a seedování databáze
@@ -185,7 +166,7 @@ Obdobně je možné spustit i Plánovač. Ve složce `planner` přejmenujte `.en
 Pro smazání databáze je možné použít připravený skript:
 
 ```console
-[web/summerjob]$ npm run delete-db
+[web]$ npm run delete-db
 ```
 
 Pro seedování jsou k dispozici následující skripty:
@@ -194,7 +175,7 @@ Pro seedování jsou k dispozici následující skripty:
 - `seed-mini` - Vytvoří 5 uživatelů, malé množství jobů a další potřebná data.
 
 ```console
-[web/summerjob]$ npm run seed
+[web]$ npm run seed
 ```
 
 ### Úprava dat v databázi
@@ -202,7 +183,7 @@ Pro seedování jsou k dispozici následující skripty:
 Pro úpravu dat v databázi je možné použít nástroj [Prisma Studio](https://www.prisma.io/studio).
 
 ```console
-[web/summerjob]$ npx prisma studio
+[web]$ npx prisma studio
 ```
 
 ### Přihlašování

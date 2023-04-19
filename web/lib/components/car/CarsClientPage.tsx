@@ -28,6 +28,10 @@ export default function CarsClientPage({ initialData }: CarsClientPageProps) {
     });
   };
 
+  const setFilterValue = (value: string) => {
+    setFilter(value.toLocaleLowerCase());
+  };
+
   const requestReload = (expectedResult: CarComplete[]) => {
     mutate(expectedResult);
   };
@@ -47,7 +51,7 @@ export default function CarsClientPage({ initialData }: CarsClientPageProps) {
         <div className="container-fluid">
           <div className="row gx-3">
             <div className="col">
-              <CarsFilters search={filter} onSearchChanged={setFilter} />
+              <CarsFilters search={filter} onSearchChanged={setFilterValue} />
             </div>
           </div>
           <div className="row gx-3">
