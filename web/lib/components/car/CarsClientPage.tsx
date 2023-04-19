@@ -20,16 +20,13 @@ export default function CarsClientPage({ initialData }: CarsClientPageProps) {
   const [filter, setFilter] = useState("");
 
   const filterCars = (cars: CarComplete[]) => {
+    const filterString = filter.toLocaleLowerCase();
     return cars.filter((car) => {
       const name = car.name.toLowerCase();
       const owner =
         car.owner.firstName.toLowerCase() + car.owner.lastName.toLowerCase();
-      return name.includes(filter) || owner.includes(filter);
+      return name.includes(filterString) || owner.includes(filterString);
     });
-  };
-
-  const setFilterValue = (value: string) => {
-    setFilter(value.toLocaleLowerCase());
   };
 
   const requestReload = (expectedResult: CarComplete[]) => {
@@ -51,7 +48,7 @@ export default function CarsClientPage({ initialData }: CarsClientPageProps) {
         <div className="container-fluid">
           <div className="row gx-3">
             <div className="col">
-              <CarsFilters search={filter} onSearchChanged={setFilterValue} />
+              <CarsFilters search={filter} onSearchChanged={setFilter} />
             </div>
           </div>
           <div className="row gx-3">
