@@ -27,8 +27,10 @@ export class BasicPlanner implements Planner {
       return { success: false, jobs: [] };
     }
     const workersWithoutJob = await this.datasource.getWorkersWithoutJob(plan);
+    // Shuffle workers to avoid assigning the first worker to the first job every day
+    const shuffledWorkers = this.shuffleArray(workersWithoutJob);
 
-    const categorizedWorkers = this.categorizeWorkers(workersWithoutJob);
+    const categorizedWorkers = this.categorizeWorkers(shuffledWorkers);
 
     const jobsInPlan: PlannedJob[] = plan.jobs.map((job) => ({
       job: job.proposedJob,
@@ -837,6 +839,19 @@ export class BasicPlanner implements Planner {
         passengerIds: r.passengers.map((p) => p.id),
       })),
     };
+  }
+
+  /**
+   * Shuffles an array reasonably well. Taken from https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+   * @param array Array to shuffle.
+   * @returns Shuffled array.
+   */
+  shuffleArray<T>(array: T[]) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
   }
 }
 

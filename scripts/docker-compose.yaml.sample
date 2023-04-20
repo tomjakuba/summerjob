@@ -7,6 +7,8 @@ services:
     image: summerjob/scripts
     networks:
       - summerjob-network
+    ports:
+      - 5555:5555
     environment:
       - DATABASE_URL=postgresql://username:password@summerjob-db:5432/summerjob?schema=public
     stdin_open: true

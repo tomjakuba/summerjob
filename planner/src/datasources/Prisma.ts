@@ -1,7 +1,6 @@
 import { Plan, PrismaClient } from "../../prisma/client";
 import { DataSource, JobToBePlanned } from "./DataSource";
 import { getPlanById } from "./prisma/plan";
-import { getProposedJobs } from "./prisma/proposed-job";
 import { getWorkersWithoutJob } from "./prisma/worker";
 
 const prisma = new PrismaClient();
@@ -13,10 +12,6 @@ export class PrismaDataSource implements DataSource {
 
   getWorkersWithoutJob(plan: Plan) {
     return getWorkersWithoutJob(plan, prisma);
-  }
-
-  getProposedJobs(eventId: string, day: Date) {
-    return getProposedJobs(eventId, day, prisma);
   }
 
   async setPlannedJobs(planId: string, jobs: JobToBePlanned[]) {

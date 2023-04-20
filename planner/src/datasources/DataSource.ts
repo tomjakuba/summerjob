@@ -12,7 +12,6 @@ import {
 export interface DataSource {
   getPlan(planId: string): Promise<PlanComplete | null>;
   getWorkersWithoutJob(plan: Plan): Promise<WorkerComplete[]>;
-  getProposedJobs(eventId: string, day: Date): Promise<ProposedJobComplete[]>;
   setPlannedJobs(planId: string, jobs: JobToBePlanned[]): void;
 }
 
@@ -45,11 +44,6 @@ export type RideComplete = Ride & {
 
 export type ActiveJobWithProposed = ActiveJob & {
   proposedJob: ProposedJob;
-};
-
-export type ProposedJobComplete = ProposedJob & {
-  area: Area;
-  activeJobs: ActiveJob[];
 };
 
 export type JobToBePlanned = {

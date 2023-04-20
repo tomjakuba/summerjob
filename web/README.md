@@ -1,34 +1,58 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Webová část aplikace SummerJob plánovač
 
-## Getting Started
+## Vývoj
 
-First, run the development server:
+Potřebné nástroje navíc:
 
-```bash
-npm run dev
-# or
-yarn dev
+- [Node.js](https://nodejs.org/en/)
+- Databáze (může být v Dockeru)
+- Fronta AMQP (např. RabbitMQ v Dockeru)
+
+Přejmenujte soubor `.env.sample` na `.env` ve složce `web` a nastavte všechny potřebné údaje.
+
+Následně nainstalujte závislosti pomocí `npm` a spusťte aplikaci:
+
+```console
+[web]$ npm install
+[web]$ npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Tento příkaz spustí aplikaci v režimu vývoje, který automaticky restartuje aplikaci po každé změně v kódu. Aplikace je dostupná na adrese `http://localhost:3000`.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+Obdobně je možné spustit i Plánovač. Ve složce `planner` přejmenujte `.env.sample` na `.env` a nastavte všechny potřebné údaje stejné jako v `docker-compose.yaml`. Následně je možné program spustit:
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+```console
+[planner]$ npm install
+[planner]$ npm run start
+```
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+### Smazání a seedování databáze
 
-## Learn More
+Pro smazání databáze je možné použít připravený skript:
 
-To learn more about Next.js, take a look at the following resources:
+```console
+[web]$ npm run delete-db
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Pro seedování jsou k dispozici následující skripty:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+- `seed` - Vytvoří 100 uživatelů a přibližně 70 jobů a další potřebná data.
+- `seed-mini` - Vytvoří 5 uživatelů, malé množství jobů a další potřebná data.
 
-## Deploy on Vercel
+```console
+[web]$ npm run seed
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Úprava dat v databázi
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Pro úpravu dat v databázi je možné použít nástroj [Prisma Studio](https://www.prisma.io/studio).
+
+```console
+[web]$ npx prisma studio
+```
+
+### Přihlašování
+
+Během vývoje je zablokováno odesílání e-mailů a uživateli je povoleno přihlášení na libovolnou e-mailovou adresu.
+
+Session cookies se nastavují jako Http Only a není je tedy možné odstranit automaticky, pokud dojde například ke změně dat v databázi. Před přihlášením je tedy nutné smazat cookie `next-auth.session-token` v prohlížeči.
