@@ -14,6 +14,11 @@ export class BasicPlanner implements Planner {
     this.datasource = datasource;
   }
 
+  /**
+   * Start creating a plan. Fills workers into jobs, creates rides, sets responsible workers.
+   * @param planId ID of the plan to start planning.
+   * @returns Planned jobs.
+   */
   async start(planId: string) {
     console.log("BasicPlanner: Starting plan %s", planId);
     const plan = await this.datasource.getPlan(planId);
@@ -77,9 +82,6 @@ export class BasicPlanner implements Planner {
       this.decategorizeWorkers(filledWithRides.remainingWorkers),
       plan.day
     );
-    // result.plannedJobs.forEach((element) => {
-    //   this.logPlannedJob(element);
-    // });
 
     return {
       success: true,
@@ -114,8 +116,9 @@ export class BasicPlanner implements Planner {
       if (!job.job.area.requiresCar) {
         continue;
       }
-      if (freeSlotsInJob(job) <= 0) {
-        continue;
+      // Don't add extra drivers if there is only one free slot left, they would have to drive alone
+      if (freeSlotsInJob(job) <= 1) {
+        break;
       }
       const driverRequest = this.findDriver(
         workersWithoutJob,
@@ -174,7 +177,7 @@ export class BasicPlanner implements Planner {
   }
 
   /**
-   * After basic planning, puts remaining workers into planned jobs if there are free seats in rides.
+   * After basic planning, puts remaining workers into planned jobs if there are free seats in rides. Does not add workers to shared rides.
    * @param plannedJobs Planned jobs.
    * @param workersWithoutJob Workers without job.
    * @returns Result of planning.
@@ -497,6 +500,12 @@ export class BasicPlanner implements Planner {
     );
   }
 
+  /**
+   * Finds all workers that are not in any of the rides
+   * @param workers Workers to look for
+   * @param rides List of rides to search in
+   * @returns Workers that are not in any of the rides
+   */
   getWorkersNotInRides(
     workers: WorkerComplete[],
     rides: RideWithPassengers[]
@@ -508,9 +517,16 @@ export class BasicPlanner implements Planner {
     return workers.filter((w) => !workersInRides.includes(w.id));
   }
 
+  /**
+   * Finds up to two rides that can be used to transport the given number of passengers.
+   * @param area Are of the job. Only rides to the same area are considered
+   * @param passengersCount How many free seats are needed
+   * @param plannedJobs Already planned jobs with rides
+   * @returns If success is true, availableRides contains one or two rides that can be used to transport the passengers. If success is false, no rides were found.
+   */
   findSharedRides(
     area: Area,
-    passengers_count: number,
+    passengersCount: number,
     plannedJobs: PlannedJob[]
   ): FindSharedRidesResult {
     const freeSeats = (ride: RideWithPassengers) => {
@@ -529,12 +545,12 @@ export class BasicPlanner implements Planner {
 
     // Sort by free seats descending
     ridesByJob.sort((a, b) => freeSeats(b.ride) - freeSeats(a.ride));
-    if (freeSeats(ridesByJob[0].ride) >= passengers_count) {
+    if (freeSeats(ridesByJob[0].ride) >= passengersCount) {
       // We can fit passengers in one ride, find the ride where free seats == passengers_count or a bit higher
-      // If all rides have free seats < passengers_count, we will use the ride with the least free seats (last one)
+      // If all rides have free seats > passengers_count, we will use the ride with the least free seats (last one)
       for (let i = 1; i < ridesByJob.length; i++) {
         const r = ridesByJob[i];
-        if (freeSeats(r.ride) < passengers_count) {
+        if (freeSeats(r.ride) < passengersCount) {
           return { success: true, availableRides: [ridesByJob[i - 1]] };
         }
       }
@@ -547,7 +563,7 @@ export class BasicPlanner implements Planner {
     for (let i = ridesByJob.length - 2; i > 0; i--) {
       const r1 = ridesByJob[i + 1];
       const r2 = ridesByJob[i];
-      if (freeSeats(r1.ride) + freeSeats(r2.ride) >= passengers_count) {
+      if (freeSeats(r1.ride) + freeSeats(r2.ride) >= passengersCount) {
         return { success: true, availableRides: [r1, r2] };
       }
     }
@@ -555,6 +571,10 @@ export class BasicPlanner implements Planner {
     return { success: false, availableRides: [] };
   }
 
+  /**
+   * Helper function to print planned job
+   * @param job Jobs to print
+   */
   logPlannedJob(job: PlannedJob) {
     console.log("------" + job.job.name + " [", job.job.area.name, "] ------");
     console.log(
@@ -576,12 +596,26 @@ export class BasicPlanner implements Planner {
     }
   }
 
+  /**
+   * Checks whether the given worker wants to do adoration on the given day
+   * @param worker Worker to check
+   * @param day Day to check
+   * @returns True if worker requires adoration on the given day, false otherwise
+   */
   workerRequiresAdoration(worker: WorkerComplete, day: Date): boolean {
     return worker.availability.adorationDays
       .map((d) => d.getTime())
       .includes(day.getTime());
   }
 
+  /**
+   * Finds a driver that can be used for the job.
+   * @param workers List of available workers.
+   * @param jobAllergens Allergens present on the job. If a driver is allergic to any of these, he cannot be used.
+   * @param areaSupportsAdoration Whether the area supports adoration. If true, a driver that requires adoration will be used if possible.
+   * @param day Day of the job. Used to check whether a driver requires adoration.
+   * @returns Driver that can be used for the job and the remaining unused workers. If no driver is found, null is returned.
+   */
   findDriver(
     workers: CategorizedWorkers,
     jobAllergens: string[],
@@ -616,6 +650,14 @@ export class BasicPlanner implements Planner {
     };
   }
 
+  /**
+   * Finds a strong worker that can be used for the job.
+   * @param workers List of available workers.
+   * @param jobAllergens Allergens present on the job. If a strong worker is allergic to any of these, he cannot be used.
+   * @param areaSupportsAdoration Whether the area supports adoration. If true, a strong worker that requires adoration will be used if possible.
+   * @param day Day of the job. Used to check whether a strong worker requires adoration.
+   * @returns Strong worker that can be used for the job and the remaining unused workers. If no strong worker is found, null is returned.
+   */
   findStrongWorker(
     workers: CategorizedWorkers,
     jobAllergens: string[],
@@ -650,6 +692,14 @@ export class BasicPlanner implements Planner {
     };
   }
 
+  /**
+   * Finds a worker that can be used for the job. Regular workers are considered first, then strong workers, then drivers.
+   * @param workers List of available workers.
+   * @param jobAllergens Allergens present on the job. If a worker is allergic to any of these, he cannot be used.
+   * @param areaSupportsAdoration Whether the area supports adoration. If true, a worker that requires adoration will be used if possible.
+   * @param day Day of the job. Used to check whether a worker requires adoration.
+   * @returns A suitable worker that can be used for the job and the remaining unused workers. If no worker is found, null is returned.
+   */
   findWorker(
     workers: CategorizedWorkers,
     jobAllergens: string[],
@@ -703,10 +753,21 @@ export class BasicPlanner implements Planner {
     return { worker: null, remainingWorkers: workers };
   }
 
+  /**
+   * Checks whether a worker is allergic to any of the allergens.
+   * @param worker Worker to check.
+   * @param allergens Allergens to check.
+   * @returns True if the worker is allergic to any of the allergens, false otherwise.
+   */
   isAllergicTo(worker: WorkerComplete, allergens: string[]): boolean {
     return worker.allergies.some((id) => allergens.includes(id));
   }
 
+  /**
+   * Splits the workers into three categories: drivers, strong workers, and regular workers.
+   * @param workers Workers to categorize.
+   * @returns Workers in three categories: drivers, strong workers, and regular workers.
+   */
   categorizeWorkers(workers: WorkerComplete[]): CategorizedWorkers {
     return workers.reduce(
       (acc: CategorizedWorkers, worker: WorkerComplete) => {
@@ -734,16 +795,31 @@ export class BasicPlanner implements Planner {
     );
   }
 
+  /**
+   * Decategorizes the workers into one array.
+   * @param workers Categorized workers.
+   * @returns All workers in one array.
+   */
   decategorizeWorkers(workers: CategorizedWorkers): WorkerComplete[] {
     return [...workers.drivers, ...workers.strong, ...workers.others];
   }
 
+  /**
+   * Gets the total number of workers in all categories combined.
+   * @param workers Categorized workers.
+   * @returns Total number of workers.
+   */
   numWorkers(workers: CategorizedWorkers): number {
     return (
       workers.drivers.length + workers.strong.length + workers.others.length
     );
   }
 
+  /**
+   * Converts between two different types of PlannedJob objects. This is a helper function for this planner.
+   * @param plannedJob A PlannedJob object.
+   * @returns A JobToBePlanned object.
+   */
   plannedJobToDatabaseJob(plannedJob: PlannedJob): JobToBePlanned {
     const responsibleWorker =
       plannedJob.responsibleWorker || plannedJob.workers[0] || undefined;
