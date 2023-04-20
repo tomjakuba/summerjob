@@ -8,12 +8,6 @@ interface RideListPrintProps {
 }
 
 export default function RideListPrint({ job, otherJobs }: RideListPrintProps) {
-  if (!job.rides || job.rides.length == 0) {
-    if (!job.proposedJob.area.requiresCar) {
-      return <div className="ride">Tato oblast nevyžaduje dopravu.</div>;
-    }
-  }
-
   const formatSingleRide = (ride: RideComplete, fromJobId?: string) => {
     const passengersFromOtherJobsIds = ride.passengers
       .filter((p) => !job.workers.map((w) => w.id).includes(p.id))
@@ -38,8 +32,7 @@ export default function RideListPrint({ job, otherJobs }: RideListPrintProps) {
       <>
         <div className="ride">
           <div className="ride-name">
-            {ride.car.name}
-            {fromJobId && ` [${fromJobId}]`}
+            {ride.car.name} {fromJobId && <i>[{fromJobId}]</i>}
           </div>
           <div className="driver-name d-flex">
             <div className="w-50">
@@ -113,6 +106,10 @@ export default function RideListPrint({ job, otherJobs }: RideListPrintProps) {
       !localPassengerIds.includes(w.id) && !otherPassengerIds.includes(w.id)
   );
 
+  const explanationForWorkersWithoutRide = job.proposedJob.area.requiresCar
+    ? "- Chybí doprava!"
+    : "";
+
   return (
     <div className="ms-1">
       {job.rides.map((r) => (
@@ -123,7 +120,9 @@ export default function RideListPrint({ job, otherJobs }: RideListPrintProps) {
       ))}
       {workersWithoutRide.length > 0 && (
         <div className="ride">
-          <div className="ride-name">Pěšky</div>
+          <div className="ride-name">
+            Pěšky {explanationForWorkersWithoutRide}
+          </div>
           <div className="driver-name d-flex"></div>
           {workersWithoutRide.map((w) => (
             <div className="ms-2 d-flex" key={`rideinfo-noride-${w.id}`}>
