@@ -82,7 +82,7 @@ async function initDB() {
     },
   });
 
-  return admin.email;
+  return admin;
 }
 
 async function wipeDB() {
@@ -119,28 +119,24 @@ async function changePermissions(email: string, permission: string) {
 }
 
 class Common {
+  private _adminId: string;
   private _email: string;
   private _session: string;
   private _url = "http://localhost:3000";
 
   private _lastIdentity: string = Id.ADMIN;
 
-  private getFirstAdminEmail = async () => {
-    if (this._email) return this._email;
-    this._email = await initDB();
-    return this._email;
-  };
-
   private getSession = async () => {
     if (this._session) return this._session;
-    const email = await this.getFirstAdminEmail();
-    this._session = await getSessionCookie(email);
+    this._session = await getSessionCookie(this._email);
     return this._session;
   };
 
   private setup = async () => {
     await wipeDB();
-    this._email = await this.getFirstAdminEmail();
+    const admin = await initDB();
+    this._adminId = admin.id;
+    this._email = admin.email;
     this._session = await this.getSession();
   };
 
@@ -148,6 +144,7 @@ class Common {
     if (!this._session) await this.setup();
     if (identity !== this._lastIdentity) {
       await changePermissions(this._email, identity);
+      this._lastIdentity = identity;
     }
     return request(this._url)
       .get(url)
@@ -190,6 +187,15 @@ class Common {
       .set("Cookie", [this._session])
       .set("Accept", "application/json")
       .send();
+  };
+
+  afterTestBlock = async () => {
+    // Delete all workers except the admin
+    const workers = await this.get("/api/workers", Id.WORKERS);
+    for (const worker of workers.body) {
+      if (worker.id === this._adminId) continue;
+      await api.del(`/api/workers/${worker.id}`, Id.WORKERS);
+    }
   };
 }
 

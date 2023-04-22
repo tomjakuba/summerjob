@@ -5,13 +5,6 @@ import { faker } from "@faker-js/faker/locale/cz";
 chai.should();
 
 describe("Workers", function () {
-  it("returns empty list of workers", async function () {
-    const resp = await api.get("/api/workers", Id.WORKERS);
-    resp.status.should.equal(200);
-    resp.body.should.be.an("array");
-    resp.body.should.have.lengthOf(0);
-  });
-
   it("returns 404 when worker does not exist", async function () {
     const resp = await api.get("/api/workers/1", Id.WORKERS);
     resp.status.should.equal(404);
@@ -39,7 +32,8 @@ describe("Workers", function () {
     const resp = await api.get("/api/workers", Id.WORKERS);
     resp.status.should.equal(200);
     resp.body.should.be.an("array");
-    resp.body.should.have.lengthOf(4);
+    // admin + 1 worker created in previous test + 3 workers created in previous test
+    resp.body.should.have.lengthOf(5);
   });
 
   it("returns a worker by id", async function () {
@@ -57,7 +51,7 @@ describe("Workers", function () {
 
     const body = {
       firstName: "Jane",
-      email: "janedoe@gmail.com",
+      phone: "000111222",
     };
     const patch = await api.patch(
       `/api/workers/${selectedWorker.id}`,
@@ -69,17 +63,35 @@ describe("Workers", function () {
     resp.body.should.be.an("object");
     resp.body.should.have.property("id");
     resp.body.firstName.should.equal("Jane");
-    resp.body.email.should.equal("janedoe@gmail.com");
+    resp.body.phone.should.equal("000111222");
   });
 
   it("deletes a worker", async function () {
-    const workers = await api.get("/api/workers", Id.WORKERS);
-    const selectedWorker = workers.body[0];
-    const resp = await api.del(`/api/workers/${selectedWorker.id}`, Id.WORKERS);
+    // Add a new worker
+    const workersBeforeAdding = await api.get("/api/workers", Id.WORKERS);
+    const body = createUserData();
+    const worker = await api.post("/api/workers", Id.WORKERS, body);
+    const workerId = worker.body.id;
+    // Check that the worker was added
+    const workersAfterAdding = await api.get("/api/workers", Id.WORKERS);
+    workersAfterAdding.body.should.have.lengthOf(
+      workersBeforeAdding.body.length + 1
+    );
+    (workersAfterAdding.body as any[])
+      .map((w) => w.id)
+      .should.include(workerId);
+    // Delete the worker
+    const resp = await api.del(`/api/workers/${workerId}`, Id.WORKERS);
     resp.status.should.equal(204);
-    const workers2 = await api.get("/api/workers", Id.WORKERS);
-    workers2.body.should.have.lengthOf(3);
-    workers2.body.should.not.include(selectedWorker);
+    // Check that the worker was deleted
+    const workersAfterRemoving = await api.get("/api/workers", Id.WORKERS);
+    // admin + 1 worker created in previous test + 3 workers created in previous test - 1 deleted worker
+    workersAfterRemoving.body.should.have.lengthOf(
+      workersBeforeAdding.body.length
+    );
+    (workersAfterRemoving.body as any[])
+      .map((w) => w.id)
+      .should.not.include(workerId);
   });
 
   it("should not be accessible without permission", async function () {
@@ -90,6 +102,8 @@ describe("Workers", function () {
       resp.body.should.be.empty;
     }
   });
+
+  this.afterAll(api.afterTestBlock);
 });
 
 function createUserData() {
