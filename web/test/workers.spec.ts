@@ -1,6 +1,5 @@
-import { Id, api } from "./common";
+import { Id, api, createWorkerData } from "./common";
 import chai from "chai";
-import { faker } from "@faker-js/faker/locale/cz";
 
 chai.should();
 
@@ -11,7 +10,7 @@ describe("Workers", function () {
   });
 
   it("creates a worker", async function () {
-    const body = createUserData();
+    const body = createWorkerData();
     const resp = await api.post("/api/workers", Id.WORKERS, body);
     resp.status.should.equal(201);
     resp.body.should.be.an("object");
@@ -20,7 +19,7 @@ describe("Workers", function () {
 
   it("creates multiple workers", async function () {
     const body = {
-      workers: [createUserData(), createUserData(), createUserData()],
+      workers: [createWorkerData(), createWorkerData(), createWorkerData()],
     };
     const resp = await api.post("/api/workers", Id.WORKERS, body);
     resp.status.should.equal(201);
@@ -69,7 +68,7 @@ describe("Workers", function () {
   it("deletes a worker", async function () {
     // Add a new worker
     const workersBeforeAdding = await api.get("/api/workers", Id.WORKERS);
-    const body = createUserData();
+    const body = createWorkerData();
     const worker = await api.post("/api/workers", Id.WORKERS, body);
     const workerId = worker.body.id;
     // Check that the worker was added
@@ -105,20 +104,5 @@ describe("Workers", function () {
 
   this.afterAll(api.afterTestBlock);
 });
-
-function createUserData() {
-  return {
-    firstName: faker.name.firstName(),
-    lastName: faker.name.lastName(),
-    email: faker.internet.email(),
-    phone: faker.phone.number("### ### ###"),
-    strong: Math.random() > 0.5,
-    allergyIds: [],
-    availability: {
-      workDays: [],
-      adorationDays: [],
-    },
-  };
-}
 
 export default {};

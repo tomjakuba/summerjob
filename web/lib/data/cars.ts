@@ -1,13 +1,14 @@
 import prisma from "lib/prisma/connection";
 import { CarComplete, CarCreateData, CarUpdateData } from "lib/types/car";
-import { cache_getActiveSummerJobEventId } from "./cache";
-import type { Worker } from "lib/prisma/client";
-import { NoActiveEventError } from "./internal-error";
 
 export async function getCarById(id: string): Promise<CarComplete | null> {
-  const car = await prisma.car.findUnique({
+  const car = await prisma.car.findFirst({
     where: {
       id,
+      deleted: false,
+      forEvent: {
+        isActive: true,
+      },
     },
     include: {
       owner: true,

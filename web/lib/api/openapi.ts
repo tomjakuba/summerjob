@@ -145,6 +145,39 @@ registry.registerPath({
   },
 });
 
+registry.registerPath({
+  path: "/api/cars/{id}",
+  method: "get",
+  description:
+    "Gets a car by ID. Permissions required (at least one): ADMIN, CARS, PLANS.",
+  summary: "Get a car by ID",
+  tags: ["Cars"],
+  parameters: [
+    {
+      name: "id",
+      in: "path",
+      required: true,
+      description: "The ID of the car to get.",
+      schema: {
+        type: "string",
+      },
+    },
+  ],
+  responses: {
+    200: {
+      description: "Car found. Returns the car.",
+      content: {
+        "application/json": {
+          schema: _CarCompleteSchema,
+        },
+      },
+    },
+    404: {
+      description: "Car not found.",
+    },
+  },
+});
+
 const _CarUpdateSchema = registry.register("CarUpdate", CarUpdateSchema);
 
 registry.registerPath({

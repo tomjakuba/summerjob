@@ -1,6 +1,7 @@
 import { randomBytes } from "crypto";
 import { PrismaClient } from "../lib/prisma/client";
 import request from "supertest";
+import { faker } from "@faker-js/faker/locale/cz";
 
 const prisma = new PrismaClient();
 
@@ -140,6 +141,19 @@ class Common {
     this._session = await this.getSession();
   };
 
+  createWorker = async () => {
+    const worker = await this.post(
+      "/api/workers",
+      Id.WORKERS,
+      createWorkerData()
+    );
+    return worker.body;
+  };
+
+  deleteWorker = async (workerId: string) => {
+    await this.del(`/api/workers/${workerId}`, Id.WORKERS);
+  };
+
   get = async (url: string, identity: string) => {
     if (!this._session) await this.setup();
     if (identity !== this._lastIdentity) {
@@ -157,6 +171,7 @@ class Common {
     if (!this._session) await this.setup();
     if (identity !== this._lastIdentity) {
       await changePermissions(this._email, identity);
+      this._lastIdentity = identity;
     }
     return request(this._url)
       .post(url)
@@ -169,6 +184,7 @@ class Common {
     if (!this._session) await this.setup();
     if (identity !== this._lastIdentity) {
       await changePermissions(this._email, identity);
+      this._lastIdentity = identity;
     }
     return request(this._url)
       .patch(url)
@@ -181,6 +197,7 @@ class Common {
     if (!this._session) await this.setup();
     if (identity !== this._lastIdentity) {
       await changePermissions(this._email, identity);
+      this._lastIdentity = identity;
     }
     return request(this._url)
       .delete(url)
@@ -196,6 +213,41 @@ class Common {
       if (worker.id === this._adminId) continue;
       await api.del(`/api/workers/${worker.id}`, Id.WORKERS);
     }
+    // Delete all cars
+    const cars = await this.get("/api/cars", Id.CARS);
+    for (const car of cars.body) {
+      await api.del(`/api/cars/${car.id}`, Id.CARS);
+    }
+  };
+}
+
+export function createWorkerData() {
+  return {
+    firstName: faker.name.firstName(),
+    lastName: faker.name.lastName(),
+    email: faker.internet.email(),
+    phone: faker.phone.number("### ### ###"),
+    strong: Math.random() > 0.5,
+    allergyIds: [],
+    availability: {
+      workDays: [],
+      adorationDays: [],
+    },
+  };
+}
+
+export function createCarData(ownerId: string) {
+  const odometerStart = Math.floor(Math.random() * 5000);
+  const odometerEnd = Math.floor(Math.random() * 1000 + odometerStart);
+  return {
+    ownerId,
+    name: faker.vehicle.vehicle(),
+    description: faker.vehicle.color(),
+    seats: Math.floor(Math.random() * 3 + 2),
+    odometerStart,
+    odometerEnd,
+    reimbursed: false,
+    reimbursementAmount: 1000,
   };
 }
 
