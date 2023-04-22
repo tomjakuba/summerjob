@@ -76,7 +76,7 @@ registry.registerPath({
       description: "List of supported allergies",
       content: {
         "application/json": {
-          schema: _AllergySchema,
+          schema: z.array(_AllergySchema),
         },
       },
     },
