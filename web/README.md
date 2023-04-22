@@ -56,3 +56,18 @@ Pro úpravu dat v databázi je možné použít nástroj [Prisma Studio](https:/
 Během vývoje je zablokováno odesílání e-mailů a uživateli je povoleno přihlášení na libovolnou e-mailovou adresu.
 
 Session cookies se nastavují jako Http Only a není je tedy možné odstranit automaticky, pokud dojde například ke změně dat v databázi. Před přihlášením je tedy nutné smazat cookie `next-auth.session-token` v prohlížeči.
+
+## Testování
+
+Pro spuštění API testů je nutné připravit testovací databázi. Tato databáze musí mít stejné schéma jako produkční, ale nesmí obsahovat data.
+Testování probíhá na produkční verzi aplikace.
+
+```console
+[web]$ npm run build
+[web]$ npm run start
+Application is running on http://localhost:3000
+```
+
+```
+[web]$ npm run test
+```

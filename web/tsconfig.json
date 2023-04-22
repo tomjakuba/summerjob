@@ -3,11 +3,7 @@
     "baseUrl": ".",
     "rootDir": ".",
     "target": "es5",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -33,9 +29,5 @@
     ".next/types/**/*.ts",
     "build/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "prisma",
-    "build"
-  ]
+  "exclude": ["node_modules", "prisma", "build", "test"]
 }

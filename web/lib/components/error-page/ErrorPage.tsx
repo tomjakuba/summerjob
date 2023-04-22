@@ -1,7 +1,6 @@
 "use client";
 
 import { ApiError } from "lib/types/api-error";
-import { default as t } from "lib/localization/cs-cz";
 import { useEffect, useState } from "react";
 
 type ErrorPageProps = {
@@ -29,7 +28,7 @@ export default function ErrorPage({ error }: ErrorPageProps) {
               Chyba:{" "}
               {error && (
                 <span className="font-monospace">
-                  {isApiError ? t(error.type) : message}
+                  {isApiError ? error.reason : message}
                 </span>
               )}
             </p>
