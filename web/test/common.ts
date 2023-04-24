@@ -143,6 +143,8 @@ class Common {
     this._session = await this.getSession();
   };
 
+  getSummerJobEventId = () => this._eventId;
+
   createWorker = async () => {
     const worker = await this.post(
       "/api/workers",
@@ -170,6 +172,20 @@ class Common {
       `/api/summerjob-events/${this._eventId}/areas/${areaId}`,
       Id.ADMIN
     );
+  };
+
+  createProposedJob = async (areaId: string) => {
+    const area = await this.createArea();
+    const job = await this.post(
+      `/api/proposed-jobs`,
+      Id.ADMIN,
+      createProposedJobData(area.id)
+    );
+    return job.body;
+  };
+
+  deleteProposedJob = async (jobId: string) => {
+    await this.del(`/api/proposed-jobs/${jobId}`, Id.ADMIN);
   };
 
   get = async (url: string, identity: string) => {
@@ -225,6 +241,10 @@ class Common {
   };
 
   afterTestBlock = async () => {
+    // Set the active event
+    await this.patch(`/api/summerjob-events/${this._eventId}`, Id.ADMIN, {
+      isActive: true,
+    });
     // Delete all workers except the admin
     const workers = await this.get("/api/workers", Id.WORKERS);
     for (const worker of workers.body) {
@@ -235,6 +255,17 @@ class Common {
     const cars = await this.get("/api/cars", Id.CARS);
     for (const car of cars.body) {
       await api.del(`/api/cars/${car.id}`, Id.CARS);
+    }
+    // Delete all areas - this also deletes all proposed and active jobs
+    const areas = await this.get(
+      `/api/summerjob-events/${this._eventId}/areas`,
+      Id.ADMIN
+    );
+    for (const area of areas.body) {
+      await api.del(
+        `/api/summerjob-events/${this._eventId}/areas/${area.id}`,
+        Id.ADMIN
+      );
     }
   };
 }
@@ -293,6 +324,14 @@ export function createProposedJobData(areaId: string) {
     hasFood: true,
     hasShower: true,
     availability: ["2023-04-24"],
+  };
+}
+
+export function createSummerJobEventData() {
+  return {
+    name: "Test Summer Job Event",
+    startDate: "2023-06-05",
+    endDate: "2023-06-11",
   };
 }
 
