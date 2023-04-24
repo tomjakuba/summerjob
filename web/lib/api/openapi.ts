@@ -938,6 +938,37 @@ registry.registerPath({
   },
 });
 
+registry.registerPath({
+  path: "/api/proposed-jobs/{proposedJobId}",
+  method: "get",
+  description:
+    "Gets a proposed job by ID. Permissions required (at least one): ADMIN, JOBS.",
+  summary: "Get a proposed job by ID",
+  tags: ["Proposed jobs"],
+  parameters: [
+    {
+      name: "proposedJobId",
+      in: "path",
+      required: true,
+      description: "ID of the proposed job to retrieve.",
+      schema: {
+        type: "string",
+        format: "uuid",
+      },
+    },
+  ],
+  responses: {
+    200: {
+      description: "Proposed job retrieved successfully.",
+      content: {
+        "application/json": {
+          schema: _ProposedJobComplete,
+        },
+      },
+    },
+  },
+});
+
 const _ProposedJobUpdateSchema = registry.register(
   "ProposedJobUpdate",
   ProposedJobUpdateSchema
@@ -1172,7 +1203,10 @@ registry.registerPath({
   },
 });
 
-const _AreaCreateSchema = registry.register("AreaCreate", AreaCreateSchema);
+const _AreaCreateSchema = registry.register(
+  "AreaCreate",
+  AreaCreateSchema.omit({ summerJobEventId: true })
+);
 
 registry.registerPath({
   path: "/api/summerjob-events/{summerJobEventId}/areas",

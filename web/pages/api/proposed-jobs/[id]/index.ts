@@ -1,7 +1,11 @@
 import { APIAccessController } from "lib/api/APIAccessControler";
 import { APIMethodHandler } from "lib/api/MethodHandler";
 import { validateOrSendError } from "lib/api/validator";
-import { deleteProposedJob, updateProposedJob } from "lib/data/proposed-jobs";
+import {
+  deleteProposedJob,
+  getProposedJobById,
+  updateProposedJob,
+} from "lib/data/proposed-jobs";
 import logger from "lib/logger/logger";
 import { ExtendedSession, Permission } from "lib/types/auth";
 import { APILogEvent } from "lib/types/logger";
@@ -10,6 +14,20 @@ import {
   ProposedJobUpdateDataInput,
 } from "lib/types/proposed-job";
 import { NextApiRequest, NextApiResponse } from "next";
+
+async function get(
+  req: NextApiRequest,
+  res: NextApiResponse,
+  session: ExtendedSession
+) {
+  const id = req.query.id as string;
+  const job = await getProposedJobById(id);
+  if (!job) {
+    res.status(404).end();
+    return;
+  }
+  res.status(200).json(job);
+}
 
 export type ProposedJobAPIPatchData = ProposedJobUpdateDataInput;
 async function patch(
@@ -44,5 +62,5 @@ async function del(
 
 export default APIAccessController(
   [Permission.JOBS],
-  APIMethodHandler({ patch, del })
+  APIMethodHandler({ get, patch, del })
 );

@@ -23,9 +23,6 @@ export async function getProposedJobById(
       activeJobs: true,
     },
   });
-  if (!job) {
-    return null;
-  }
   return job;
 }
 

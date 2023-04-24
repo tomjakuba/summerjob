@@ -83,7 +83,7 @@ async function initDB() {
     },
   });
 
-  return admin;
+  return { event, admin };
 }
 
 async function wipeDB() {
@@ -123,6 +123,7 @@ class Common {
   private _adminId: string;
   private _email: string;
   private _session: string;
+  private _eventId: string;
   private _url = "http://localhost:3000";
 
   private _lastIdentity: string = Id.ADMIN;
@@ -135,9 +136,10 @@ class Common {
 
   private setup = async () => {
     await wipeDB();
-    const admin = await initDB();
+    const { event, admin } = await initDB();
     this._adminId = admin.id;
     this._email = admin.email;
+    this._eventId = event.id;
     this._session = await this.getSession();
   };
 
@@ -152,6 +154,22 @@ class Common {
 
   deleteWorker = async (workerId: string) => {
     await this.del(`/api/workers/${workerId}`, Id.WORKERS);
+  };
+
+  createArea = async () => {
+    const area = await this.post(
+      `/api/summerjob-events/${this._eventId}/areas`,
+      Id.ADMIN,
+      createAreaData()
+    );
+    return area.body;
+  };
+
+  deleteArea = async (areaId: string) => {
+    await this.del(
+      `/api/summerjob-events/${this._eventId}/areas/${areaId}`,
+      Id.ADMIN
+    );
   };
 
   get = async (url: string, identity: string) => {
@@ -248,6 +266,33 @@ export function createCarData(ownerId: string) {
     odometerEnd,
     reimbursed: false,
     reimbursementAmount: 1000,
+  };
+}
+
+export function createAreaData() {
+  return {
+    name: faker.address.city(),
+    requiresCar: true,
+    supportsAdoration: true,
+  };
+}
+
+export function createProposedJobData(areaId: string) {
+  return {
+    areaId: areaId,
+    allergens: ["HAY"],
+    privateDescription: "string",
+    publicDescription: "string",
+    name: "string",
+    address: "string",
+    contact: "string",
+    maxWorkers: 1,
+    minWorkers: 1,
+    strongWorkers: 0,
+    requiredDays: 1,
+    hasFood: true,
+    hasShower: true,
+    availability: ["2023-04-24"],
   };
 }
 
