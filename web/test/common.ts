@@ -162,6 +162,15 @@ class Common {
     await this.del(`/api/workers/${workerId}`, Id.WORKERS);
   };
 
+  createCar = async (driverId: string) => {
+    const car = await this.post("/api/cars", Id.CARS, createCarData(driverId));
+    return car.body;
+  };
+
+  deleteCar = async (carId: string) => {
+    await this.del(`/api/cars/${carId}`, Id.CARS);
+  };
+
   createArea = async () => {
     const area = await this.post(
       `/api/summerjob-events/${this.getSummerJobEventId()}/areas`,
@@ -190,6 +199,95 @@ class Common {
 
   deleteProposedJob = async (jobId: string) => {
     await this.del(`/api/proposed-jobs/${jobId}`, Id.ADMIN);
+  };
+
+  createPlanWithJob = async () => {
+    const plan = await api.post(
+      "/api/plans",
+      Id.PLANS,
+      createPlanData(api.getSummerJobEventEnd())
+    );
+    const area = await api.createArea();
+    const job = await api.createProposedJob(area.id);
+    const payload = {
+      proposedJobId: job.id,
+      privateDescription: faker.lorem.paragraph(),
+      publicDescription: faker.lorem.paragraph(),
+    };
+    const activeJob = await api.post(
+      `/api/plans/${plan.body.id}/active-jobs`,
+      Id.PLANS,
+      payload
+    );
+    return { plan: plan.body, area: area, job: activeJob.body };
+  };
+
+  /**
+   * Creates a plan with two jobs with two workers each, one of which has a ride.
+   * @returns Created plan, area, job with ride (first) and job without ride, each with two workers.
+   */
+  createPlanWithJobsAndRide = async () => {
+    // Add two workers to a job, plan a ride for them
+    const { plan, area, job } = await this.createPlanWithJob();
+    const driver = await this.createWorker();
+    const passenger = await this.createWorker();
+    await this.post(`/api/plans/${plan.id}/active-jobs/${job.id}`, Id.PLANS, {
+      workerIds: [driver.id, passenger.id],
+    });
+    const car = await this.createCar(driver.id);
+    const payload = {
+      carId: car.id,
+      driverId: driver.id,
+      passengerIds: [passenger.id],
+    };
+    const ride = await this.post(
+      `/api/plans/${plan.id}/active-jobs/${job.id}/rides`,
+      Id.PLANS,
+      payload
+    );
+    // Set driver as a responsible worker for the job
+    await this.post(`/api/plans/${plan.id}/active-jobs/${job.id}`, Id.PLANS, {
+      responsibleWorkerId: [driver.id],
+    });
+
+    // Add another job to the plan with two different workers
+    const otherJob = await this.createProposedJob(area.id);
+    await this.post(`/api/plans/${plan.id}/active-jobs`, Id.PLANS, {
+      proposedJobId: otherJob.id,
+      privateDescription: faker.lorem.paragraph(),
+      publicDescription: "",
+    });
+    const workers = await Promise.all([
+      this.createWorker(),
+      this.createWorker(),
+    ]);
+    await this.post(
+      `/api/plans/${plan.id}/active-jobs/${otherJob.id}`,
+      Id.PLANS,
+      {
+        workerIds: workers.map((w) => w.id),
+      }
+    );
+    await this.post(
+      `/api/plans/${plan.id}/active-jobs/${otherJob.id}`,
+      Id.PLANS,
+      {
+        responsibleWorkerId: [workers[0].id],
+      }
+    );
+
+    return {
+      plan,
+      area,
+      jobs: [
+        { id: job.id, ride: ride.body, workerIds: [driver.id, passenger.id] },
+        { id: otherJob.id, workerIds: workers.map((w) => w.id) },
+      ],
+    };
+  };
+
+  deletePlan = async (planId: string) => {
+    await this.del(`/api/plans/${planId}`, Id.ADMIN);
   };
 
   get = async (url: string, identity: string) => {

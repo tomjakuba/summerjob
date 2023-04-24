@@ -12,8 +12,7 @@
     "delete-db": "ts-node --skip-project prisma/drop-tables.ts",
     "create-session": "ts-node --skip-project scripts/create-session.ts",
     "create-admin": "ts-node --skip-project scripts/create-admin.ts",
-    "test2": "ts-mocha -p 'test/tsconfig.json' 'test/**/*.spec.ts'",
-    "test": "ts-mocha -p 'test/tsconfig.json' 'test/plans.spec.ts'"
+    "test": "ts-mocha -p 'test/tsconfig.json' 'test/**/*.spec.ts'"
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^4.5.3",

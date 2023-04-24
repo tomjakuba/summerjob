@@ -39,7 +39,6 @@ export const ActiveJobUpdateSchema = z
   .object({
     privateDescription: z.string(),
     publicDescription: z.string(),
-    proposedJobId: z.string(),
     workerIds: z.array(z.string()),
     responsibleWorkerId: z.string(),
     rideIds: z.array(z.string()),
