@@ -1586,7 +1586,7 @@ try {
       title: "SummerJob API",
       version: "1.0",
       description:
-        "All endpoints require session cookies to be set. Before you start trying the commands below, you must sign into the SummerJob website to obtain session cookie. Schema available at */api/swagger.json* .",
+        "All endpoints require session cookies to be set. Before you start trying the commands below, you must sign into the SummerJob website to obtain session cookie. Schema available at */api/swagger.json* . When sending dates to any of the following endpoints, use ISO 8601 format (e.g. 2021-07-01T00:00:00.000Z).",
     },
   });
 } catch (err) {

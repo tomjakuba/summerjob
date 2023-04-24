@@ -45,8 +45,8 @@ async function getSessionCookie(email: string) {
 async function initDB() {
   const start = new Date();
   start.setUTCFullYear(start.getUTCFullYear() + 1);
-  start.setUTCMonth(Math.random() * 12);
-  start.setUTCDate(Math.random() * 28);
+  start.setUTCMonth(10);
+  start.setUTCDate(10);
   start.setUTCHours(0);
   start.setUTCMinutes(0);
   start.setUTCSeconds(0);
@@ -123,7 +123,7 @@ class Common {
   private _adminId: string;
   private _email: string;
   private _session: string;
-  private _eventId: string;
+  private _event: { id: string; start: Date; end: Date };
   private _url = "http://localhost:3000";
 
   private _lastIdentity: string = Id.ADMIN;
@@ -139,11 +139,15 @@ class Common {
     const { event, admin } = await initDB();
     this._adminId = admin.id;
     this._email = admin.email;
-    this._eventId = event.id;
+    this._event = { id: event.id, start: event.startDate, end: event.endDate };
     this._session = await this.getSession();
   };
 
-  getSummerJobEventId = () => this._eventId;
+  getSummerJobEventId = () => this._event.id;
+
+  getSummerJobEventStart = () => this._event.start;
+
+  getSummerJobEventEnd = () => this._event.end;
 
   createWorker = async () => {
     const worker = await this.post(
@@ -160,7 +164,7 @@ class Common {
 
   createArea = async () => {
     const area = await this.post(
-      `/api/summerjob-events/${this._eventId}/areas`,
+      `/api/summerjob-events/${this.getSummerJobEventId()}/areas`,
       Id.ADMIN,
       createAreaData()
     );
@@ -169,7 +173,7 @@ class Common {
 
   deleteArea = async (areaId: string) => {
     await this.del(
-      `/api/summerjob-events/${this._eventId}/areas/${areaId}`,
+      `/api/summerjob-events/${this.getSummerJobEventId()}/areas/${areaId}`,
       Id.ADMIN
     );
   };
@@ -242,9 +246,13 @@ class Common {
 
   afterTestBlock = async () => {
     // Set the active event
-    await this.patch(`/api/summerjob-events/${this._eventId}`, Id.ADMIN, {
-      isActive: true,
-    });
+    await this.patch(
+      `/api/summerjob-events/${this.getSummerJobEventId()}`,
+      Id.ADMIN,
+      {
+        isActive: true,
+      }
+    );
     // Delete all workers except the admin
     const workers = await this.get("/api/workers", Id.WORKERS);
     for (const worker of workers.body) {
@@ -258,12 +266,12 @@ class Common {
     }
     // Delete all areas - this also deletes all proposed and active jobs
     const areas = await this.get(
-      `/api/summerjob-events/${this._eventId}/areas`,
+      `/api/summerjob-events/${this.getSummerJobEventId()}/areas`,
       Id.ADMIN
     );
     for (const area of areas.body) {
       await api.del(
-        `/api/summerjob-events/${this._eventId}/areas/${area.id}`,
+        `/api/summerjob-events/${this.getSummerJobEventId()}/areas/${area.id}`,
         Id.ADMIN
       );
     }
@@ -323,15 +331,21 @@ export function createProposedJobData(areaId: string) {
     requiredDays: 1,
     hasFood: true,
     hasShower: true,
-    availability: ["2023-04-24"],
+    availability: ["2023-04-24T00:00:00.000Z"],
   };
 }
 
 export function createSummerJobEventData() {
   return {
     name: "Test Summer Job Event",
-    startDate: "2023-06-05",
-    endDate: "2023-06-11",
+    startDate: "2023-06-05T00:00:00.000Z",
+    endDate: "2023-06-11T00:00:00.000Z",
+  };
+}
+
+export function createPlanData(date: Date) {
+  return {
+    day: date.toISOString(),
   };
 }
 

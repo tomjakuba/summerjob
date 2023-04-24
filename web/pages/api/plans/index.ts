@@ -43,7 +43,9 @@ async function post(
     return;
   }
   if (date < activeEvent.startDate || date > activeEvent.endDate) {
-    res.status(400).json({ error: new ApiBadRequestError("Invalid date.") });
+    res
+      .status(400)
+      .json({ error: new ApiBadRequestError("Date out of range.") });
     return;
   }
   await logger.apiRequest(APILogEvent.PLAN_CREATE, "plans", req.body, session);

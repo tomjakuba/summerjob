@@ -29,7 +29,6 @@ function formatUserRow(
   onUserEdited: () => void
 ) {
   const permissions = user.permissions;
-  // TODO: translate permissions
   const permissionString = permissions.join(", ");
   return [
     `${user.lastName}, ${user.firstName}`,

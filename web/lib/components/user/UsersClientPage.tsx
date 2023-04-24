@@ -90,7 +90,6 @@ function getFulltextData(users?: UserComplete[]) {
 function getPermissions(): UsersFiltersPermission[] {
   const perms = [{ id: "all", name: "Vyberte oprávnění" }];
   for (const perm of Object.values(Permission)) {
-    // TODO: translate permissions
     perms.push({ id: perm, name: perm });
   }
   return perms;
