@@ -1,6 +1,40 @@
 # Webová část aplikace SummerJob plánovač
 
+Instrukce pro spuštění aplikace v produkčním režimu se nachází v kořenové složce repozitáře.
+
 ## Vývoj
+
+### Adresářová struktura
+
+Použitý framework [Next.js](https://nextjs.org/) ve verzi 13, beta, využívá routing podle adresářů. Stránky zodpovědné za routing se nachází v adresáři `app`. Složky s názvem v kulatých závorkách - `(user)` - se v URL neprojeví a slouží pouze pro organizaci souborů. Složky s názvem v hranatých závorkách - `[id]` - slouží pro předání dynamických parametrů.
+
+Složka `app` využívá Server-side rendering (SSR), takže je možné v těchto stránkách např. získat data z databáze bez nutnosti volání API. Interaktivní stránky, které je potřeba vyrenderovat na klientovi, se nacházejí v adresáři `lib/components` a jsou do serverových stránek importovány.
+
+API se nachází v adresáři `pages/api`. Složka `pages/api` je speciální složka, která také provádí vyhodnocení na serveru. Ostatní složky ve složce `pages` jsou renderované na klientovi. Všechny API endpointy jsou vytvořeny pomocí [Next.js API routes](https://nextjs.org/docs/api-routes/introduction). Všechny API endpointy s výjimkou přihlašování jsou přístupné pouze pro přihlášené uživatele. Tým Next.js v současnosti pracuje na převedení API endpointů do složky `app`, ale pro fungování této aplikace tato změna nemá vliv a obě varianty budou nadále podporovány.
+
+```
+/
+├── app/                    # Webové stránky
+├── lib/
+│   ├── api/                # Pomocné soubory pro API, OpenAPI, Swagger
+│   ├── auth/               # Pomocné soubory pro ověřování uživatelů
+│   ├── components/         # Interaktivní komponenty pro webové stránky (většina obsahu webu)
+│   ├── data/               # Spojení s databází, přístup k datům
+│   ├── fetcher/            # Funkce pro client-side přístup k API
+│   ├── logger/             # Logování
+│   ├── prisma/             # Automaticky generované soubory pro přístup k DB pomocí Prisma
+│   ├── types/              # Typové definice Zod, TypeScript
+├── pages/
+│   ├── api/                # API endpointy
+│       ├── /auth           # Konfigurace NextAuth.js pro přihlašování
+├── prisma/                 # Konfigurace databáze, definice schématu
+├── public/                 # Veřejné soubory (favicon, logo)
+├── scripts/                # Pomocné skripty pro vývoj nebo první nastavení
+├── styles/                 # CSS soubory, importované do komponent
+├── test/                   # API testy
+```
+
+### Lokální spuštění
 
 Potřebné nástroje navíc:
 
@@ -60,6 +94,8 @@ Session cookies se nastavují jako Http Only a není je tedy možné odstranit a
 ## Testování
 
 Pro spuštění API testů je nutné připravit testovací databázi. Tato databáze musí mít stejné schéma jako produkční, ale nesmí obsahovat data.
+Nastavte v souboru `.env` v adresáři `web` proměnnou `DATABASE_URL` na adresu testovací databáze.
+
 Testování probíhá na produkční verzi aplikace.
 
 ```console
@@ -71,3 +107,5 @@ Application is running on http://localhost:3000
 ```
 [web]$ npm run test
 ```
+
+Pokud chcete testy opakovat, restartujte aplikaci a spusťte testy znovu.
