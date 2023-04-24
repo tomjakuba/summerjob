@@ -7,12 +7,12 @@ import { useState } from "react";
 import AllergyPill from "../forms/AllergyPill";
 import ErrorMessageModal from "../modal/ErrorMessageModal";
 import SuccessProceedModal from "../modal/SuccessProceedModal";
-import { Serialized } from "lib/types/serialize";
 import DaysSelection from "../forms/DaysSelection";
 import { datesBetween } from "lib/helpers/helpers";
 import { useRouter } from "next/navigation";
 import { useAPIWorkerCreate } from "lib/fetcher/worker";
 import { Allergy } from "lib/types/allergy";
+import FormWarning from "../forms/FormWarning";
 
 const schema = WorkerCreateSchema;
 type WorkerForm = z.input<typeof schema>;
@@ -76,9 +76,7 @@ export default function CreateWorker({
               placeholder="Jméno"
               {...register("firstName")}
             />
-            {errors.firstName?.message && (
-              <p>{errors.firstName.message as string}</p>
-            )}
+            <FormWarning message={errors.firstName?.message} />
             <label className="form-label fw-bold mt-4" htmlFor="surname">
               Příjmení
             </label>
@@ -89,6 +87,7 @@ export default function CreateWorker({
               placeholder="Příjmení"
               {...register("lastName")}
             />
+            <FormWarning message={errors.lastName?.message} />
             <label className="form-label fw-bold mt-4" htmlFor="phone">
               Telefonní číslo
             </label>
@@ -101,6 +100,7 @@ export default function CreateWorker({
               placeholder="(+420) 123 456 789"
               {...register("phone")}
             />
+            <FormWarning message={errors.phone?.message} />
             <label className="form-label fw-bold mt-4" htmlFor="email">
               E-mail
             </label>
@@ -108,8 +108,10 @@ export default function CreateWorker({
               id="email"
               className="form-control p-0 fs-5"
               type="email"
+              placeholder="uzivatel@example.cz"
               {...register("email")}
             />
+            <FormWarning message={errors.email?.message} />
             <label
               className="form-label d-block fw-bold mt-4"
               htmlFor="availability.workDays"

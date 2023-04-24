@@ -18,6 +18,7 @@ import DaysSelection from "../forms/DaysSelection";
 import { datesBetween, pick } from "lib/helpers/helpers";
 import { useRouter } from "next/navigation";
 import { Allergy } from "lib/types/allergy";
+import FormWarning from "../forms/FormWarning";
 
 const schema = WorkerUpdateSchema;
 type WorkerForm = z.input<typeof schema>;
@@ -107,9 +108,7 @@ export default function EditWorker({
               placeholder="Jméno"
               {...register("firstName")}
             />
-            {errors.firstName?.message && (
-              <p>{errors.firstName.message as string}</p>
-            )}
+            <FormWarning message={errors.firstName?.message} />
             <label className="form-label fw-bold mt-4" htmlFor="surname">
               Příjmení
             </label>
@@ -120,6 +119,7 @@ export default function EditWorker({
               placeholder="Příjmení"
               {...register("lastName")}
             />
+            <FormWarning message={errors.lastName?.message} />
             <label className="form-label fw-bold mt-4" htmlFor="phone">
               Telefonní číslo
             </label>
@@ -132,6 +132,7 @@ export default function EditWorker({
               placeholder="(+420) 123 456 789"
               {...register("phone")}
             />
+            <FormWarning message={errors.phone?.message} />
             <label className="form-label fw-bold mt-4" htmlFor="email">
               E-mail
             </label>
@@ -141,6 +142,7 @@ export default function EditWorker({
               type="email"
               {...register("email")}
             />
+            <FormWarning message={errors.email?.message} />
             <p className="text-muted mt-1">
               {isProfilePage
                 ? "Změnou e-mailu dojde k odhlášení z aplikace."
