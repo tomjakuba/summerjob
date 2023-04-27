@@ -229,6 +229,7 @@ export async function unblockRegisteredUsers(
           eventId,
         },
       },
+      deleted: false,
     },
     data: {
       blocked: false,
