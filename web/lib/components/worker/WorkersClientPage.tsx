@@ -39,19 +39,19 @@ export default function WorkersClientPage({
     <>
       <PageHeader title="Pracanti">
         <Link href={`/workers/import`}>
-          <button className="btn btn-warning btn-with-icon" type="button">
+          <button className="btn btn-primary btn-with-icon" type="button">
             <i className="fas fa-users"></i>
             <span>Hromadný import</span>
           </button>
         </Link>
         <Link href={`/workers/new`}>
-          <button className="btn btn-warning btn-with-icon" type="button">
+          <button className="btn btn-primary btn-with-icon" type="button">
             <i className="fas fa-user-plus"></i>
             <span>Přidat pracanta</span>
           </button>
         </Link>
         <Link href={`/print-workers`} prefetch={false}>
-          <button className="btn btn-primary btn-with-icon" type="button">
+          <button className="btn btn-secondary btn-with-icon" type="button">
             <i className="fas fa-print"></i>
             <span>Tisknout</span>
           </button>

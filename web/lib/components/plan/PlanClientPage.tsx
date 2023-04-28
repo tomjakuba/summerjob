@@ -186,7 +186,7 @@ export default function PlanClientPage({
             }
           >
             <button
-              className="btn btn-warning btn-with-icon"
+              className="btn btn-primary btn-with-icon"
               type="button"
               onClick={openModal}
             >
@@ -203,7 +203,7 @@ export default function PlanClientPage({
               <span>Vygenerovat plán</span>
             </button>
             <Link href={`/print-plan/${planData?.id}`} prefetch={false}>
-              <button className="btn btn-primary btn-with-icon" type="button">
+              <button className="btn btn-secondary btn-with-icon" type="button">
                 <i className="fas fa-print"></i>
                 <span>Tisknout</span>
               </button>
@@ -319,7 +319,7 @@ export default function PlanClientPage({
               >
                 <p>Plán byl zařazen do fronty na generování.</p>
                 <button
-                  className="btn pt-2 pb-2 btn-warning float-end"
+                  className="btn pt-2 pb-2 btn-primary float-end"
                   onClick={() => setShowGenerateConfirmation(false)}
                 >
                   Pokračovat

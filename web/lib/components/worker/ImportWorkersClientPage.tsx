@@ -119,7 +119,7 @@ export default function ImportWorkersClientPage({
             <div className="d-flex justify-content-end">
               <button
                 type="button"
-                className="btn btn-warning mt-3"
+                className="btn btn-primary mt-3"
                 disabled={!isImportAllowed}
                 onClick={() => startImport()}
               >

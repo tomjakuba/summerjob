@@ -37,7 +37,7 @@ export default function CarsClientPage({ initialData }: CarsClientPageProps) {
     <>
       <PageHeader title={"Seznam vozidel"}>
         <Link href="/cars/new">
-          <button className="btn btn-warning btn-with-icon" type="button">
+          <button className="btn btn-primary btn-with-icon" type="button">
             <i className="fas fa-car"></i>
             <span>Nové auto</span>
           </button>

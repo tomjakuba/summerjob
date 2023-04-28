@@ -10,7 +10,7 @@ export default function SuccessProceedModal({
     <Modal title="Úspěch" size={ModalSize.MEDIUM} onClose={onClose}>
       <p>Změny byly úspěšně uloženy.</p>
       <button
-        className="btn pt-2 pb-2 btn-warning float-end"
+        className="btn pt-2 pb-2 btn-primary float-end"
         onClick={() => onClose()}
       >
         Pokračovat

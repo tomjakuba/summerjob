@@ -84,7 +84,7 @@ export default function MoveWorkerModal({
           Zpět
         </button>
         <button
-          className="btn pt-2 pb-2 btn-warning"
+          className="btn pt-2 pb-2 btn-primary"
           onClick={() => onConfirm()}
           disabled={!canSubmit}
         >

@@ -132,7 +132,7 @@ export default function AddJobToPlanForm({
         {errors.jobs && <div className="text-danger">Vyberte job!</div>}
 
         <button
-          className="btn btn-warning mt-4 float-end"
+          className="btn btn-primary mt-4 float-end"
           type="submit"
           disabled={isMutating}
         >

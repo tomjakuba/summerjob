@@ -199,7 +199,7 @@ export default function CreateWorker({
               </button>
               <input
                 type={"submit"}
-                className="btn btn-warning mt-4"
+                className="btn btn-primary mt-4"
                 value={"Uložit"}
                 disabled={isMutating}
               />

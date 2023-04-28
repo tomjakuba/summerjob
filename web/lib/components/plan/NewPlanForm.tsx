@@ -68,7 +68,7 @@ export default function NewPlanForm({
       <div className="row">
         <div className="col">
           <button
-            className="btn btn-warning mt-2 float-end pt-2 pb-2"
+            className="btn btn-primary mt-2 float-end pt-2 pb-2"
             type="submit"
             onClick={onSubmit}
             disabled={isMutating}

@@ -55,7 +55,7 @@ export default function PlansClientPage({
     <>
       <PageHeader title="Seznam plánů" isFluid={false}>
         <button
-          className="btn btn-warning btn-with-icon"
+          className="btn btn-primary btn-with-icon"
           type="button"
           onClick={openModal}
         >

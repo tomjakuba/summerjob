@@ -80,7 +80,7 @@ export default function AddRideButton({ job }: AddRideButtonProps) {
           </select>
           <div className="d-flex justify-content-end mt-3">
             <button
-              className="btn pt-2 pb-2 btn-warning"
+              className="btn pt-2 pb-2 btn-primary"
               onClick={addRide}
               disabled={isMutating}
             >

@@ -14,7 +14,7 @@ export default function EventsHeader() {
   return (
     <PageHeader title={"Ročníky"} isFluid={false}>
       <button
-        className="btn btn-warning btn-with-icon"
+        className="btn btn-primary btn-with-icon"
         onClick={() => setIsNewEventModalOpen(true)}
       >
         <i className="far fa-plus"></i>

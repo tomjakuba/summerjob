@@ -93,7 +93,7 @@ export default function EditAreaForm({ sArea }: EditAreaProps) {
               </button>
               <input
                 type={"submit"}
-                className="btn btn-warning mt-4"
+                className="btn btn-primary mt-4"
                 value={"Uložit"}
                 disabled={isMutating}
               />

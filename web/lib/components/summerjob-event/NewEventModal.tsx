@@ -106,7 +106,7 @@ export default function NewEventModal({
         <div className="d-flex justify-content-end mt-4">
           <input
             type="submit"
-            className="btn pt-2 pb-2 btn-warning"
+            className="btn pt-2 pb-2 btn-primary"
             value={"Vytvořit"}
             disabled={isMutating}
           />

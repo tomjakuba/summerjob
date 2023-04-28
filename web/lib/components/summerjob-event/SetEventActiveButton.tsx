@@ -40,7 +40,7 @@ export default function SetEventActiveButton({
       )}
       {!smjEvent.isActive && (
         <button
-          className="btn btn-warning pt-2 pb-2 align-self-start"
+          className="btn btn-primary pt-2 pb-2 align-self-start"
           onClick={() => setIsSetActiveEventModalOpen(true)}
         >
           <i className="far fa-clock me-2"></i>

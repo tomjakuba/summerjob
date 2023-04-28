@@ -77,7 +77,7 @@ export default function ProposedJobsClientPage({
     <>
       <PageHeader title="Dostupné joby">
         <Link href="/jobs/new">
-          <button className="btn btn-warning btn-with-icon" type="button">
+          <button className="btn btn-primary btn-with-icon" type="button">
             <i className="fas fa-briefcase"></i>
             <span>Nový job</span>
           </button>

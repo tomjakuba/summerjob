@@ -56,7 +56,7 @@ export default function EditUserForm({ user, onUpdate }: EditUserProps) {
         </div>
         <input
           type={"submit"}
-          className="btn btn-warning float-end pt-2 pb-2"
+          className="btn btn-primary float-end pt-2 pb-2"
           value={"Uložit"}
           disabled={isMutating}
         />
