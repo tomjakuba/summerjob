@@ -37,6 +37,13 @@ export default function CreateWorker({
     formState: { errors },
   } = useForm<WorkerForm>({
     resolver: zodResolver(schema),
+    defaultValues: {
+      availability: {
+        workDays: [],
+        adorationDays: [],
+      },
+      allergyIds: [],
+    },
   });
 
   const router = useRouter();
@@ -76,7 +83,9 @@ export default function CreateWorker({
               placeholder="Jméno"
               {...register("firstName")}
             />
-            <FormWarning message={errors.firstName?.message} />
+            <FormWarning
+              message={errors.firstName?.message ? "Zadejte jméno" : undefined}
+            />
             <label className="form-label fw-bold mt-4" htmlFor="surname">
               Příjmení
             </label>
@@ -87,7 +96,11 @@ export default function CreateWorker({
               placeholder="Příjmení"
               {...register("lastName")}
             />
-            <FormWarning message={errors.lastName?.message} />
+            <FormWarning
+              message={
+                errors.lastName?.message ? "Zadejte příjmení" : undefined
+              }
+            />
             <label className="form-label fw-bold mt-4" htmlFor="phone">
               Telefonní číslo
             </label>
@@ -100,7 +113,11 @@ export default function CreateWorker({
               placeholder="(+420) 123 456 789"
               {...register("phone")}
             />
-            <FormWarning message={errors.phone?.message} />
+            <FormWarning
+              message={
+                errors.phone?.message ? "Zadejte telefonní číslo" : undefined
+              }
+            />
             <label className="form-label fw-bold mt-4" htmlFor="email">
               E-mail
             </label>
@@ -111,7 +128,9 @@ export default function CreateWorker({
               placeholder="uzivatel@example.cz"
               {...register("email")}
             />
-            <FormWarning message={errors.email?.message} />
+            <FormWarning
+              message={errors.email?.message ? "Zadejte e-mail" : undefined}
+            />
             <label
               className="form-label d-block fw-bold mt-4"
               htmlFor="availability.workDays"

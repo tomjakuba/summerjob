@@ -40,7 +40,10 @@ export default function CreateProposedJobForm({
     setValue,
   } = useForm<ProposedJobCreateData>({
     resolver: zodResolver(ProposedJobCreateSchema),
-    defaultValues: {},
+    defaultValues: {
+      availability: [],
+      allergens: [],
+    },
   });
 
   const onSubmit = (data: ProposedJobCreateData) => {
