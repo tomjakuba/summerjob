@@ -15,7 +15,7 @@ RUN \
 
 
 # Rebuild the source code only when needed
-FROM node:18 AS builder
+FROM node:18-slim AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -25,7 +25,7 @@ RUN npx prisma generate
 RUN npm run build
 
 # Production image, copy all the files and run node
-FROM node:18 AS runner
+FROM node:18-slim AS runner
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=builder /app/prisma ./prisma
