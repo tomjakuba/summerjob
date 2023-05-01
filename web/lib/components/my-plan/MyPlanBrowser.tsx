@@ -58,7 +58,7 @@ export default function MyPlanBrowser({ plans }: MyPlanBrowserProps) {
                   {selectedPlan.job.responsibleWorkerName}
                 </p>
                 <p>
-                  <strong>Pracovníci: </strong>
+                  <strong>Pracanti: </strong>
                   {selectedPlan.job.workerNames.join(", ")}
                 </p>
                 <p>

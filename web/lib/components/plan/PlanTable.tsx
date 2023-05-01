@@ -14,7 +14,7 @@ import { RidesForJob } from "lib/types/ride";
 
 const _columns: SortableColumn[] = [
   { id: "name", name: "Práce", sortable: true },
-  { id: "workers", name: "Pracovníci", sortable: true },
+  { id: "workers", name: "Pracanti", sortable: true },
   { id: "contact", name: "Kontaktní osoba", sortable: true },
   { id: "area", name: "Oblast", sortable: true },
   { id: "address", name: "Adresa", sortable: true },

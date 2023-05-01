@@ -60,14 +60,14 @@ export function ActiveJobIssueBanner({
               {issues.missingRides && (
                 <div className="row">
                   <div className="col">
-                    Někteří pracovníci nemají přiřazenou dopravu.
+                    Někteří pracanti nemají přiřazenou dopravu.
                   </div>
                 </div>
               )}
               {issues.allergies && (
                 <div className="row">
                   <div className="col">
-                    Někteří pracovníci mají konfliktní alergie.
+                    Někteří pracanti mají konfliktní alergie.
                   </div>
                 </div>
               )}

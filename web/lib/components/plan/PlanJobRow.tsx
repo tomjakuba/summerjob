@@ -206,7 +206,7 @@ export function PlanJobRow({
                   {job.workers.length === 0 && (
                     <tr>
                       <td colSpan={6}>
-                        <i>Žádní pracovníci</i>
+                        <i>Žádní pracanti</i>
                       </td>
                     </tr>
                   )}
