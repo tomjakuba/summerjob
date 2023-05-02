@@ -57,6 +57,6 @@ async function post(
 }
 
 export default APIAccessController(
-  [Permission.JOBS],
+  [Permission.JOBS, Permission.PLANS],
   APIMethodHandler({ get, post })
 );
