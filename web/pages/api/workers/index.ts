@@ -34,6 +34,12 @@ async function post(
   const singleWorker = WorkerCreateSchema.safeParse(req.body);
   if (singleWorker.success) {
     const worker = await createWorker(singleWorker.data);
+    await logger.apiRequest(
+      APILogEvent.WORKER_CREATE,
+      "workers",
+      req.body,
+      session
+    );
     res.status(201).json(worker);
     return;
   }
