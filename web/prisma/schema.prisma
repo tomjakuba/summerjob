@@ -111,7 +111,7 @@ model ProposedJob {
   activeJobs         ActiveJob[]
   allergens          Allergy[]
   availability       DateTime[]  @db.Date
-  jobType            JobType
+  jobType            JobType     @default(OTHER)
 }
 
 model ActiveJob {
