@@ -28,28 +28,7 @@ Sestavte docker image pro Plánovač:
 
 ### Kořenová složka projektu
 
-Vytvořte docker síť, do které budou připojeny kontejnery:
-
-```console
-[repo]$ docker network create summerjob-network
-```
-
-Přejmenujte soubor `docker-compose.yaml.sample` na `docker-compose.yaml` a nastavte v něm všechny potřebné proměnné prostředí, parametry pro připojení Plánovače (`summerjob-planner`) a jméno sítě, pokud je jiné než `summerjob-network`. Zejména se jedná o změny následujících proměnných:
-
-- summerjob-web
-  - `DATABASE_URL` - connection string pro připojení k databázi, nahraďte `username` a `password` libovolným uživatelským jménem a heslem pro připojení k databázi
-  - `EMAIL_SERVER` - connection string SMTP serveru pro odesílání e-mailů
-  - `EMAIL_USER` - uživatelské jméno použité k odesílání e-mailů
-  - `NEXTAUTH_URL` - Webová adresa, na které bude aplikace dostupná (nebo `http://localhost:3000` v případě lokálního spuštění)
-  - `NEXTAUTH_SECRET` - libovolný řetězec, který slouží jako tajný klíč pro generování tokenů, `openssl rand -base64 32`
-- summerjob-db
-  - `POSTGRES_USER` - uživatelské jméno pro připojení k databázi, stejné jako v connection string pro web
-  - `POSTGRES_PASSWORD` - heslo pro připojení k databázi, stejné jako v connection string pro web
-  - `POSTGRES_DB` - jméno databáze, stejné jako v connection string pro web
-- summerjob-planner
-  - `DATABASE_URL` - connection string pro připojení k databázi, stejný jako connection string pro web
-
-Nyní je možné spustit kontejnery pomocí docker-compose:
+Vytvořte soubor `.env` [Specifikace docker](https://docs.docker.com/compose/environment-variables/set-environment-variables/) a spusťte kontejnery pomocí docker-compose:
 
 ```console
 [web]$ docker compose up -d
