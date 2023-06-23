@@ -1,6 +1,7 @@
 # Checking system predispositions
 source .env
 mkdir -p web-storage
+mkdir -p backup
 
 # Make database dump/backup
 echo "📚 Creating database backup"
