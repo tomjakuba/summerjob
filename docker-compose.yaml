@@ -10,7 +10,7 @@ services:
       - summerjob-network
       # - additional networks for reverse proxy or specify open ports below
     environment:
-      - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@summerjob-db:5432/${POSTGRES_DB}?schema=public
       - EMAIL_SERVER=${EMAIL_SERVER}
       - EMAIL_FROM=${EMAIL_FROM}
       - NEXTAUTH_URL=${NEXTAUTH_URL}
@@ -34,9 +34,9 @@ services:
     hostname: summerjob-db
     image: postgres:15
     environment:
-      - POSTGRES_USER=username
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_DB=summerjob
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     networks:
       - summerjob-network
     volumes:
@@ -51,9 +51,9 @@ services:
     image: summerjob-planner
     restart: on-failure:5
     environment:
-      - AMQP_URL=amqp://summerjob-amqp
-      - QUEUE_NAME=planner
-      - DATABASE_URL=postgresql://username:password@summerjob-db:5432/summerjob?schema=public
+      - AMQP_URL=${AMQP_URL}
+      - QUEUE_NAME=${QUEUE_NAME}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@summerjob-db:5432/${POSTGRES_DB}?schema=public
     networks:
       - summerjob-network
     build:
