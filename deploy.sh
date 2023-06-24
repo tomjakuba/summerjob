@@ -1,3 +1,17 @@
+if [ "$EUID" -eq 0 ]
+  then echo "It's not recommended to run this script as root, do you still want to continue? [y/n]"
+
+  read -r -p "Are you sure? [y/N] " response
+  if [[ "$response" =~ ^([yY][eE][sS]|[yY])$ ]]
+  then
+      echo "Ok, running as root, this might cause some problems."
+  else
+      exit 1
+  fi
+  exit
+fi
+
+echo "🚀 Starting deployment"
 # Checking system predispositions
 source .env
 mkdir -p web-storage
@@ -12,6 +26,7 @@ docker cp summerjob-db:/$filename backup/$filename
 
 # Download new docker manifest
 echo "🔖 Downloading new docker compose manifest"
+mv docker-compose.yaml docker-compose.yaml.old
 curl https://raw.githubusercontent.com/ladal1/summerjob/main/docker-compose.yaml -O -s
 
 # Download updated containers
