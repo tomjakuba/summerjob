@@ -14,8 +14,9 @@ RUN npm ci
 # Rebuild the source code only when needed
 FROM node:18-slim AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+COPY --from=deps /app/node_modules ./node_modules
+RUN apt-get update -y && apt-get install -y openssl
 
 # Next.js collects completely anonymous telemetry data about general usage.
 # Learn more here: https://nextjs.org/telemetry
