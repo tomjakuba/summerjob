@@ -95,7 +95,13 @@ export default function WorkersClientPage({
               </div>
               <div
                 className="smj-search-stack smj-shadow rounded-3"
-                style={{ width: '100%', maxWidth: '100%', padding: '10px' }}
+                style={{
+                  width: '100%',
+                  maxWidth: '100%',
+                  padding: '10px',
+                  top: '20px',
+                  position: 'sticky',
+                }}
               >
                 <h5 style={{ paddingLeft: '12px', paddingTop: '12px' }}>
                   Foto
