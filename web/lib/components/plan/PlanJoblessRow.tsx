@@ -146,9 +146,13 @@ function formatWorkerData(
   const name = `${worker.firstName} ${worker.lastName}`
   const abilities = []
 
-  if (worker.cars.length > 0) abilities.push('Auto')
-  if (worker.isStrong) abilities.push('Silák')
-  if (worker.availability.adorationDays.includes(planDay))
+  console.log(worker.availability.adorationDays)
+  console.log(planDay)
+  if (
+    worker.availability.adorationDays.find(
+      x => x.getTime() === planDay.getTime()
+    )
+  )
     abilities.push('Adoruje')
   const allergies = worker.allergies
 
