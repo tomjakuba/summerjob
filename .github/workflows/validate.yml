@@ -81,6 +81,16 @@ jobs:
       - name: Run tests
         run: npm run build
 
+  build-web-docker:
+    name: Build web Docker image
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./web
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
