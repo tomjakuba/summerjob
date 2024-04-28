@@ -15,7 +15,7 @@ jobs:
     name: Lint web
     strategy:
       matrix:
-        node-version: [16, 18]
+        node-version: [18]
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -38,7 +38,7 @@ jobs:
     name: Lint planner
     strategy:
       matrix:
-        node-version: [16, 18]
+        node-version: [18]
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -61,7 +61,7 @@ jobs:
     name: Build web
     strategy:
       matrix:
-        node-version: [16, 18]
+        node-version: [18]
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -80,6 +80,20 @@ jobs:
 
       - name: Run tests
         run: npm run build
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./web
+          platforms: linux/amd64,linux/arm64/v8
+          push: false
+
   # build-planner:
   #   name: Build planner
   #   strategy:
