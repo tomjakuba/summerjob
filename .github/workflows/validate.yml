@@ -82,10 +82,7 @@ jobs:
         run: npm run build
 
   build-web-docker:
-    name: Build web Docker image
-    strategy:
-      matrix:
-        platform: ["linux/amd64", "linux/arm64/v8"]
+    name: Build web
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -104,7 +101,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./web
-          platforms: ${{ matrix.platform }}
+          platforms: linux/amd64,linux/arm64/v8
           push: false
 
   # build-planner:
