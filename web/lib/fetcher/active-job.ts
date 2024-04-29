@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { ActiveJobUpdateData } from 'lib/types/active-job'
 import {
   useData,
@@ -8,6 +10,11 @@ import {
 } from './fetcher'
 import type { ActiveJobAPIGetResponse } from 'pages/api/plans/[planId]/active-jobs/[jobId]'
 import { ActiveJobsAPIPostData } from 'pages/api/plans/[planId]/active-jobs'
+import { ActiveJobsAPIGetResponse } from 'pages/api/plans/active-jobs'
+
+export function useAPIActiveJobs(options?: any) {
+  return useData<ActiveJobsAPIGetResponse>('/api/plans/active-jobs', options)
+}
 
 export function useAPIActiveJobCreate(planId: string, options?: any) {
   return useDataCreate<ActiveJobsAPIPostData>(

@@ -11,26 +11,33 @@ import {
 import { ProposedJobComplete } from 'lib/types/proposed-job'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
-import DeleteIcon from '../forms/DeleteIcon'
+import DeleteIcon from '../table/icons/DeleteIcon'
+import { PinIcon } from '../forms/PinIcon'
 import ConfirmationModal from '../modal/ConfirmationModal'
 import ErrorMessageModal from '../modal/ErrorMessageModal'
 import { ExpandableRow } from '../table/ExpandableRow'
+import { RowCells } from '../table/RowCells'
+import { RowContent, RowContentsInterface } from '../table/RowContent'
+import MarkAsCompletedIcon from '../table/icons/MarkAsCompletedIcon'
+import { priorityMapping } from 'lib/data/enumMapping/priorityMapping'
 
 interface ProposedJobRowData {
   job: ProposedJobComplete
   reloadJobs: () => void
+  workerId: string
 }
 
 export default function ProposedJobRow({
   job,
   reloadJobs,
+  workerId,
 }: ProposedJobRowData) {
   const { trigger: triggerUpdate } = useAPIProposedJobUpdate(job.id, {
     onSuccess: reloadJobs,
   })
 
   const setJobPinned = (pinned: boolean) => {
-    triggerUpdate({ pinned })
+    triggerUpdate({ pinnedByChange: { workerId: workerId, pinned } })
   }
 
   const setJobCompleted = (completed: boolean) => {
@@ -70,44 +77,55 @@ export default function ProposedJobRow({
     return days.map(formatDateShort).map(capitalizeFirstLetter).join(', ')
   }, [job.availability])
 
+  const expandedContent: RowContentsInterface[] = [
+    {
+      label: 'Popis',
+      content: `${job.publicDescription}`,
+    },
+    {
+      label: 'Poznámka pro organizátory',
+      content: `${job.privateDescription}`,
+    },
+    {
+      label: 'Počet pracantů',
+      content: `${job.minWorkers} - ${job.maxWorkers} (${job.strongWorkers} siláků)`,
+    },
+    {
+      label: 'Doprava do oblasti požadována',
+      content: `${
+        job.area ? (job.area.requiresCar ? 'Ano' : 'Ne') : 'Není známo'
+      }`,
+    },
+    {
+      label: 'Alergeny',
+      content: `${
+        job.allergens.length > 0 ? job.allergens.join(', ') : 'Žádné'
+      }`,
+    },
+    {
+      label: 'Dostupné',
+      content: `${availableDays}`,
+    },
+    {
+      label: 'Naplánované dny',
+      content: `${job.activeJobs.length} / ${job.requiredDays}`,
+    },
+  ]
+
   return (
     <ExpandableRow
       data={formatJobRow(
         job,
+        workerId,
         setJobPinned,
         setJobCompleted,
         setJobHidden,
         confirmDelete,
         isBeingDeleted
       )}
-      className={rowColorClass(job)}
+      className={rowColorClass(job, workerId)}
     >
-      <div className="ms-2">
-        <strong>Popis</strong>
-        <p>{job.publicDescription}</p>
-        <strong>Poznámka pro organizátory</strong>
-        <p>{job.privateDescription}</p>
-        <p>
-          <strong>Počet pracantů: </strong>
-          {job.minWorkers} - {job.maxWorkers} ({job.strongWorkers} siláků)
-        </p>
-        <p>
-          <strong>Doprava do oblasti požadována: </strong>
-          {job.area ? (job.area.requiresCar ? 'Ano' : 'Ne') : 'Není známo'}
-        </p>
-        <p>
-          <strong>Alergeny: </strong>
-          {job.allergens.length > 0 ? job.allergens.join(', ') : 'Žádné'}
-        </p>
-        <p>
-          <strong>Dostupné: </strong>
-          {availableDays}
-        </p>
-        <p>
-          <strong>Naplánované dny: </strong>
-          {job.activeJobs.length} / {job.requiredDays}
-        </p>
-      </div>
+      <RowContent data={expandedContent} />
       {showDeleteConfirmation && !deleteError && (
         <ConfirmationModal
           onConfirm={deleteJob}
@@ -135,14 +153,14 @@ export default function ProposedJobRow({
   )
 }
 
-function rowColorClass(job: ProposedJobComplete) {
+function rowColorClass(job: ProposedJobComplete, workerId: string) {
   if (job.hidden) {
     return 'smj-hidden-job-row'
   }
   if (job.completed) {
     return 'smj-completed-job-row'
   }
-  if (job.pinned) {
+  if (job.pinnedBy.some(worker => worker.workerId === workerId)) {
     return 'smj-pinned-job-row'
   }
   return ''
@@ -150,78 +168,54 @@ function rowColorClass(job: ProposedJobComplete) {
 
 function formatJobRow(
   job: ProposedJobComplete,
+  workerId: string,
   setPinned: (pinned: boolean) => void,
   setCompleted: (completed: boolean) => void,
   setHidden: (hidden: boolean) => void,
   deleteJob: () => void,
   isBeingDeleted: boolean
-) {
+): RowCells[] {
   // Show job as available today before 6:00
   // After that, show job as not available anymore
   const now = new Date()
   now.setHours(now.getHours() - 6)
   return [
-    job.name,
-    job.area?.name,
-    job.contact,
-    job.address,
-    `${job.activeJobs.length} / ${job.requiredDays}`,
-    datesAfterDate(job.availability, now).length,
-    `${job.minWorkers} - ${job.maxWorkers}`,
-    <span key={job.id} className="d-flex align-items-center gap-3">
-      {markJobAsCompletedIcon(job, setCompleted)}
-      {pinJobIcon(job, setPinned)}
-      {hideJobIcon(job, setHidden)}
-      <Link
-        href={`/jobs/${job.id}`}
-        onClick={e => e.stopPropagation()}
-        className="smj-action-edit"
-      >
-        <i className="fas fa-edit" title="Upravit"></i>
-      </Link>
-      <DeleteIcon onClick={deleteJob} isBeingDeleted={isBeingDeleted} />
-    </span>,
+    { content: job.name },
+    { content: job.area?.name },
+    { content: job.contact },
+    { content: job.address },
+    { content: `${job.activeJobs.length} / ${job.requiredDays}` },
+    { content: datesAfterDate(job.availability, now).length },
+    { content: `${job.minWorkers} - ${job.maxWorkers}` },
+    { content: priorityMapping[job.priority] },
+    {
+      content: (
+        <span
+          key={job.id}
+          className="d-inline-flex flex-wrap align-items-center gap-3"
+        >
+          <MarkAsCompletedIcon
+            completed={job.completed}
+            setCompleted={setCompleted}
+          />
+          <PinIcon
+            isPinned={job.pinnedBy.some(worker => worker.workerId === workerId)}
+            setPinned={setPinned}
+          />
+          {hideJobIcon(job, setHidden)}
+          <Link
+            href={`/jobs/${job.id}`}
+            onClick={e => e.stopPropagation()}
+            className="smj-action-edit"
+          >
+            <i className="fas fa-edit" title="Upravit"></i>
+          </Link>
+          <DeleteIcon onClick={deleteJob} isBeingDeleted={isBeingDeleted} />
+        </span>
+      ),
+      stickyRight: true,
+    },
   ]
-}
-
-function markJobAsCompletedIcon(
-  job: ProposedJobComplete,
-  setCompleted: (completed: boolean) => void
-) {
-  const color = job.completed ? 'smj-action-completed' : 'smj-action-complete'
-  const title = job.completed
-    ? 'Označit jako nedokončený'
-    : 'Označit jako dokončený'
-  const icon = job.completed ? 'fa-times' : 'fa-check'
-  return (
-    <i
-      className={`fas ${icon} ${color}`}
-      title={title}
-      onClick={e => {
-        e.stopPropagation()
-        setCompleted(!job.completed)
-      }}
-    ></i>
-  )
-}
-
-function pinJobIcon(
-  job: ProposedJobComplete,
-  setPinned: (pinned: boolean) => void
-) {
-  const color = job.pinned ? 'smj-action-pinned' : 'smj-action-pin'
-  const title = job.pinned ? 'Odepnout' : 'Připnout'
-  const icon = job.pinned ? 'fa-thumbtack' : 'fa-thumbtack'
-  return (
-    <i
-      className={`fas ${icon} ${color}`}
-      title={title}
-      onClick={e => {
-        e.stopPropagation()
-        setPinned(!job.pinned)
-      }}
-    ></i>
-  )
 }
 
 function hideJobIcon(

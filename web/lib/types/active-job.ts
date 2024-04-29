@@ -1,12 +1,15 @@
-import { ActiveJob, Plan } from 'lib/prisma/client'
-import { ProposedJobWithArea } from './proposed-job'
 import type { Worker } from 'lib/prisma/client'
-import { z } from 'zod'
-import { WorkerComplete } from './worker'
-import { Serialized } from './serialize'
+import { ActiveJob, Plan } from 'lib/prisma/client'
 import { ActiveJobSchema, ProposedJobSchema } from 'lib/prisma/zod'
+import { z } from 'zod'
 import { ActiveJobNoPlanSchema } from './_schemas'
+import {
+  ProposedJobForActiveJobSchema,
+  ProposedJobWithArea,
+} from './proposed-job'
 import { RideComplete } from './ride'
+import { Serialized } from './serialize'
+import { WorkerComplete } from './worker'
 
 export type ActiveJobNoPlan = z.infer<typeof ActiveJobNoPlanSchema>
 
@@ -15,6 +18,12 @@ export type ActiveJobComplete = ActiveJob & {
   proposedJob: ProposedJobWithArea
   rides: RideComplete[]
   responsibleWorker: Worker | null
+  plan: Plan
+}
+
+export type ActiveJobWorkersAndJobs = ActiveJob & {
+  workers: WorkerComplete[]
+  proposedJob: ProposedJobWithArea
   plan: Plan
 }
 
@@ -27,8 +36,6 @@ export type ActiveJobWithProposed = z.infer<typeof ActiveJobWithProposedSchema>
 export const ActiveJobCreateSchema = z
   .object({
     proposedJobId: z.string().min(1),
-    privateDescription: z.string(),
-    publicDescription: z.string(),
     planId: z.string(),
   })
   .strict()
@@ -37,8 +44,8 @@ export type ActiveJobCreateData = z.infer<typeof ActiveJobCreateSchema>
 
 export const ActiveJobUpdateSchema = z
   .object({
-    privateDescription: z.string(),
-    publicDescription: z.string(),
+    completed: z.boolean(),
+    proposedJob: ProposedJobForActiveJobSchema.strict().partial(),
     workerIds: z.array(z.string()),
     responsibleWorkerId: z.string(),
     rideIds: z.array(z.string()),

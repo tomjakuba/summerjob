@@ -7,17 +7,22 @@ import {
 } from 'pages/api/summerjob-events'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
+import { TextInput } from '../forms/input/TextInput'
+import { Label } from '../forms/Label'
 import { Modal, ModalSize } from '../modal/Modal'
+
+const schema = SummerJobEventCreateSchema
 
 interface NewEventModalProps {
   onConfirm: (newPlanId: string) => void
   onReject: () => void
 }
+
 export default function NewEventModal({
   onConfirm,
   onReject,
 }: NewEventModalProps) {
-  const { trigger, error, isMutating } = useAPISummerJobEventCreate({
+  const { trigger, isMutating } = useAPISummerJobEventCreate({
     onSuccess: (data: SummerJobEventsAPIPostResponse) => {
       onConfirm(data.id)
     },
@@ -42,65 +47,44 @@ export default function NewEventModal({
       onClose={onReject}
     >
       <form onSubmit={handleSubmit(onSubmit)} autoComplete={'off'}>
-        <label className="form-label fw-bold" htmlFor="name">
-          Název ročníku
-        </label>
-        <input
+        <TextInput
           id="name"
-          className="form-control p-0 fs-5"
-          type="text"
+          label="Název ročníku"
           placeholder="Název ročníku"
-          {...register('name')}
+          errors={errors}
+          register={() => register('name')}
+          mandatory
+          margin={false}
         />
-        {errors.name?.message && (
-          <p className="text-danger">{errors.name.message as string}</p>
-        )}
-        <label
-          className="form-label fw-bold mt-4 d-none d-md-block"
-          htmlFor="dayStart"
-        >
-          Začátek a konec
-        </label>
+        <Label
+          id="startDate"
+          label="Začátek a konec"
+          className="d-none d-md-block mt-4"
+          mandatory
+        />
         <div className="d-flex flex-column flex-md-row">
           <div className="d-flex flex-column flex-fill">
-            <label
-              className="form-label fw-bold mt-4 d-block d-md-none"
-              htmlFor="dayStart"
-            >
-              Začátek
-            </label>
-
-            <input
-              className="form-control p-1 fs-5"
-              id="dayStart"
+            <TextInput
+              id="startDate"
+              label="Začátek"
               type="date"
-              {...register('startDate', { valueAsDate: true })}
+              labelClassName="d-md-none"
+              mandatory
+              errors={errors}
+              register={() => register('startDate')}
             />
-            <p className="text-danger">
-              {errors.startDate?.message
-                ? (errors.startDate.message as string)
-                : ' '}
-            </p>
           </div>
-          <div className="fs-3 ms-3 me-3 d-none d-md-block">-</div>
+          <div className="fs-3 mx-3 me-3 d-none d-md-block">-</div>
           <div className="d-flex flex-column flex-fill">
-            <label
-              className="form-label fw-bold mt-4 d-block d-md-none"
-              htmlFor="dayEnd"
-            >
-              Konec
-            </label>
-            <input
-              className="form-control p-1 fs-5"
-              id="dayEnd"
+            <TextInput
+              id="endDate"
+              label="Konec"
               type="date"
-              {...register('endDate', { valueAsDate: true })}
+              labelClassName="d-md-none"
+              mandatory
+              errors={errors}
+              register={() => register('endDate')}
             />
-            <p className="text-danger">
-              {errors.endDate?.message
-                ? (errors.endDate.message as string)
-                : ' '}
-            </p>
           </div>
         </div>
         <div className="d-flex justify-content-end mt-4">
@@ -115,11 +99,3 @@ export default function NewEventModal({
     </Modal>
   )
 }
-
-const schema = SummerJobEventCreateSchema.refine(
-  data => data.startDate <= data.endDate,
-  data => ({
-    message: 'Final date must be after starting date',
-    path: ['endDate'],
-  })
-)

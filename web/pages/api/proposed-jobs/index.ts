@@ -1,13 +1,18 @@
 import { APIAccessController } from 'lib/api/APIAccessControler'
+import {
+  generateFileName,
+  getUploadDirForImagesForCurrentEvent,
+} from 'lib/api/fileManager'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
+import { parseFormWithImages } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
-import { WrappedError, ApiError } from 'lib/types/api-error'
 import {
   createProposedJob,
   getProposedJobs,
   getProposedJobsAssignableTo,
 } from 'lib/data/proposed-jobs'
 import logger from 'lib/logger/logger'
+import { ApiError, WrappedError } from 'lib/types/api-error'
 import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
 import {
@@ -42,17 +47,30 @@ async function post(
   res: NextApiResponse<ProposedJobsAPIPostResponse | WrappedError<ApiError>>,
   session: ExtendedSession
 ) {
-  const result = validateOrSendError(ProposedJobCreateSchema, req.body, res)
+  const temporaryName = generateFileName(30) // temporary name for the file
+  const uploadDirectory =
+    (await getUploadDirForImagesForCurrentEvent()) + '/proposed-jobs'
+  const { files, json } = await parseFormWithImages(
+    req,
+    res,
+    temporaryName,
+    uploadDirectory,
+    10
+  )
+
+  const result = validateOrSendError(ProposedJobCreateSchema, json, res)
   if (!result) {
     return
   }
+
   await logger.apiRequest(
     APILogEvent.JOB_CREATE,
     'proposed-jobs',
-    req.body,
+    result,
     session
   )
-  const job = await createProposedJob(result)
+  const job = await createProposedJob(result, files)
+
   res.status(201).json(job)
 }
 
@@ -60,3 +78,9 @@ export default APIAccessController(
   [Permission.JOBS, Permission.PLANS],
   APIMethodHandler({ get, post })
 )
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+}

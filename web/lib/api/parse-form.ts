@@ -1,48 +1,119 @@
-import type { NextApiRequest } from 'next'
+import type { NextApiRequest, NextApiResponse } from 'next'
 import mime from 'mime'
 import formidable from 'formidable'
-import { mkdir, stat } from 'fs/promises'
+import { createDirectory, deleteFile } from './fileManager'
+import { ApiBadRequestError } from 'lib/types/api-error'
 
-export const FormidableError = formidable.errors.FormidableError
+/* Get simple data from string jsonData containing json data. */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const getJson = (fieldsJsonData: string | string[]): any => {
+  const jsonData = Array.isArray(fieldsJsonData)
+    ? fieldsJsonData[0]
+    : fieldsJsonData
+  let json
+  try {
+    json = JSON.parse(jsonData)
+  } catch (error) {
+    console.log(error)
+  }
+  return json
+}
+
+/* Get photoPath from uploaded photoFile. */
+export const getPhotoPath = (
+  filesPhotoFile: formidable.File | formidable.File[]
+): string => {
+  return Array.isArray(filesPhotoFile)
+    ? filesPhotoFile[0].filepath
+    : filesPhotoFile.filepath
+}
 
 export const parseForm = async (
   req: NextApiRequest
-): Promise<{ fields: formidable.Fields; files: formidable.Files }> => {
+): Promise<{
+  fields: formidable.Fields
+  files: formidable.Files
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  json: any
+}> => {
   return await new Promise(async (resolve, reject) => {
-    const uploadDir = process.env.UPLOAD_DIR || '/web-storage'
-
-    try {
-      await stat(uploadDir)
-    } catch (e: any) {
-      if (e.code === 'ENOENT') {
-        await mkdir(uploadDir, { recursive: true })
-      } else {
-        console.error(e)
-        reject(e)
+    const form = formidable({})
+    form.parse(req, (err, fields, files) => {
+      if (err) {
+        reject({ err })
         return
       }
-    }
+      const json = getJson(fields.jsonData)
+      resolve({ fields, files, json })
+    })
+  })
+}
 
-    const form = formidable({
-      maxFiles: 1,
-      maxFileSize: 1024 * 1024 * 10, // 10mb
-      uploadDir,
-      filename: (_name, _ext, part) => {
-        const filename = `${req.query.id as string}.${
+export const parseFormWithImages = async (
+  req: NextApiRequest,
+  res: NextApiResponse,
+  nameOfImage: string,
+  uploadDir: string,
+  maxFiles: number
+): Promise<{
+  fields: formidable.Fields
+  files: formidable.Files
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  json: any
+}> => {
+  await createDirectory(uploadDir)
+  let count = 0
+  const uploadedFiles: string[] = []
+  const form = formidable({
+    maxFiles: maxFiles,
+    maxFileSize: 1024 * 1024 * 10,
+    maxTotalFileSize: 1024 * 1024 * 10 * maxFiles, // 10 MB a picture
+    uploadDir,
+    filename: (_name, _ext, part) => {
+      let filename = ''
+      if (maxFiles > 1) {
+        filename = `${nameOfImage}-${count}.${
           mime.getExtension(part.mimetype || '') || 'unknown'
         }`
-        return filename
-      },
-      filter: part => {
-        return (
-          part.name === 'image' && (part.mimetype?.includes('image') || false)
-        )
-      },
-    })
-
-    form.parse(req, function (err, fields, files) {
-      if (err) reject(err)
-      else resolve({ fields, files })
+        count = count + 1
+      } else {
+        filename = `${nameOfImage}.${
+          mime.getExtension(part.mimetype || '') || 'unknown'
+        }`
+      }
+      uploadedFiles.push(filename)
+      return filename
+    },
+    filter: part => {
+      if (!part.mimetype?.includes('image')) {
+        res.status(400).json({
+          error: new ApiBadRequestError(
+            'Invalid file type - only images are allowed.'
+          ),
+        })
+        return false
+      }
+      return true
+    },
+  })
+  return await new Promise(async (resolve, reject) => {
+    form.parse(req, async function (err, fields, files) {
+      if (err) {
+        for (const file of uploadedFiles) {
+          try {
+            await deleteFile(uploadDir + '/' + file)
+          } catch (error) {}
+        }
+        res.status(err.httpCode).json({
+          error: new ApiBadRequestError(
+            'Type: ' + err.type + '\nMessage: ' + err.message
+          ),
+        })
+        reject(err)
+        return
+      }
+      const json = getJson(fields.jsonData)
+      resolve({ fields, files, json })
     })
   })
 }

@@ -1,9 +1,10 @@
-import { getSMJSession } from 'lib/auth/auth'
+import { getSMJSession, withPermissions } from 'lib/auth/auth'
 import ErrorPage404 from 'lib/components/404/404'
-import EditBox from 'lib/components/forms/EditBox'
+import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
 import EditWorker from 'lib/components/worker/EditWorker'
 import { cache_getActiveSummerJobEvent } from 'lib/data/cache'
 import { getWorkerById } from 'lib/data/workers'
+import { Permission } from 'lib/types/auth'
 import { serializeWorker } from 'lib/types/worker'
 
 export const metadata = {
@@ -14,6 +15,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function MyProfilePage() {
   const session = await getSMJSession()
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const worker = await getWorkerById(session!.userID)
 
   if (!worker || !worker.availability) {
@@ -21,20 +23,22 @@ export default async function MyProfilePage() {
   }
   const serializedWorker = serializeWorker(worker)
   const summerJobEvent = await cache_getActiveSummerJobEvent()
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const { startDate, endDate } = summerJobEvent!
+
+  const allDates = dateSelectionMaker(startDate.toJSON(), endDate.toJSON())
+
+  const isCarAccessAllowed = await withPermissions([Permission.CARS])
 
   return (
     <>
-      <section className="mb-3">
-        <EditBox>
-          <EditWorker
-            serializedWorker={serializedWorker}
-            eventStartDate={startDate.toJSON()}
-            eventEndDate={endDate.toJSON()}
-            isProfilePage={true}
-          />
-        </EditBox>
-      </section>
+      <EditWorker
+        serializedWorker={serializedWorker}
+        allDates={allDates}
+        isProfilePage={true}
+        carAccess={isCarAccessAllowed.success}
+        label="Upravit profil"
+      />
     </>
   )
 }

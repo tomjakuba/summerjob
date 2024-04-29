@@ -2,13 +2,16 @@
 import ErrorPage from 'lib/components/error-page/ErrorPage'
 import PageHeader from 'lib/components/page-header/PageHeader'
 import { useAPIWorkers } from 'lib/fetcher/worker'
+import { normalizeString } from 'lib/helpers/helpers'
 import { Serialized } from 'lib/types/serialize'
 import { deserializeWorkers, WorkerComplete } from 'lib/types/worker'
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
-import { WorkersFilters } from './WorkersFilters'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useEffect, useMemo, useState } from 'react'
+import { Filters } from '../filters/Filters'
+import { PhotoViewer } from '../photo/PhotoViewer'
+import { WorkersStatistics } from './WorkersStatistics'
 import WorkersTable from './WorkersTable'
-import Image from 'next/image'
 
 interface WorkersClientPageProps {
   sWorkers: Serialized
@@ -22,13 +25,57 @@ export default function WorkersClientPage({
     fallbackData: inititalWorkers,
   })
 
-  const [filter, setFilter] = useState('')
-  const [onlyStrong, setOnlyStrong] = useState(false)
-  const [onlyWithCar, setOnlyWithCar] = useState(false)
+  // get query parameters
+  const searchParams = useSearchParams()
+  const onlyStrongQ = searchParams?.get('area')
+  const onlyWithCarQ = searchParams?.get('day')
+  const searchQ = searchParams?.get('search')
+
+  const getBoolean = (value: string) => {
+    switch (value) {
+      case 'true':
+      case '1':
+      case 'ano':
+      case 'yes':
+        return true
+      default:
+        return false
+    }
+  }
+
+  const [filter, setFilter] = useState(searchQ ?? '')
+  const [onlyStrong, setOnlyStrong] = useState(
+    onlyStrongQ ? getBoolean(onlyStrongQ) : false
+  )
+  const [onlyWithCar, setOnlyWithCar] = useState(
+    onlyWithCarQ ? getBoolean(onlyWithCarQ) : false
+  )
+
+  // replace url with new query parameters
+  const router = useRouter()
+  useEffect(() => {
+    router.replace(
+      `?${new URLSearchParams({
+        onlyStrong: `${onlyStrong}`,
+        onlyWithCar: `${onlyWithCar}`,
+        search: filter,
+      })}`,
+      {
+        scroll: false,
+      }
+    )
+  }, [onlyStrong, onlyWithCar, filter, router])
 
   const fulltextData = useMemo(() => getFulltextData(data), [data])
   const filteredData = useMemo(
-    () => filterWorkers(filter, fulltextData, onlyStrong, onlyWithCar, data),
+    () =>
+      filterWorkers(
+        normalizeString(filter).trimEnd(),
+        fulltextData,
+        onlyStrong,
+        onlyWithCar,
+        data
+      ),
     [fulltextData, filter, onlyStrong, onlyWithCar, data]
   )
   const [workerPhotoURL, setWorkerPhotoURL] = useState<string | null>(null)
@@ -36,7 +83,6 @@ export default function WorkersClientPage({
   if (error && !data) {
     return <ErrorPage error={error} />
   }
-
   return (
     <>
       <PageHeader title="Pracanti">
@@ -64,18 +110,28 @@ export default function WorkersClientPage({
         <div className="container-fluid">
           <div className="row gx-3">
             <div className="col">
-              <WorkersFilters
+              <Filters
                 search={filter}
                 onSearchChanged={setFilter}
-                onlyStrong={onlyStrong}
-                onOnlyStrongChanged={setOnlyStrong}
-                onlyWithCar={onlyWithCar}
-                onOnlyWithCarChanged={setOnlyWithCar}
+                checkboxes={[
+                  {
+                    id: 'onlyStrongCheckbox',
+                    label: 'Pouze silní',
+                    checked: onlyStrong,
+                    onCheckboxChanged: setOnlyStrong,
+                  },
+                  {
+                    id: 'onlyWithCarCheckbox',
+                    label: 'Pouze s autem',
+                    checked: onlyWithCar,
+                    onCheckboxChanged: setOnlyWithCar,
+                  },
+                ]}
               />
             </div>
           </div>
           <div className="row gx-3">
-            <div className="col-sm-12 col-lg-10">
+            <div className="col-lg-10 pb-2">
               <WorkersTable
                 workers={filteredData || []}
                 onUpdated={mutate}
@@ -83,55 +139,8 @@ export default function WorkersClientPage({
               />
             </div>
             <div className="col-sm-12 col-lg-2">
-              <div className="vstack smj-search-stack smj-shadow rounded-3">
-                <h5>Statistiky</h5>
-                <hr />
-                <ul className="list-group list-group-flush ">
-                  <li className="list-group-item ps-0 pe-0 d-flex justify-content-between align-items-center smj-gray">
-                    Pracantů
-                    <span>{data?.length}</span>
-                  </li>
-                </ul>
-              </div>
-              <div
-                className="smj-search-stack smj-shadow rounded-3"
-                style={{
-                  width: '100%',
-                  maxWidth: '100%',
-                  padding: '10px',
-                  top: '20px',
-                  position: 'sticky',
-                }}
-              >
-                <h5 style={{ paddingLeft: '12px', paddingTop: '12px' }}>
-                  Foto
-                </h5>
-                <hr />
-                {workerPhotoURL ? (
-                  <Image
-                    src={workerPhotoURL}
-                    alt="Pracant"
-                    style={{
-                      objectFit: 'cover',
-                      width: '100%',
-                      height: '100%',
-                    }}
-                    width={500}
-                    height={500}
-                  />
-                ) : (
-                  <svg
-                    viewBox="0 0 64 64"
-                    xmlns="http://www.w3.org/2000/svg"
-                    strokeWidth="3"
-                    stroke="#000000"
-                    fill="none"
-                  >
-                    <circle cx="32" cy="18.14" r="11.14" />
-                    <path d="M54.55,56.85A22.55,22.55,0,0,0,32,34.3h0A22.55,22.55,0,0,0,9.45,56.85Z" />
-                  </svg>
-                )}
-              </div>
+              <WorkersStatistics data={filteredData ?? []} />
+              <PhotoViewer photoURL={workerPhotoURL} alt="Pracant" />
             </div>
           </div>
         </div>
@@ -145,12 +154,9 @@ function getFulltextData(workers?: WorkerComplete[]) {
   workers?.forEach(worker => {
     map.set(
       worker.id,
-      (
-        worker.firstName +
-        worker.lastName +
-        worker.phone +
-        worker.email
-      ).toLocaleLowerCase()
+      normalizeString(
+        worker.firstName + worker.lastName + worker.phone + worker.email
+      )
     )
   })
   return map

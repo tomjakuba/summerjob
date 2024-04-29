@@ -1,11 +1,12 @@
+import type { Prisma } from 'lib/prisma/client'
 import prisma from 'lib/prisma/connection'
 import {
   ActiveJobComplete,
   ActiveJobCreateData,
   ActiveJobCreateMultipleData,
   ActiveJobUpdateData,
+  ActiveJobWorkersAndJobs,
 } from 'lib/types/active-job'
-import type { Worker, Prisma } from 'lib/prisma/client'
 import { cache_getActiveSummerJobEventId } from './cache'
 import { InvalidDataError, NoActiveEventError } from './internal-error'
 import { databaseWorkerToWorkerComplete } from './workers'
@@ -40,6 +41,8 @@ export async function getActiveJobById(
       proposedJob: {
         include: {
           area: true,
+          toolsOnSite: true,
+          toolsToTakeWith: true,
         },
       },
       responsibleWorker: true,
@@ -203,16 +206,11 @@ function getActiveJobDetailsById(
 }
 
 export async function updateActiveJob(id: string, job: ActiveJobUpdateData) {
-  const {
-    privateDescription,
-    publicDescription,
-    responsibleWorkerId,
-    workerIds,
-  } = job
+  const { completed, proposedJob, responsibleWorkerId, workerIds } = job
   return await prisma.$transaction(async tx => {
     const existingActiveJob = await getActiveJobDetailsById(id, tx)
     if (!existingActiveJob) {
-      throw new Error('Active job not found')
+      throw new Error(`Active job of id ${id} not found`)
     }
     let workersCommand = {}
 
@@ -256,13 +254,25 @@ export async function updateActiveJob(id: string, job: ActiveJobUpdateData) {
       }
     }
 
+    // update proposed job
+    await tx.proposedJob.update({
+      where: {
+        id: existingActiveJob.proposedJobId,
+      },
+      data: {
+        name: proposedJob?.name,
+        publicDescription: proposedJob?.publicDescription,
+        privateDescription: proposedJob?.privateDescription,
+      },
+    })
+
+    // update active job
     const activeJob = await tx.activeJob.update({
       where: {
         id,
       },
       data: {
-        privateDescription,
-        publicDescription,
+        completed,
         responsibleWorkerId,
         ...workersCommand,
       },
@@ -272,8 +282,28 @@ export async function updateActiveJob(id: string, job: ActiveJobUpdateData) {
   })
 }
 
+export async function getActiveJobs(): Promise<ActiveJobWorkersAndJobs[]> {
+  const activeEventId = await cache_getActiveSummerJobEventId()
+  if (!activeEventId) {
+    throw new NoActiveEventError()
+  }
+  const jobs = await prisma.activeJob.findMany({
+    where: {
+      plan: {
+        summerJobEventId: activeEventId,
+      },
+    },
+    include: {
+      workers: true,
+      proposedJob: true,
+      plan: true,
+    },
+  })
+  return jobs as unknown as ActiveJobWorkersAndJobs[]
+}
+
 export async function createActiveJob(job: ActiveJobCreateData) {
-  const { proposedJobId, privateDescription, publicDescription, planId } = job
+  const { proposedJobId, planId } = job
   const activeJob = await prisma.$transaction(async tx => {
     const existingActiveJob = await tx.activeJob.findFirst({
       where: {
@@ -286,8 +316,6 @@ export async function createActiveJob(job: ActiveJobCreateData) {
     }
     const activeJob = await tx.activeJob.create({
       data: {
-        privateDescription,
-        publicDescription,
         planId,
         proposedJobId,
       },
@@ -314,8 +342,6 @@ export async function createActiveJobs(data: ActiveJobCreateMultipleData) {
     }
     const activeJobs = await tx.activeJob.createMany({
       data: data.jobs.map(job => ({
-        privateDescription: job.privateDescription,
-        publicDescription: job.publicDescription,
         planId: data.planId,
         proposedJobId: job.proposedJobId,
       })),

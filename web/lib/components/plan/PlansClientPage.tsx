@@ -3,7 +3,7 @@ import ErrorPage from 'lib/components/error-page/ErrorPage'
 import PageHeader from 'lib/components/page-header/PageHeader'
 import { useAPIPlans } from 'lib/fetcher/plan'
 import { formatDateLong } from 'lib/helpers/helpers'
-import { deserializePlans, PlanWithJobs } from 'lib/types/plan'
+import { deserializePlans } from 'lib/types/plan'
 import { Serialized } from 'lib/types/serialize'
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
@@ -82,7 +82,7 @@ export default function PlansClientPage({
               >
                 <div className="row">
                   <div className="col">
-                    <h5>{formatDateLong(plan.day, true)}</h5>
+                    <h5>{formatDateLong(plan.day)}</h5>
                     <p>{plan.jobs.length} jobů</p>
                   </div>
                   <div className="col d-flex justify-content-end align-items-center gap-3">

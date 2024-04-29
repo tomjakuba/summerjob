@@ -1,6 +1,8 @@
 import {
+  Allergy,
   Car,
   Plan,
+  PostTag,
   PrismaClient,
   ProposedJob,
   SummerJobEvent,
@@ -23,17 +25,23 @@ function between(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1) + min)
 }
 
+function startWithZeros(num: number, numOfDigits = 2) {
+  const numString = num.toString()
+  const numZerosToAdd = numOfDigits - numString.length
+  return '0'.repeat(numZerosToAdd) + numString
+}
+
 function chooseWithProbability<T>(array: T[], probability: number): T[] {
   return array.filter((_, i) => Math.random() < probability)
 }
 
-function createAllergies() {
-  const allergies = ['DUST', 'ANIMALS', 'HAY']
+function createAllergies(): Allergy[] {
+  const allergies: Allergy[] = ['DUST', 'ANIMALS', 'HAY']
   return allergies
 }
 
 async function createWorkers(
-  allergies: string[],
+  allergies: Allergy[],
   eventId: string,
   days: Date[],
   count = 100
@@ -117,12 +125,22 @@ async function createWorkers(
 }
 
 async function createYearlyEvent() {
-  const year = new Date().getFullYear() + 1
+  const eventLastYear = await prisma.summerJobEvent.findFirst({
+    orderBy: {
+      startDate: 'desc',
+    },
+  })
+  const year = eventLastYear
+    ? eventLastYear.endDate.getFullYear() + 1
+    : new Date().getFullYear() + 1
+  const month = startWithZeros(between(1, 12))
+  const dayStart = between(1, 25)
+  const dayEnd = between(dayStart, 28)
   const event = await prisma.summerJobEvent.create({
     data: {
-      name: `Krkonoše ${year}`,
-      startDate: new Date(`${year}-07-03`),
-      endDate: new Date(`${year}-07-09`),
+      name: `${faker.address.cityName()} ${year}`,
+      startDate: new Date(`${year}-${month}-${startWithZeros(dayStart)}`),
+      endDate: new Date(`${year}-${month}-${startWithZeros(dayEnd)}`),
       isActive: true,
     },
   })
@@ -149,7 +167,7 @@ async function createProposedJobs(
   areaIds: string[],
   eventId: string,
   days: Date[],
-  allergens: string[],
+  allergens: Allergy[],
   count = 70
 ) {
   let titles = [
@@ -244,8 +262,6 @@ async function populatePlan(
 
   const activeJob = await prisma.activeJob.create({
     data: {
-      privateDescription: 'Popis úkolu, který vidí jen organizátor',
-      publicDescription: 'Popis úkolu, který vidí všichni',
       planId: plan.id,
       proposedJobId: job.id,
       workers: {
@@ -267,7 +283,55 @@ async function populatePlan(
   })
 }
 
+async function createPosts(eventId: string, days: Date[], count = 10) {
+  const POSTS_COUNT = count
+  const createPost = () => {
+    const printTime = Math.random() > 0.5
+    const hourStart = faker.datatype.number({ min: 0, max: 21 })
+    const hourEnd = faker.datatype.number({ min: hourStart, max: 23 })
+    const tags = choose(Object.values(PostTag), between(1, 3))
+    return {
+      forEventId: eventId,
+      name: faker.lorem.words(3),
+      madeIn: choose(days, 1)[0],
+      availability: chooseWithProbability(days, 0.5),
+      timeFrom: printTime
+        ? `${startWithZeros(hourStart)}:${startWithZeros(between(0, 59))}`
+        : undefined,
+      timeTo: printTime
+        ? `${startWithZeros(hourEnd)}:${startWithZeros(between(0, 59))}`
+        : undefined,
+      address: faker.address.streetAddress(),
+      coordinates: [+faker.address.longitude(), +faker.address.latitude()],
+      tags: tags,
+      shortDescription: faker.lorem.sentence(),
+      longDescription: faker.lorem.paragraph(),
+      isOpenForParticipants: Math.random() > 0.5,
+      isMandatory: Math.random() > 0.7,
+      isPinned: Math.random() > 0.8,
+    }
+  }
+
+  for (let i = 0; i < POSTS_COUNT; i++) {
+    await prisma.post.create({
+      data: createPost(),
+    })
+  }
+
+  return await prisma.post.findMany()
+}
+
+async function setEventAsInactive() {
+  await prisma.summerJobEvent.updateMany({
+    data: {
+      isActive: false,
+    },
+  })
+}
+
 async function main() {
+  console.log('Seting potential active event as inactive...')
+  await setEventAsInactive()
   const mini = process.argv[2] === 'mini'
   console.log('Creating yearly event...')
   const yearlyEvent = await createYearlyEvent()
@@ -295,6 +359,12 @@ async function main() {
   if (!mini) {
     await populatePlan(plan, proposedJobs, workers)
   }
+  console.log('Creating posts...')
+  await createPosts(
+    yearlyEvent.id,
+    datesBetween(yearlyEvent.startDate, yearlyEvent.endDate),
+    mini ? 5 : 30
+  )
 }
 
 main()

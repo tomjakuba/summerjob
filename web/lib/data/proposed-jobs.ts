@@ -1,11 +1,17 @@
+import { PrismaClient } from '@prisma/client'
+import formidable from 'formidable'
 import prisma from 'lib/prisma/connection'
+import { PhotoIdsData } from 'lib/types/photo'
+import { PrismaTransactionClient } from 'lib/types/prisma'
 import {
   ProposedJobCreateData,
   type ProposedJobComplete,
   type ProposedJobUpdateData,
 } from 'lib/types/proposed-job'
 import { cache_getActiveSummerJobEventId } from './cache'
-import { InvalidDataError, NoActiveEventError } from './internal-error'
+import { NoActiveEventError } from './internal-error'
+import { deleteAllPhotos, registerPhotos } from './jobPhoto'
+import { registerTools, ToolType } from './tools'
 
 export async function getProposedJobById(
   id: string
@@ -21,9 +27,44 @@ export async function getProposedJobById(
     include: {
       area: true,
       activeJobs: true,
+      toolsOnSite: true,
+      toolsToTakeWith: true,
+      photos: true,
+      pinnedBy: {
+        select: {
+          workerId: true,
+        },
+      },
     },
   })
   return job
+}
+
+export async function getProposedJobPhotoIdsById(
+  id: string,
+  prismaClient: PrismaClient | PrismaTransactionClient = prisma
+): Promise<PhotoIdsData | null> {
+  const photos = await prismaClient.proposedJob.findUnique({
+    where: {
+      id: id,
+    },
+    select: {
+      photos: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  })
+  return photos
+}
+
+export async function hasProposedJobPhotos(
+  id: string,
+  prismaClient: PrismaClient | PrismaTransactionClient = prisma
+): Promise<boolean> {
+  const photoIds = await getProposedJobPhotoIdsById(id, prismaClient)
+  return photoIds?.photos.length !== 0
 }
 
 export async function getProposedJobs(): Promise<ProposedJobComplete[]> {
@@ -38,6 +79,14 @@ export async function getProposedJobs(): Promise<ProposedJobComplete[]> {
     include: {
       area: true,
       activeJobs: true,
+      toolsOnSite: true,
+      toolsToTakeWith: true,
+      photos: true,
+      pinnedBy: {
+        select: {
+          workerId: true,
+        },
+      },
     },
     orderBy: [
       {
@@ -82,6 +131,14 @@ export async function getProposedJobsAssignableTo(
     include: {
       area: true,
       activeJobs: true,
+      toolsOnSite: true,
+      toolsToTakeWith: true,
+      photos: true,
+      pinnedBy: {
+        select: {
+          workerId: true,
+        },
+      },
     },
     orderBy: [
       {
@@ -94,38 +151,128 @@ export async function getProposedJobsAssignableTo(
 
 export async function updateProposedJob(
   id: string,
-  proposedJobData: ProposedJobUpdateData
+  proposedJobData: ProposedJobUpdateData,
+  files: formidable.Files
 ) {
   const activeEventId = await cache_getActiveSummerJobEventId()
   if (!activeEventId) {
     throw new NoActiveEventError()
   }
-  const { allergens, ...rest } = proposedJobData
+  const {
+    allergens,
+    pinnedByChange,
+    toolsOnSite,
+    toolsOnSiteIdsDeleted,
+    toolsOnSiteUpdated,
+    toolsToTakeWith,
+    toolsToTakeWithIdsDeleted,
+    toolsToTakeWithUpdated,
+    photoIdsDeleted,
+    ...rest
+  } = proposedJobData
   const allergyUpdate = allergens ? { allergens: { set: allergens } } : {}
 
-  const proposedJob = await prisma.proposedJob.update({
-    where: {
-      id,
-    },
-    data: {
-      ...rest,
-      ...allergyUpdate,
-    },
+  const updated = await prisma.$transaction(async tx => {
+    // Update pinned
+    if (pinnedByChange !== undefined && !pinnedByChange.pinned) {
+      await tx.pinnedProposedJobByWorker.delete({
+        where: {
+          workerId_jobId: { workerId: pinnedByChange.workerId, jobId: id },
+        },
+      })
+    }
+    // Update job
+    const proposedJob = await tx.proposedJob.update({
+      where: {
+        id,
+      },
+      data: {
+        pinnedBy: {
+          ...(pinnedByChange?.pinned && {
+            create: {
+              worker: {
+                connect: {
+                  id: pinnedByChange.workerId,
+                },
+              },
+            },
+          }),
+        },
+        ...rest,
+        ...allergyUpdate,
+      },
+    })
+    // Update job's tools
+    await registerTools(
+      toolsOnSite,
+      toolsOnSiteUpdated,
+      toolsOnSiteIdsDeleted,
+      proposedJob.id,
+      ToolType.ON_SITE,
+      tx
+    )
+    await registerTools(
+      toolsToTakeWith,
+      toolsToTakeWithUpdated,
+      toolsToTakeWithIdsDeleted,
+      proposedJob.id,
+      ToolType.TO_TAKE_WITH,
+      tx
+    )
+    // Update job's photos
+    await registerPhotos(files, photoIdsDeleted, proposedJob.id, tx)
+    return proposedJob
   })
-  return proposedJob
+  return updated
 }
 
-export async function createProposedJob(data: ProposedJobCreateData) {
-  const proposedJob = await prisma.proposedJob.create({
-    data: data,
+export async function createProposedJob(
+  data: ProposedJobCreateData,
+  files: formidable.Files
+) {
+  const { toolsOnSite, toolsToTakeWith, ...rest } = data
+
+  const created = await prisma.$transaction(async tx => {
+    // Create job
+    const proposedJob = await tx.proposedJob.create({
+      data: { ...rest },
+    })
+    // Create job's tools
+    await registerTools(
+      toolsOnSite,
+      undefined,
+      undefined,
+      proposedJob.id,
+      ToolType.ON_SITE,
+      tx
+    )
+    await registerTools(
+      toolsToTakeWith,
+      undefined,
+      undefined,
+      proposedJob.id,
+      ToolType.TO_TAKE_WITH,
+      tx
+    )
+    // Create job's photos
+    await registerPhotos(files, undefined, proposedJob.id, tx)
+    return proposedJob
   })
-  return proposedJob
+  return created
 }
 
 export async function deleteProposedJob(id: string) {
-  await prisma.proposedJob.delete({
-    where: {
-      id,
-    },
+  await prisma.$transaction(async tx => {
+    await deleteAllPhotos(id, tx)
+    await tx.pinnedProposedJobByWorker.deleteMany({
+      where: {
+        jobId: id,
+      },
+    })
+    await tx.proposedJob.delete({
+      where: {
+        id,
+      },
+    })
   })
 }

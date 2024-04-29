@@ -1,4 +1,6 @@
 'use client'
+import { mapToolNameToSkill } from 'lib/data/enumMapping/mapToolNameToSkill'
+import { Skill } from 'lib/prisma/client'
 import { ActiveJobNoPlan } from 'lib/types/active-job'
 import { RidesForJob } from 'lib/types/ride'
 import { useMemo } from 'react'
@@ -7,18 +9,23 @@ interface ActiveJobIssueProps {
   job: ActiveJobNoPlan
   day: Date
   ridesForOtherJobs: RidesForJob[]
+  sameWorkIssue?: boolean
+  sameCoworkerIssue?: boolean
 }
 
 export function ActiveJobIssueBanner({
   job,
   day,
   ridesForOtherJobs,
+  sameWorkIssue = false,
+  sameCoworkerIssue = false,
 }: ActiveJobIssueProps) {
   const issues = useMemo(
     () => getIssues(job, ridesForOtherJobs, day),
     [job, ridesForOtherJobs, day]
   )
-  const hasIssues = Object.values(issues).some(i => i)
+  const hasIssues =
+    Object.values(issues).some(i => i) || sameWorkIssue || sameCoworkerIssue
   return (
     <>
       {hasIssues && (
@@ -76,6 +83,29 @@ export function ActiveJobIssueBanner({
                   <div className="col">V této oblasti není možné adorovat.</div>
                 </div>
               )}
+              {issues.lowSkilledWorkers && (
+                <div className="row">
+                  <div className="col">
+                    Na jobu nejsou dostatečně zruční pracanti.
+                  </div>
+                </div>
+              )}
+              {sameWorkIssue && (
+                <div className="row">
+                  <div className="col">
+                    Na jobu se vyskytují pracanti, kteří již na práci dříve
+                    byli.
+                  </div>
+                </div>
+              )}
+              {sameCoworkerIssue && (
+                <div className="row">
+                  <div className="col">
+                    Na jobu se vyskytují pracanti, kteří s některými kolegy
+                    dříve pracovali.
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -88,12 +118,15 @@ export function ActiveJobIssueIcon({
   job,
   day,
   ridesForOtherJobs,
+  sameWorkIssue = false,
+  sameCoworkerIssue = false,
 }: ActiveJobIssueProps) {
   const issues = useMemo(
     () => getIssues(job, ridesForOtherJobs, day),
     [job, ridesForOtherJobs, day]
   )
-  const hasIssues = Object.values(issues).some(i => i)
+  const hasIssues =
+    Object.values(issues).some(i => i) || sameWorkIssue || sameCoworkerIssue
   return <>{hasIssues && <div className="fas fa-triangle-exclamation"></div>}</>
 }
 
@@ -111,6 +144,7 @@ function getIssues(
     missingRides: missingRides(job, ridesForOtherJobs),
     allergies: allergies(job),
     adorations: adorations(job, day),
+    lowSkilledWorkers: lowSkilledWorkers(job),
   }
 }
 
@@ -173,4 +207,30 @@ function adorations(job: ActiveJobNoPlan, day: Date) {
     }
   }
   return false
+}
+
+function lowSkilledWorkers(job: ActiveJobNoPlan) {
+  const requiredSkills: Set<keyof typeof Skill> = new Set()
+
+  // Iterate over toolsOnSite to collect required skills
+  job.proposedJob.toolsOnSite.forEach(tool => {
+    const skills = mapToolNameToSkill(tool.tool)
+    skills.forEach(skill => requiredSkills.add(skill))
+  })
+
+  const workersSkills: Set<keyof typeof Skill> = new Set()
+
+  // Sum all workers skills
+  job.workers.forEach(worker => {
+    worker.skills.forEach(skill => workersSkills.add(skill))
+  })
+
+  // Check if needs for skills are met
+  let allRequiredSkillsPresent = true
+  requiredSkills.forEach(skill => {
+    if (!workersSkills.has(skill)) allRequiredSkillsPresent = false
+    return
+  })
+
+  return !allRequiredSkillsPresent
 }

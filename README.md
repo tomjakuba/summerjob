@@ -1,8 +1,86 @@
 # Aplikace pro dobrovolnickou brigádu SummerJob
 
-Webová aplikace pro organizaci SummerJob, vyvíjená jako diplomová práce na FIT ČVUT v Praze.
+Webová aplikace pro organizaci SummerJob, vyvíjená jako diplomová práce a později rozšířená v rámci bakalářské práce na FIT ČVUT v Praze.
 
-## Instalace a první spuštění
+## DEV Instalace a první spuštění
+
+Potřebné nástroje:
+
+- [docker-compose](https://docs.docker.com/compose/)
+- [npm + node + npx](https://www.npmjs.com/)
+  - _Při instalaci npm na Ubuntu si dejte pozor na verzi. Při instalaci přes `apt install npm` se stáhne zastaralá verze node.js pro tento projekt. Doporučuji postupovat dle [tohoto návodu](https://learn.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-wsl#install-nvm-nodejs-and-npm)._
+
+### Kořenová složka projektu
+
+- Přejmenujte soubor `.env.sample` na `.env`.
+- V souboru `docker-compose.yaml` zakomentujte části týkající se **summerjob-web**, **summerjob-planner** a **summerjob-amqp**.
+- Spusťte kontejnery:
+  ```console
+  [summerjob]$ docker-compose up -d
+  ```
+
+### Složka `web`
+
+- Přejmenujte soubor `.env.sample` na `.env`.
+- Nainstalujte závislosti:
+  ```console
+  [summerjob/web]$ npm ci
+  ```
+- Nechte si vygenerovat databázi:
+  ```console
+  [summerjob/web]$ npx prisma generate
+  ```
+- Tuhle databázi pak použijte do aplikace:
+  ```console
+  [summerjob/web]$ npx prisma db push
+  ```
+- Vytvořte si administrátorský účet (_POZN: Vytvořeným emailem se budete přihlašovat._):
+  ```console
+  [summerjob/web]$ npm run create-admin
+  ```
+- Můžete spustit aplikaci:
+  ```console
+  [summerjob/web]$ npm run dev
+  ```
+
+## Spuštění a zastavování
+
+- Spusťte kontejnery:
+  ```console
+  [summerjob]$ docker-compose up -d
+  ```
+- Spusťte aplikaci:
+  ```console
+  [summerjob/web]$ npm run dev
+  ```
+- Zastavte aplikaci (_CTRL + C_)
+
+  ```console
+  [summerjob/web]$ ^C
+  ```
+
+- Zastavte kontejnery:
+  ```console
+  [summerjob]$ docker-compose down
+  ```
+
+Aplikace defaultně běží na adrese: http://localhost:3000 .
+
+## Časté problémy
+
+### API handler should not return a value, received object.
+
+Pokud se v konzoli vypisuje toto, poté co se pokusíte přihlásit a email je korektní:
+
+```console
+API handler should not return a value, received object.
+```
+
+Zkuste v prohlížeči smazat údaje o prohlížení resp. cookies.
+
+---
+
+## Instalace a první spuštění - pův. znění
 
 Potřebné nástroje:
 

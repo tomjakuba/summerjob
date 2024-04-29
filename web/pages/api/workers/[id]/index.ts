@@ -1,9 +1,11 @@
+import { getUploadDirForImagesForCurrentEvent } from 'lib/api/fileManager'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
+import { parseFormWithImages } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
 import { getSMJSessionAPI, isAccessAllowed } from 'lib/auth/auth'
-import { ApiError, WrappedError } from 'lib/types/api-error'
 import { deleteWorker, getWorkerById, updateWorker } from 'lib/data/workers'
 import logger from 'lib/logger/logger'
+import { ApiError, WrappedError } from 'lib/types/api-error'
 import { ExtendedSession, Permission } from 'lib/types/auth'
 import { APILogEvent } from 'lib/types/logger'
 import { WorkerUpdateDataInput, WorkerUpdateSchema } from 'lib/types/worker'
@@ -31,29 +33,65 @@ async function get(
 export type WorkerAPIPatchData = WorkerUpdateDataInput
 async function patch(req: NextApiRequest, res: NextApiResponse) {
   const id = req.query.id as string
+  const worker = await getWorkerById(id)
+  if (!worker) {
+    res.status(404).end()
+    return
+  }
   const session = await getSMJSessionAPI(req, res)
-  const allowed = await isAllowedToAccessWorker(session, id, res)
+  const allowed = await isAllowedToAccessWorker(session, worker.id, res)
   if (!allowed) {
     return
   }
-  const workerData = validateOrSendError(WorkerUpdateSchema, req.body, res)
+  const uploadDir = (await getUploadDirForImagesForCurrentEvent()) + '/workers'
+  const { files, json } = await parseFormWithImages(
+    req,
+    res,
+    worker.id,
+    uploadDir,
+    1
+  )
+
+  /* Validate simple data from json. */
+  const workerData = validateOrSendError(WorkerUpdateSchema, json, res)
   if (!workerData) {
     return
   }
-  await logger.apiRequest(APILogEvent.WORKER_MODIFY, id, req.body, session!)
-  await updateWorker(id, workerData)
+
+  const fileFieldNames = Object.keys(files)
+  await logger.apiRequest(
+    APILogEvent.WORKER_MODIFY,
+    worker.id,
+    workerData,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    session!
+  )
+  await updateWorker(
+    worker.id,
+    workerData,
+    fileFieldNames.length !== 0 ? files[fileFieldNames[0]] : undefined
+  )
+
   res.status(204).end()
 }
 
 async function del(req: NextApiRequest, res: NextApiResponse) {
   const id = req.query.id as string
+  const worker = await getWorkerById(id)
+  if (!worker) {
+    res.status(404).end()
+    return
+  }
   const session = await getSMJSessionAPI(req, res)
   const allowed = await isAllowedToDeleteWorker(session, res)
   if (!allowed) {
     return
   }
-  await logger.apiRequest(APILogEvent.WORKER_DELETE, id, req.body, session!)
-  await deleteWorker(id)
+
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  await logger.apiRequest(APILogEvent.WORKER_DELETE, worker.id, {}, session!)
+  await deleteWorker(worker.id)
+
   res.status(204).end()
 }
 
@@ -95,3 +133,9 @@ async function isAllowedToDeleteWorker(
 
 // Access control is done individually in this case to allow users to access their own data
 export default APIMethodHandler({ get, patch, del })
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+}

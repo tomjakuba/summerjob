@@ -2,36 +2,82 @@ import { z } from 'zod'
 import type { Worker } from '../../lib/prisma/client'
 import { Serialized } from './serialize'
 import useZodOpenApi from 'lib/api/useZodOpenApi'
+import { customErrorMessages as err } from 'lib/lang/error-messages'
+
 import {
   CarSchema,
   WorkerAvailabilitySchema,
   WorkerSchema,
 } from 'lib/prisma/zod'
-import { Allergy } from '../../lib/prisma/client'
+import { Allergy, Skill } from '../../lib/prisma/client'
 
 useZodOpenApi
 
 export const WorkerCompleteSchema = WorkerSchema.extend({
   cars: z.array(CarSchema),
   availability: WorkerAvailabilitySchema,
+  skills: z.array(z.nativeEnum(Skill)),
 })
 
 export type WorkerComplete = z.infer<typeof WorkerCompleteSchema>
 
 export const WorkerCreateSchema = z
   .object({
-    firstName: z.string().min(1),
-    lastName: z.string().min(1),
-    email: z.string().min(1).email(),
-    phone: z.string().min(1),
-    strong: z.boolean(),
+    firstName: z
+      .string({ required_error: err.emptyFirstName })
+      .min(1, { message: err.emptyFirstName })
+      .trim(),
+    lastName: z
+      .string({ required_error: err.emptyLastName })
+      .min(1, { message: err.emptyLastName })
+      .trim(),
+    email: z
+      .string({ required_error: err.emptyEmail })
+      .min(1, { message: err.emptyEmail })
+      .email({ message: err.invalidEmail }),
+    phone: z
+      .string({ required_error: err.emptyPhone })
+      .min(1, { message: err.emptyPhone })
+      .refine(
+        phone =>
+          /^((?:\+|00)[0-9]{1,3})?[ ]?[0-9]{3}[ ]?[0-9]{3}[ ]?[0-9]{3}$/.test(
+            phone
+          ),
+        {
+          message: err.invalidRegexPhone,
+        }
+      ),
+    strong: z.boolean().default(false),
+    team: z.boolean().default(false),
+    skills: z.array(z.nativeEnum(Skill)),
     allergyIds: z.array(z.nativeEnum(Allergy)),
     note: z.string().optional(),
     age: z
-      .number({ invalid_type_error: 'Zadejte číslo' })
-      .int({ message: 'Zadejte celé číslo' })
-      .positive({ message: 'Zadejte pozitivní číslo' })
-      .nullable(),
+      .number({ invalid_type_error: err.invalidTypeNumber })
+      .int({ message: err.nonInt })
+      .positive({ message: err.nonPositiveNumber })
+      .nullable()
+      .optional(),
+    photoFile: z
+      .any()
+      .refine(fileList => fileList instanceof FileList, err.invalidTypeFile)
+      .transform(
+        fileList =>
+          (fileList && fileList.length > 0 && fileList[0]) || null || undefined
+      )
+      .refine(
+        file => !file || (!!file && file.size <= 1024 * 1024 * 10),
+        err.maxCapacityImage + ' - 10 MB'
+      )
+      .refine(
+        file => !file || (!!file && file.type?.startsWith('image')),
+        err.unsuportedTypeImage
+      ) // any image
+      .openapi({ type: 'array', items: { type: 'string', format: 'binary' } })
+      .nullable()
+      .optional(),
+    photoFileRemoved: z.boolean().optional(),
+    photoPath: z.string().optional(),
     availability: z.object({
       workDays: z
         .array(z.date().or(z.string().min(1).pipe(z.coerce.date())))

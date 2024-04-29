@@ -15,6 +15,12 @@ interface NavbarServerProps {
 export function NavbarServer({ session }: NavbarServerProps) {
   const navPaths: NavPath[] = [
     {
+      path: '/posts',
+      name: 'Nástěnka',
+      icon: 'fas fa-thumbtack',
+      permissions: [],
+    },
+    {
       path: '/plans',
       name: 'Plány',
       icon: 'fas fa-calendar-days',
@@ -50,7 +56,12 @@ export function NavbarServer({ session }: NavbarServerProps) {
       icon: 'fas fa-calendar-week',
       permissions: [],
     },
-    { path: '/profile', name: 'Profil', icon: 'fas fa-user', permissions: [] },
+    {
+      path: '/profile',
+      name: 'Profil',
+      icon: 'fas fa-user',
+      permissions: [],
+    },
   ]
 
   const availablePaths = navPaths.filter(path => {

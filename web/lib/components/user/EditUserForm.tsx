@@ -14,11 +14,7 @@ export default function EditUserForm({ user, onUpdate }: EditUserProps) {
   const { trigger, error, isMutating, reset } = useAPIUserUpdate(user.id, {
     onSuccess: () => onUpdate(),
   })
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<UserUpdateData>({
+  const { register, handleSubmit } = useForm<UserUpdateData>({
     resolver: zodResolver(UserUpdateSchema),
     defaultValues: {
       permissions: user.permissions,
@@ -47,7 +43,7 @@ export default function EditUserForm({ user, onUpdate }: EditUserProps) {
               <input
                 type="checkbox"
                 value={permission}
-                className="form-check-input fs-5 checkbox-white"
+                className="form-check-input fs-5 smj-checkbox"
                 {...register('permissions')}
               />{' '}
               <span className="d-inline-block fs-5">{permission}</span>
