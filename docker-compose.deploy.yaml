@@ -80,6 +80,28 @@ services:
       timeout: 10s
       retries: 10
 
+  swag:
+    image: lscr.io/linuxserver/swag:latest
+    container_name: webserver
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Etc/GMT
+      - URL=jobplanner.summerjob.eu
+      - SUBDOMAINs=www
+      - VALIDATION=http
+    volumes:
+      - /home/jobplanner/webserver/config:/config
+    ports:
+      - 443:443
+      - 80:80
+    restart: unless-stopped
+    networks:
+      - summerjob-network
+      - webserver
+
 networks:
   summerjob-network:
   webserver:
