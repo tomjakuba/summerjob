@@ -752,3 +752,7 @@ img.smj-nav-logo {
 .smj-sort-choice.selected {
   background-color: #fdc345;
 }
+
+.modal {
+  margin-top: 10%;
+}
