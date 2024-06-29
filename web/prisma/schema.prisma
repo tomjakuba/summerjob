@@ -69,6 +69,7 @@ enum Skill {
   DANGER
   ELECTRICIAN
   HEIGHTS
+  MASON
 }
 
 enum PostTag {
