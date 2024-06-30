@@ -525,10 +525,11 @@ function filterPosts(
       } else {
         return selectedDays.some(selected => {
           return (
-            post.availability &&
-            post.availability.some(availDay => {
-              return selected.day.getTime() === availDay.getTime()
-            })
+            (post.availability &&
+              post.availability.some(availDay => {
+                return selected.day.getTime() === availDay.getTime()
+              })) ||
+            post.availability.length === 0
           )
         })
       }
