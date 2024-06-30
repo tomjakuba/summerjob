@@ -35,13 +35,18 @@ export const MyEvents = ({ date, events, userId }: MyEventsProps) => {
   )
 }
 
-function filterEvents(selectedDay: Date, posts: PostComplete[]) {
+export function filterEvents(selectedDay: Date, posts: PostComplete[]) {
   if (!posts) return []
   return posts.filter(post => {
     return (
       (post.availability &&
         post.availability.some(availDay => {
-          return selectedDay && availDay.getTime() === selectedDay.getTime()
+          return (
+            selectedDay &&
+            availDay.getDate() === selectedDay.getDate() &&
+            availDay.getMonth() === selectedDay.getMonth() &&
+            availDay.getFullYear() === selectedDay.getFullYear()
+          )
         })) ||
       post.availability === undefined ||
       post.availability.length === 0

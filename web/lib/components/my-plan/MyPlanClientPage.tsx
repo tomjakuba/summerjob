@@ -12,7 +12,7 @@ import { useMemo, useState } from 'react'
 import SimpleDatePicker from '../date-picker/date-picker'
 import PageHeader from '../page-header/PageHeader'
 import { HeaderNoContent } from './HeaderNoContent'
-import { MyEvents } from './MyEvents'
+import { filterEvents, MyEvents } from './MyEvents'
 import MyJob from './MyJob'
 interface MyPlanProps {
   sPlan: Serialized
@@ -106,20 +106,6 @@ export default function MyPlanClientPage({
   )
 }
 
-function filterEvents(selectedDay: Date, posts: PostComplete[]) {
-  if (!posts) return []
-  const filterdPosts = posts.filter(post => {
-    return (
-      (post.availability &&
-        post.availability.some(availDay => {
-          return selectedDay && availDay.getTime() === selectedDay.getTime()
-        })) ||
-      post.availability === undefined ||
-      post.availability.length === 0
-    )
-  })
-  return filterdPosts
-}
 function sortEvents(posts: PostComplete[]) {
   return [...posts].sort((a, b) => {
     const compareDatesResult = compareDates(a.availability, b.availability)
