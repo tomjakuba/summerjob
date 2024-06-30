@@ -67,8 +67,10 @@ export const PostModal = ({
           </div>
         )}
         <Label id={'description'} label="Popis" margin={shouldShowMargin} />
-        <p>{item.shortDescription}</p>
-        {item.longDescription.length > 0 && <p>{item.longDescription}</p>}
+        <p style={{ whiteSpace: 'pre-wrap' }}>{item.shortDescription}</p>
+        {item.longDescription.length > 0 && (
+          <p style={{ whiteSpace: 'pre-wrap' }}>{item.longDescription}</p>
+        )}
         {item.photoPath && (
           <div className="d-inline-block smj-shadow-small bg-white rounded border p-3 mb-2">
             <div
