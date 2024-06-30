@@ -9,7 +9,8 @@ export const EmailSchema = z
     email: z
       .string({ required_error: err.emptyEmail })
       .min(1, { message: err.emptyEmail })
-      .email({ message: err.invalidEmail }),
+      .email({ message: err.invalidEmail })
+      .trim(),
   })
   .strict()
 
