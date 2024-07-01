@@ -73,7 +73,9 @@ function JobInfo({
       <div className="job-data-col">
         <div className="w-50">
           <h2>{job.proposedJob.name}</h2>
-          <p>{job.proposedJob.publicDescription}</p>
+          <p style={{ whiteSpace: 'pre-wrap' }}>
+            {job.proposedJob.publicDescription}
+          </p>
           <div>
             <i className="fas fa-user-group me-1"></i>
             {job.workers.length == 0 && 'Nikdo'}
