@@ -8,8 +8,8 @@ WORKDIR /app
 
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json ./
-RUN npm ci
-
+RUN npm ci && npm install -g --arch=x64 --platform=linux --libc=glibc sharp@0.33.4
+ENV NEXT_SHARP_PATH=/usr/local/lib/node_modules/sharp
 
 # Rebuild the source code only when needed
 FROM node:18-slim AS builder
@@ -30,6 +30,7 @@ RUN npm run build
 # Production image, copy all the files and run next
 FROM node:18-slim AS runner
 WORKDIR /app
+COPY --from=deps --chown=nextjs:nodejs /usr/local/lib/node_modules/sharp /usr/local/lib/node_modules/sharp
 
 # Uncomment the following line in case you want to disable telemetry during runtime.
 # ENV NEXT_TELEMETRY_DISABLED 1

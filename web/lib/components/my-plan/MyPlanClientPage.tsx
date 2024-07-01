@@ -70,7 +70,11 @@ export default function MyPlanClientPage({
   }
   const selectedPlan = useMemo(() => {
     return sortedPlans.find(plan => {
-      return plan.day.getTime() === date.getTime()
+      return (
+        plan.day.getDate() === date.getDate() &&
+        plan.day.getMonth() === date.getMonth() &&
+        plan.day.getFullYear() === date.getFullYear()
+      )
     })
   }, [date, sortedPlans])
 
