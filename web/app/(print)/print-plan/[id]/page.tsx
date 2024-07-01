@@ -103,7 +103,7 @@ function JobInfo({
           </div>
 
           <div>
-            <i className="fas fa-screwdriver-wrench"></i>
+            <i className="fas fa-screwdriver-wrench me-1"></i>
             {formatTools(job.proposedJob.toolsToTakeWith)}
           </div>
           <div>
