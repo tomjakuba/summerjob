@@ -7,12 +7,24 @@ import Image from 'next/image'
 import logoImage from 'public/logo-smj-yellow.png'
 import React from 'react'
 import '/styles/print.css'
-import { formatTools } from 'lib/components/plan/PlanJobRow'
+import { ToolCompleteData } from 'lib/types/tool'
+import { toolNameMapping } from 'lib/data/enumMapping/toolNameMapping'
 
 type PathProps = {
   params: {
     id: string
   }
+}
+
+function formatTools(tools: ToolCompleteData[]) {
+  if (tools.length == 0) return 'Žádné'
+  return tools
+    .map(
+      tool =>
+        toolNameMapping[tool.tool] +
+        (tool.amount > 1 ? ' - ' + tool.amount : '')
+    )
+    .join(', ')
 }
 
 export default async function PrintPlanPage({ params }: PathProps) {
