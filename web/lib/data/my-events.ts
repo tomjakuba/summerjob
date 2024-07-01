@@ -38,6 +38,12 @@ export async function getMyEvents(workerId: string): Promise<PostComplete[]> {
       participants: {
         select: {
           workerId: true,
+          worker: {
+            select: {
+              firstName: true,
+              lastName: true,
+            },
+          },
         },
       },
     },

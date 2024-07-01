@@ -23,6 +23,12 @@ export async function getPosts(): Promise<PostComplete[]> {
       participants: {
         select: {
           workerId: true,
+          worker: {
+            select: {
+              firstName: true,
+              lastName: true,
+            },
+          },
         },
       },
     },
@@ -51,6 +57,12 @@ export async function getPostById(id: string): Promise<PostComplete | null> {
       participants: {
         select: {
           workerId: true,
+          worker: {
+            select: {
+              firstName: true,
+              lastName: true,
+            },
+          },
         },
       },
     },

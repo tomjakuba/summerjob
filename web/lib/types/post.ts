@@ -12,7 +12,12 @@ useZodOpenApi
 export const PostCompleteSchema = PostSchema.extend({
   availability: z.array(z.date()),
   tags: z.array(z.nativeEnum(PostTag)),
-  participants: z.array(z.object({ workerId: z.string() })),
+  participants: z.array(
+    z.object({
+      workerId: z.string(),
+      worker: z.object({ firstName: z.string(), lastName: z.string() }),
+    })
+  ),
 })
 
 export type PostComplete = z.infer<typeof PostCompleteSchema>

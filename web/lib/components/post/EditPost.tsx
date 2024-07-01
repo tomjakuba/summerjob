@@ -22,6 +22,7 @@ import { PillSelectInput } from '../forms/input/PillSelectInput'
 import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
 import { TimeInput } from '../forms/input/TimeInput'
+import { Label } from '../forms/Label'
 
 const schema = PostUpdateSchema
 type PostForm = z.input<typeof schema>
@@ -277,7 +278,16 @@ export default function EditPost({ serializedPost, allDates }: EditPostProps) {
               label: 'Otevřeno pro zapsání účastníky',
             },
           ]}
-        />
+        />{' '}
+        <Label id={'participants'} label="Zapsaní účastníci" />
+        <p style={{ whiteSpace: 'pre-wrap' }}>
+          {post.participants
+            .sort((a, b) => a.worker.lastName.localeCompare(b.worker.lastName))
+            .map(
+              participant =>
+                `${participant.worker.firstName} ${participant.worker.lastName}\n`
+            )}
+        </p>
       </form>
     </Form>
   )
