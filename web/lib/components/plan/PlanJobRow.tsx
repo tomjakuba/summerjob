@@ -283,9 +283,7 @@ export function PlanJobRow({
                         activeJobs,
                         removeWorkerFromJob,
                         setWorkerToMove,
-                        reloadPlan,
-                        registerSameWorkerIssue,
-                        registerSameCoworkerIssue
+                        reloadPlan
                       )}
                       onMouseEnter={() =>
                         worker.photoPath
@@ -467,9 +465,7 @@ function formatWorkerData(
   plannedJobs: ActiveJobWorkersAndJobs[] | undefined,
   removeWorker: (workerId: string) => void,
   requestMoveWorker: (worker: WorkerComplete) => void,
-  reloadPlan: () => void,
-  registerSameWorkerIssue: (workerId: string, value: boolean) => void,
-  registerSameCoworkerIssue: (workerId: string, value: boolean) => void
+  reloadPlan: () => void
 ) {
   const name = `${worker.firstName} ${worker.lastName}${
     worker.age ? `, ${worker.age}` : ''
@@ -490,8 +486,6 @@ function formatWorkerData(
   const allergies = worker.allergies
   const workerSameWork = sameWork(worker.id, job, day, plannedJobs)
   const workerSameCoworker = sameCoworker(worker.id, job, day, plannedJobs)
-  registerSameWorkerIssue(worker.id, workerSameWork.length > 0)
-  registerSameCoworkerIssue(worker.id, workerSameCoworker.length > 0)
 
   return [
     {
@@ -573,21 +567,18 @@ function sameWork(
   plannedJobs: ActiveJobWorkersAndJobs[] | undefined
 ) {
   const issues: Date[] = []
-  // if (plannedJobs) {
-  //   for (const job of plannedJobs) {
-  //     if (
-  //       job.proposedJobId === currentJob.proposedJobId &&
-  //       job.planId !== currentJob.planId &&
-  //       new Date(job.plan.day).getTime() < currentDay.getTime()
-  //     ) {
-  //       for (const worker of job.workers) {
-  //         if (worker.id === currentWorkerId) {
-  //           issues.push(new Date(job.plan.day))
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
+  if (plannedJobs) {
+    for (const job of plannedJobs) {
+      if (
+        new Date(job.plan.day).getTime() < currentDay.getTime() &&
+        job.proposedJobId === currentJob.proposedJobId &&
+        job.planId !== currentJob.planId &&
+        job.workers.find(x => x.id === currentWorkerId) !== undefined
+      ) {
+        issues.push(new Date(job.plan.day))
+      }
+    }
+  }
   return issues
 }
 
@@ -601,7 +592,6 @@ function sameCoworker(
   // if (plannedJobs) {
   //   for (const curWorker of currentJob.workers) {
   //     for (const job of plannedJobs) {
-  //       console.log(job.workers)
   //       if (
   //         job.planId !== currentJob.planId &&
   //         new Date(job.plan.day).getTime() < currentDay.getTime() &&
