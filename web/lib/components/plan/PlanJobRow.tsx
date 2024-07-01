@@ -573,21 +573,21 @@ function sameWork(
   plannedJobs: ActiveJobWorkersAndJobs[] | undefined
 ) {
   const issues: Date[] = []
-  if (plannedJobs) {
-    for (const job of plannedJobs) {
-      if (
-        job.proposedJobId === currentJob.proposedJobId &&
-        job.planId !== currentJob.planId &&
-        new Date(job.plan.day).getTime() < currentDay.getTime()
-      ) {
-        for (const worker of job.workers) {
-          if (worker.id === currentWorkerId) {
-            issues.push(new Date(job.plan.day))
-          }
-        }
-      }
-    }
-  }
+  // if (plannedJobs) {
+  //   for (const job of plannedJobs) {
+  //     if (
+  //       job.proposedJobId === currentJob.proposedJobId &&
+  //       job.planId !== currentJob.planId &&
+  //       new Date(job.plan.day).getTime() < currentDay.getTime()
+  //     ) {
+  //       for (const worker of job.workers) {
+  //         if (worker.id === currentWorkerId) {
+  //           issues.push(new Date(job.plan.day))
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
   return issues
 }
 
