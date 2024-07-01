@@ -7,6 +7,7 @@ import Image from 'next/image'
 import logoImage from 'public/logo-smj-yellow.png'
 import React from 'react'
 import '/styles/print.css'
+import { formatTools } from 'lib/components/plan/PlanJobRow'
 
 type PathProps = {
   params: {
@@ -89,6 +90,10 @@ function JobInfo({
             {job.proposedJob.contact}
           </div>
 
+          <div>
+            <i className="fas fa-screwdriver-wrench"></i>
+            {formatTools(job.proposedJob.toolsToTakeWith)}
+          </div>
           <div>
             <i className="fas fa-utensils me-1"></i>
             {job.proposedJob.hasFood ? 'Ano' : 'Ne'}

@@ -358,7 +358,7 @@ function formatAllergens(job: ActiveJobNoPlan) {
     .join(', ')
 }
 
-function formatTools(tools: ToolCompleteData[]) {
+export function formatTools(tools: ToolCompleteData[]) {
   if (tools.length == 0) return 'Žádné'
   return tools
     .map(
