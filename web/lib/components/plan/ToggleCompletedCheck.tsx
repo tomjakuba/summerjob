@@ -45,7 +45,6 @@ export default function ToggleCompletedCheck({
     ) as ActiveJobUpdateData
     trigger(modified, {
       onSuccess: () => {
-        setChecked(!checked)
         setShowNoteModal(false)
       },
     })
@@ -60,6 +59,7 @@ export default function ToggleCompletedCheck({
         checked={checked}
         {...register('completed', {
           onChange: () => {
+            setChecked(!checked)
             setShowNoteModal(true)
           },
         })}

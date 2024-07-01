@@ -6,6 +6,7 @@ import {
   compareDates,
   compareTimes,
   datesBetween,
+  formatDateShort,
   formateTime,
   getHourAndMinute,
   normalizeString,
@@ -117,13 +118,13 @@ export default function PostsClientPage({
 
   //#region Sort
 
-  const selectedSortQ = searchParams?.get('sort') ?? 'time-new-old'
+  const selectedSortQ = searchParams?.get('sort') ?? 'date-new-old'
 
   const getSelectedSortFromQuery = (): SortObject => {
     const result = test.find(t => t.id === selectedSortQ)
     return result !== undefined
       ? result
-      : { id: 'time-new-old', label: 'Čas (nejnovější - nejstarší)' }
+      : { id: 'date-new-old', label: 'Čas (nejnovější - nejstarší)' }
   }
 
   const [selectedSort, setSelectedSort] = useState(getSelectedSortFromQuery())
@@ -134,7 +135,7 @@ export default function PostsClientPage({
 
   const selectedDaysQ = searchParams?.get('days')
 
-  const today = () => {
+  const upcomingDays = () => {
     const todayDate = new Date(
       new Date().setHours(
         firstDay.getHours(),
@@ -148,7 +149,7 @@ export default function PostsClientPage({
       day: new Date(todayDate),
     }
     if (days.some(day => day.id === todayDay.id)) {
-      return [todayDay]
+      return days.filter(day => day.day.getTime() >= todayDay.day.getTime())
     }
     return days
   }
@@ -162,9 +163,9 @@ export default function PostsClientPage({
       const result = days.filter(day =>
         daysInDateQ.some(dQ => dQ.toJSON() === day.id)
       )
-      return result.length === 0 ? today() : result
+      return result.length === 0 ? upcomingDays() : result
     }
-    return today()
+    return upcomingDays()
   }
 
   const [selectedDays, setSelectedDays] = useState(getSelectedDaysFromQuery())
@@ -382,6 +383,16 @@ export default function PostsClientPage({
     return <ErrorPage error={error} />
   }
 
+  const dayFormatter = new Intl.DateTimeFormat('cs-CZ', {
+    weekday: 'short',
+    timeZone: 'Europe/Prague',
+  })
+
+  const formatDateToDayShort = (date: Date) => {
+    const dayShort = dayFormatter.format(date)
+    return dayShort.charAt(0).toUpperCase() + dayShort.slice(1)
+  }
+
   return (
     <>
       <PageHeader title="Nástěnka">
@@ -456,6 +467,9 @@ export default function PostsClientPage({
                     <div className="col-sm-1 me-2">
                       {item.timeFrom && item.timeTo && (
                         <div className="fw-bold text-center">
+                          <div>
+                            {formatDateToDayShort(item.availability[0])}
+                          </div>
                           <div>{formateTime(item.timeFrom)}</div>
                           {' - '}
                           <div>{formateTime(item.timeTo)}</div>
@@ -595,9 +609,15 @@ function sortPosts(selectedSort: SortObject, posts: PostComplete[]) {
       case 'address-z-a':
         return compareAddresses(b.address, a.address)
       case 'date-new-old':
-        return compareDates(a.availability, b.availability)
+        return chainCompare(
+          compareDates(a.availability, b.availability),
+          compareTimes(a.timeFrom, b.timeFrom)
+        )
       case 'date-old-new':
-        return compareDates(b.availability, a.availability)
+        return chainCompare(
+          compareDates(b.availability, a.availability),
+          compareTimes(b.timeFrom, a.timeFrom)
+        )
       case 'time-new-old':
         return compareTimes(a.timeFrom, b.timeFrom)
       case 'time-old-new':
@@ -606,6 +626,15 @@ function sortPosts(selectedSort: SortObject, posts: PostComplete[]) {
         return 0
     }
   })
+}
+
+function chainCompare(...comparators: number[]) {
+  for (const comparator of comparators) {
+    if (comparator !== 0) {
+      return comparator
+    }
+  }
+  return 0
 }
 
 function compareAddresses(addressA: string | null, addressB: string | null) {
