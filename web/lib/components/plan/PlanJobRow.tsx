@@ -598,28 +598,30 @@ function sameCoworker(
   plannedJobs: ActiveJobWorkersAndJobs[] | undefined
 ) {
   const issues: SameCoworkerIssue[] = []
-  if (plannedJobs) {
-    for (const job of plannedJobs) {
-      if (
-        job.planId !== currentJob.planId &&
-        new Date(job.plan.day).getTime() < currentDay.getTime()
-      ) {
-        for (const worker of job.workers) {
-          for (const curWorker of currentJob.workers) {
-            if (
-              curWorker.id !== currentWorkerId &&
-              worker.id === curWorker.id
-            ) {
-              issues.push({
-                name: worker.firstName + ' ' + worker.lastName,
-                jobName: job.proposedJob.name,
-                planDay: formatDateShort(new Date(job.plan.day)),
-              })
-            }
-          }
-        }
-      }
-    }
-  }
+  // if (plannedJobs) {
+  //   for (const curWorker of currentJob.workers) {
+  //     for (const job of plannedJobs) {
+  //       console.log(job.workers)
+  //       if (
+  //         job.planId !== currentJob.planId &&
+  //         new Date(job.plan.day).getTime() < currentDay.getTime() &&
+  //         job.workers.find(x => x.id === curWorker.id) !== undefined
+  //       ) {
+  //         for (const worker of job.workers) {
+  //           if (
+  //             curWorker.id !== currentWorkerId &&
+  //             worker.id === curWorker.id
+  //           ) {
+  //             issues.push({
+  //               name: worker.firstName + ' ' + worker.lastName,
+  //               jobName: job.proposedJob.name,
+  //               planDay: formatDateShort(new Date(job.plan.day)),
+  //             })
+  //           }
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
   return issues
 }
