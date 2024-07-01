@@ -48,6 +48,7 @@ const sendData =
 const get = send('GET')
 const post = sendData('POST')
 const patch = sendData('PATCH')
+const put = sendData('PUT')
 const del = send('DELETE')
 
 export function useData<T>(url: string, options?: any) {
@@ -58,6 +59,11 @@ export function useDataPartialUpdate<T>(url: string, options?: any) {
   // Bugfix until this is solved https://github.com/vercel/swr/issues/2376
   options = { throwOnError: false, ...options }
   return useSWRMutation<any, any, Key, T>(url, patch, options)
+}
+
+export function useDataUpdate<T>(url: string, options?: any) {
+  options = { throwOnError: false, ...options }
+  return useSWRMutation<any, any, Key, T>(url, put, options)
 }
 
 export function useDataPartialUpdateDynamic<T>(

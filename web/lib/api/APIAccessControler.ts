@@ -3,7 +3,11 @@ import { APIMethod } from 'lib/types/api'
 import { Permission } from 'lib/types/auth'
 
 export function APIAccessController(
-  permissions: Permission[],
+  permissions:
+    | {
+        [key in 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT']?: Permission[]
+      }
+    | Permission[],
   handler: APIMethod
 ): APIMethod {
   return async (req, res) => {
@@ -13,7 +17,16 @@ export function APIAccessController(
       return
     }
 
-    if (!isAccessAllowed(permissions, session)) {
+    if (
+      !isAccessAllowed(
+        Array.isArray(permissions)
+          ? permissions
+          : req.method
+          ? (permissions as Record<string, any>)[req.method] ?? []
+          : [],
+        session
+      )
+    ) {
       res.status(403).end()
       return
     }

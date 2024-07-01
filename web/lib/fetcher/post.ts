@@ -6,6 +6,7 @@ import {
   useDataCreate,
   useDataDelete,
   useDataPartialUpdate,
+  useDataUpdate,
 } from './fetcher'
 import { PostCreateData, PostUpdateDataInput } from 'lib/types/post'
 
@@ -14,6 +15,10 @@ export function useAPIPostUpdate(postId: string, options?: any) {
     `/api/posts/${postId}`,
     options
   )
+}
+
+export function useApiPostParticipateChange(postId: string, options?: any) {
+  return useDataUpdate<PostUpdateDataInput>(`/api/posts/${postId}`, options)
 }
 
 export function useAPIPosts(options?: any) {

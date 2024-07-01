@@ -15,6 +15,7 @@ interface MethodHandlerProps {
   post?: APIMethod
   del?: APIMethod
   patch?: APIMethod
+  put?: APIMethod
 }
 
 export function APIMethodHandler({
@@ -22,6 +23,7 @@ export function APIMethodHandler({
   post,
   patch,
   del,
+  put,
 }: MethodHandlerProps) {
   return async function (
     req: NextApiRequest,
@@ -50,6 +52,12 @@ export function APIMethodHandler({
       case 'DELETE':
         if (del) {
           await handle(del, req, res, session)
+          return
+        }
+        break
+      case 'PUT':
+        if (put) {
+          await handle(put, req, res, session)
           return
         }
         break

@@ -61,6 +61,34 @@ async function patch(req: NextApiRequest, res: NextApiResponse) {
   res.status(204).end()
 }
 
+async function setParticipation(req: NextApiRequest, res: NextApiResponse) {
+  const id = req.query.id as string
+  const post = await getPostById(id)
+  if (!post) {
+    res.status(404).end()
+    return
+  }
+  const session = await getSMJSessionAPI(req, res)
+  if (!session) {
+    res.status(401).end()
+    return
+  }
+
+  const postData = {
+    participateChange: {
+      workerId: session.userID,
+      isEnrolled: !post.participants.find(p => p.workerId === session.userID),
+    },
+  }
+  if (!postData) {
+    return
+  }
+
+  await updatePost(post.id, postData)
+
+  res.status(204).end()
+}
+
 async function del(req: NextApiRequest, res: NextApiResponse) {
   const id = req.query.id as string
   const post = await getPostById(id)
@@ -98,8 +126,13 @@ async function isAllowedToAccessPost(
 }
 
 export default APIAccessController(
-  [Permission.POSTS],
-  APIMethodHandler({ get, patch, del })
+  {
+    GET: [Permission.POSTS],
+    PATCH: [Permission.POSTS],
+    DELETE: [Permission.POSTS],
+    PUT: [],
+  },
+  APIMethodHandler({ get, patch, del, put: setParticipation })
 )
 
 export const config = {

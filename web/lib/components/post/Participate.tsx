@@ -1,4 +1,4 @@
-import { useAPIPostUpdate } from 'lib/fetcher/post'
+import { useApiPostParticipateChange, useAPIPostUpdate } from 'lib/fetcher/post'
 import { PostComplete } from 'lib/types/post'
 import { useCallback, useEffect, useState } from 'react'
 
@@ -18,7 +18,7 @@ export const Participate = ({ post, onUpdated, userId }: ParticipateProps) => {
 
   const [checked, setChecked] = useState(post.isMandatory || isEnrolled)
 
-  const { trigger, isMutating } = useAPIPostUpdate(post.id, {
+  const { trigger, isMutating } = useApiPostParticipateChange(post.id, {
     onSuccess: onUpdated,
   })
 

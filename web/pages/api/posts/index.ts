@@ -51,7 +51,10 @@ async function post(
 }
 
 export default APIAccessController(
-  [Permission.POSTS],
+  {
+    GET: [],
+    POST: [Permission.POSTS],
+  },
   APIMethodHandler({ get, post })
 )
 
