@@ -588,30 +588,41 @@ function sameCoworker(
   currentDay: Date,
   plannedJobs: ActiveJobWorkersAndJobs[] | undefined
 ) {
-  const issues: SameCoworkerIssue[] = []
-  // if (plannedJobs) {
-  //   for (const curWorker of currentJob.workers) {
-  //     for (const job of plannedJobs) {
-  //       if (
-  //         job.planId !== currentJob.planId &&
-  //         new Date(job.plan.day).getTime() < currentDay.getTime() &&
-  //         job.workers.find(x => x.id === curWorker.id) !== undefined
-  //       ) {
-  //         for (const worker of job.workers) {
-  //           if (
-  //             curWorker.id !== currentWorkerId &&
-  //             worker.id === curWorker.id
-  //           ) {
-  //             issues.push({
-  //               name: worker.firstName + ' ' + worker.lastName,
-  //               jobName: job.proposedJob.name,
-  //               planDay: formatDateShort(new Date(job.plan.day)),
-  //             })
-  //           }
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
-  return issues
+  const issues: Map<string, SameCoworkerIssue[]> = new Map()
+  if (plannedJobs) {
+    for (const job of plannedJobs) {
+      if (
+        new Date(job.plan.day).getTime() < currentDay.getTime() &&
+        job.planId !== currentJob.planId &&
+        job.workers.find(x => x.id === currentWorkerId) !== undefined
+      ) {
+        for (const worker of job.workers) {
+          if (
+            worker.id !== currentWorkerId &&
+            currentJob.workers.find(x => x.id === worker.id) !== undefined
+          ) {
+            const existingIssues = issues.get(worker.id)
+            if (existingIssues) {
+              existingIssues.push({
+                name: currentJob.proposedJob.name,
+                jobName: job.proposedJob.name,
+                planDay: formatDateShort(new Date(job.plan.day)),
+              })
+            } else {
+              issues.set(worker.id, [
+                {
+                  name: currentJob.proposedJob.name,
+                  jobName: job.proposedJob.name,
+                  planDay: formatDateShort(new Date(job.plan.day)),
+                },
+              ])
+            }
+          }
+        }
+      }
+    }
+  }
+  return Array.from(issues.values())
+    .filter(x => x.length > 2)
+    .flat()
 }
