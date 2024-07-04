@@ -604,14 +604,14 @@ function sameCoworker(
             const existingIssues = issues.get(worker.id)
             if (existingIssues) {
               existingIssues.push({
-                name: currentJob.proposedJob.name,
+                name: `${worker.firstName} ${worker.lastName}`,
                 jobName: job.proposedJob.name,
                 planDay: formatDateShort(new Date(job.plan.day)),
               })
             } else {
               issues.set(worker.id, [
                 {
-                  name: currentJob.proposedJob.name,
+                  name: `${worker.firstName} ${worker.lastName}`,
                   jobName: job.proposedJob.name,
                   planDay: formatDateShort(new Date(job.plan.day)),
                 },
@@ -622,7 +622,5 @@ function sameCoworker(
       }
     }
   }
-  return Array.from(issues.values())
-    .filter(x => x.length > 1)
-    .flat()
+  return Array.from(issues.values()).flat()
 }
