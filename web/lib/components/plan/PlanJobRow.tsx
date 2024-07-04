@@ -623,6 +623,6 @@ function sameCoworker(
     }
   }
   return Array.from(issues.values())
-    .filter(x => x.length > 2)
+    .filter(x => x.length > 1)
     .flat()
 }
