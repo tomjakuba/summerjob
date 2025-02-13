@@ -47,6 +47,9 @@ export async function getWorkers(
       cars: {
         where: {
           deleted: false,
+          forEvent: {
+            isActive: true,
+          },
         },
       },
       availability: {
@@ -113,6 +116,9 @@ export async function getWorkerById(
       cars: {
         where: {
           deleted: false,
+          forEvent: {
+            isActive: true,
+          },
         },
       },
       availability: {
