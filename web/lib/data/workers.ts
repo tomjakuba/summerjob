@@ -1,5 +1,6 @@
 import {
   deleteFile,
+  getUploadDirForImages,
   getUploadDirForImagesForCurrentEvent,
   renameFile,
   updatePhotoPathByNewFilename,
@@ -82,10 +83,6 @@ export async function getWorkerPhotoPathById(
   id: string,
   prismaClient: PrismaClient | PrismaTransactionClient = prisma
 ): Promise<string | null> {
-  const activeEventId = await cache_getActiveSummerJobEventId()
-  if (!activeEventId) {
-    throw new NoActiveEventError()
-  }
   const worker = await prismaClient.worker.findUnique({
     where: {
       id: id,
@@ -97,7 +94,7 @@ export async function getWorkerPhotoPathById(
   if (!worker || !worker.photoPath) {
     return null
   }
-  const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
+  const uploadDirAbsolutePath = getUploadDirForImages()
   return path.join(uploadDirAbsolutePath, worker.photoPath)
 }
 
