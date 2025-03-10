@@ -343,3 +343,29 @@ model VerificationToken {
 
   @@unique([identifier, token])
 }
+
+model Application {
+  id             String   @id @default(uuid())
+  firstName      String
+  lastName       String
+  birthDate      DateTime
+  gender         String
+  phone          String
+  email          String   @unique
+  address        String
+  pastParticipation Boolean
+  arrivalDate    DateTime
+  departureDate  DateTime
+  allergies      String
+  toolsSkills    String   // Nářadí, se kterým umí zacházet
+  toolsBringing  String   // Nářadí, které přiveze
+  heardAboutUs   String?  // Jak se o nás dozvěděl
+  playsInstrument Boolean
+  tShirtSize     String?  // Velikost trička
+  additionalInfo String?  // Dodatečné informace
+  photo          String   // Cesta k uložené fotce
+  accommodationPrice Int
+  ownsCar        Boolean  @default(false)
+  canBeMedic     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+}
