@@ -51,9 +51,9 @@ export default function ApplicationsPage() {
   }, [])
 
   const onSubmit = async (data: ApplicationCreateDataInput) => {
-    console.log('ahooj') // Debugging
+    console.log('ahooj')
     try {
-      await trigger(data) // Správné odeslání
+      await trigger(data)
     } catch (err) {
       console.error('Chyba při odesílání přihlášky:', err)
     }
@@ -101,12 +101,9 @@ export default function ApplicationsPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 p-6 border rounded-lg shadow-lg bg-white">
-      <h1 className="text-2xl font-bold text-center mb-6">
-        Přihláška na brigádu
-      </h1>
+    <div className="max-w-2xl mx-auto mt-10 p-6 border rounded-lg shadow-lg">
       <Form
-        label="Odeslat přihlášku"
+        label="Přihláška na brigádu"
         isInputDisabled={isMutating}
         onConfirmationClosed={onConfirmationClosed}
         resetForm={reset}
@@ -198,33 +195,27 @@ export default function ApplicationsPage() {
             label="Alergie"
             register={() => register('allergies')}
             errors={errors}
+            mandatory
           />
           <TextInput
             id="toolsSkills"
             label="Nářadí, se kterým umím zacházet"
             register={() => register('toolsSkills')}
             errors={errors}
+            mandatory
           />
           <TextInput
             id="toolsBringing"
             label="Nářadí, které přivezu"
             register={() => register('toolsBringing')}
             errors={errors}
+            mandatory
           />
           <TextInput
             id="heardAboutUs"
             label="Jak jste se o nás dozvěděl/a?"
             register={() => register('heardAboutUs')}
             errors={errors}
-          />
-          <CheckboxInput
-            id="playsInstrument"
-            label="Umím hrát na hudební nástroj"
-            register={() =>
-              register('playsInstrument', {
-                setValueAs: v => v === true,
-              })
-            }
           />
           <TextInput
             id="tShirtSize"
@@ -240,8 +231,8 @@ export default function ApplicationsPage() {
           />
           <ImageUploader
             id="photo"
-            label="Fotka"
-            secondaryLabel="Nahrajte svou fotku (bude uložena jako base64 string)"
+            label="Fotografie"
+            secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
             errors={errors}
             registerPhoto={registerPhoto}
             removeNewPhoto={removePhoto}
@@ -267,7 +258,7 @@ export default function ApplicationsPage() {
                 setValueAs: v => v === true,
               })
             }
-          />{' '}
+          />
           <CheckboxInput
             id="canBeMedic"
             label="Mohu se zúčastnit jako zdravotník"
@@ -277,9 +268,19 @@ export default function ApplicationsPage() {
               })
             }
           />
+          <CheckboxInput
+            id="playsInstrument"
+            label="Umím hrát na hudební nástroj"
+            register={() =>
+              register('playsInstrument', {
+                setValueAs: v => v === true,
+              })
+            }
+          />
           <button
             type="submit"
-            className="w-full btn btn-primary"
+            className="w-full btn btn-primary d-block m-auto
+            mt-5"
             disabled={isMutating}
           >
             {isMutating ? 'Odesílání...' : 'Odeslat přihlášku'}
