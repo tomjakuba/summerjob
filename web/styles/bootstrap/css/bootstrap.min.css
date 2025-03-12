@@ -7677,6 +7677,10 @@ fieldset:disabled .btn {
   width: 25% !important;
 }
 
+.w-45 {
+  width: 45% !important;
+}
+
 .w-50 {
   width: 50% !important;
 }
@@ -12442,4 +12446,11 @@ select.form-control[multiple] {
 .carousel-caption h6,
 .carousel-caption .h6 {
   color: inherit;
+}
+
+form.application .light-placeholder + input::placeholder,
+form.application .light-placeholder + textarea::placeholder,
+form.application .light-placeholder + div > input::placeholder {
+  color: var(--bs-gray-400);
+  font-size: medium;
 }

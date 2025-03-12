@@ -19,6 +19,8 @@ import { formatNumber } from 'lib/helpers/helpers'
 import { Form } from 'lib/components/forms/Form'
 import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
 
+// TODO: change checkbox component
+// TODO: change datepicker (or create new component?)
 export default function ApplicationsPage() {
   const [isApplicationOpen, setIsApplicationOpen] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -110,97 +112,134 @@ export default function ApplicationsPage() {
         saved={submitted}
         error={error}
         formId="application-form"
+        saveBar={false}
       >
         <form
           id="application-form"
           onSubmit={handleSubmit(onSubmit)}
-          className="space-y-4"
+          className="space-y-4 mx-5 application"
         >
-          <TextInput
-            id="firstName"
-            label="Jméno"
-            register={() => register('firstName')}
-            errors={errors}
-            mandatory
-          />
-          <TextInput
-            id="lastName"
-            label="Příjmení"
-            register={() => register('lastName')}
-            errors={errors}
-            mandatory
-          />
-          <DateSelectionInput
-            id="birthDate"
-            label="Datum narození"
-            register={() => register('birthDate')}
-            days={allDates}
-          />
-          <FilterSelectInput
-            id="gender"
-            label="Pohlaví"
-            placeholder="Vyberte pohlaví"
-            items={[
-              { id: 'Muž', name: 'Muž', searchable: 'Muž' },
-              { id: 'Žena', name: 'Žena', searchable: 'Žena' },
-            ]}
-            onSelected={id => setValue('gender', id as 'Muž' | 'Žena')}
-            errors={errors}
-            mandatory
-          />
-          <TextInput
-            id="phone"
-            label="Telefon"
-            register={() => register('phone')}
-            errors={errors}
-            mandatory
-          />
-          <TextInput
-            id="email"
-            label="Email"
-            register={() => register('email')}
-            errors={errors}
-            mandatory
-          />
-          <TextInput
-            id="address"
-            label="Adresa"
-            register={() => register('address')}
-            errors={errors}
-            mandatory
-          />
-          <CheckboxInput
-            id="pastParticipation"
-            label="Už jsem se v minulosti zúčastnil/a"
-            register={() =>
-              register('pastParticipation', {
-                setValueAs: v => v === true,
-              })
-            }
-          />
-          <DateSelectionInput
-            id="arrivalDate"
-            label="Datum příjezdu"
-            register={() => register('arrivalDate')}
-            days={allDates}
-          />
-          <DateSelectionInput
-            id="departureDate"
-            label="Datum odjezdu"
-            register={() => register('departureDate')}
-            days={allDates}
-          />
-          <TextInput
-            id="allergies"
-            label="Alergie"
-            register={() => register('allergies')}
-            errors={errors}
-            mandatory
-          />
+          <div className="d-flex flex-row w-100 justify-content-between">
+            <div className="w-45">
+              <TextInput
+                id="firstName"
+                label="Jméno"
+                register={() => register('firstName')}
+                placeholder="Vaše jméno"
+                errors={errors}
+                labelClassName="light-placeholder"
+                mandatory
+              />
+            </div>
+            <div className="w-45">
+              <TextInput
+                id="lastName"
+                label="Příjmení"
+                register={() => register('lastName')}
+                placeholder="Vaše příjmení"
+                errors={errors}
+                labelClassName="light-placeholder"
+                mandatory
+              />
+            </div>
+          </div>
+          <div className="d-flex flex-row w-100 justify-content-between">
+            <div className="w-45">
+              <DateSelectionInput
+                id="birthDate"
+                label="Datum narození"
+                register={() => register('birthDate')}
+                days={allDates}
+              />
+            </div>
+            <div className="w-45">
+              <FilterSelectInput
+                id="gender"
+                label="Pohlaví"
+                placeholder="Vyberte pohlaví"
+                labelClassName="light-placeholder"
+                items={[
+                  { id: 'Muž', name: 'Muž', searchable: 'Muž' },
+                  { id: 'Žena', name: 'Žena', searchable: 'Žena' },
+                ]}
+                onSelected={id => setValue('gender', id as 'Muž' | 'Žena')}
+                errors={errors}
+                mandatory
+              />
+            </div>
+          </div>
+          <div className="d-flex flex-row w-100 justify-content-between">
+            <div className="w-45">
+              <TextInput
+                id="phone"
+                label="Telefon"
+                register={() => register('phone')}
+                placeholder="Váš telefon"
+                labelClassName="light-placeholder"
+                errors={errors}
+                mandatory
+              />
+            </div>
+            <div className="w-45">
+              <TextInput
+                id="email"
+                label="Email"
+                register={() => register('email')}
+                labelClassName="light-placeholder"
+                placeholder="Váš email"
+                errors={errors}
+                mandatory
+              />
+            </div>
+          </div>
+          <div className="d-flex flex-row w-100 justify-content-between">
+            <div className="w-45">
+              <TextInput
+                id="address"
+                label="Adresa"
+                register={() => register('address')}
+                labelClassName="light-placeholder"
+                placeholder="Vaše adresa"
+                errors={errors}
+                mandatory
+              />
+            </div>
+            <div className="w-45">
+              <CheckboxInput
+                id="pastParticipation"
+                label="Už jsem se v minulosti zúčastnil/a"
+                register={() =>
+                  register('pastParticipation', {
+                    setValueAs: v => v === true,
+                  })
+                }
+              />
+            </div>
+          </div>
+          <div className="d-flex flex-row w-100 justify-content-between">
+            <div className="w-45">
+              <DateSelectionInput
+                id="arrivalDate"
+                label="Datum příjezdu"
+                register={() => register('arrivalDate')}
+                days={allDates}
+              />
+            </div>
+            <div className="w-45">
+              <DateSelectionInput
+                id="departureDate"
+                label="Datum odjezdu"
+                register={() => register('departureDate')}
+                days={allDates}
+              />
+            </div>
+          </div>
           <TextInput
             id="toolsSkills"
             label="Nářadí, se kterým umím zacházet"
             register={() => register('toolsSkills')}
+            placeholder="Nářadí - motorovka, křovinořez, cirkulárka..."
+            labelClassName="light-placeholder"
             errors={errors}
             mandatory
           />
@@ -208,25 +247,63 @@ export default function ApplicationsPage() {
             id="toolsBringing"
             label="Nářadí, které přivezu"
             register={() => register('toolsBringing')}
+            placeholder="Nářadí - motorovka, křovinořez, kladivo..."
+            labelClassName="light-placeholder"
             errors={errors}
             mandatory
           />
-          <TextInput
-            id="heardAboutUs"
-            label="Jak jste se o nás dozvěděl/a?"
-            register={() => register('heardAboutUs')}
-            errors={errors}
-          />
-          <TextInput
-            id="tShirtSize"
-            label="Velikost trička"
-            register={() => register('tShirtSize')}
-            errors={errors}
-          />
+          <div className="d-flex flex-row w-100 justify-content-between">
+            <div className="w-45">
+              <TextInput
+                id="allergies"
+                label="Alergie"
+                register={() => register('allergies')}
+                placeholder="Vaše alergie na jídlo, pyl, zvířata..."
+                labelClassName="light-placeholder"
+                errors={errors}
+                mandatory
+              />
+            </div>
+            <div className="w-45">
+              <TextInput
+                id="heardAboutUs"
+                label="Jak jste se o nás dozvěděl/a?"
+                register={() => register('heardAboutUs')}
+                placeholder="Řekl mi o vás kamarád..."
+                labelClassName="light-placeholder"
+                errors={errors}
+              />
+            </div>
+          </div>
+          <div className="d-flex flex-row w-100 justify-content-between">
+            <div className="w-45">
+              <TextInput
+                id="tShirtSize"
+                label="Velikost trička"
+                register={() => register('tShirtSize')}
+                labelClassName="light-placeholder"
+                placeholder="S, M, L, XL, XXL"
+                errors={errors}
+              />
+            </div>
+            <div className="w-45">
+              <CheckboxInput
+                id="playsInstrument"
+                label="Umím hrát na hudební nástroj"
+                register={() =>
+                  register('playsInstrument', {
+                    setValueAs: v => v === true,
+                  })
+                }
+              />
+            </div>
+          </div>
           <TextAreaInput
             id="additionalInfo"
-            label="Dodatečné informace"
+            label="Dodatečné informace (speciální požadavky)"
             register={() => register('additionalInfo')}
+            labelClassName="light-placeholder"
+            placeholder="Vaše poznámka"
             errors={errors}
           />
           <ImageUploader
@@ -237,6 +314,7 @@ export default function ApplicationsPage() {
             registerPhoto={registerPhoto}
             removeNewPhoto={removePhoto}
           />
+          {/* TODO: create new component for accommodationPrice */}
           <TextInput
             id="accommodationPrice"
             label="Cena za ubytování"
@@ -268,19 +346,10 @@ export default function ApplicationsPage() {
               })
             }
           />
-          <CheckboxInput
-            id="playsInstrument"
-            label="Umím hrát na hudební nástroj"
-            register={() =>
-              register('playsInstrument', {
-                setValueAs: v => v === true,
-              })
-            }
-          />
           <button
             type="submit"
             className="w-full btn btn-primary d-block m-auto
-            mt-5"
+            my-5"
             disabled={isMutating}
           >
             {isMutating ? 'Odesílání...' : 'Odeslat přihlášku'}
