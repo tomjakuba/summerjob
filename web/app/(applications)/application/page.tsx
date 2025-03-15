@@ -208,14 +208,20 @@ export default function ApplicationsPage() {
               />
             </div>
             <div className="w-45">
-              <CheckboxInput
+              <FilterSelectInput
                 id="pastParticipation"
-                label="Už jsem se v minulosti zúčastnil/a"
-                register={() =>
-                  register('pastParticipation', {
-                    setValueAs: v => v === true,
-                  })
+                label="Už jsem se v minulosti zúčastnil/a?"
+                placeholder="Vyberte odpověď"
+                labelClassName="light-placeholder"
+                items={[
+                  { id: 'true', name: 'Ano', searchable: 'Ano' },
+                  { id: 'false', name: 'Ne', searchable: 'Ne' },
+                ]}
+                onSelected={id =>
+                  setValue('pastParticipation', id === 'true' ? true : false)
                 }
+                errors={errors}
+                mandatory
               />
             </div>
           </div>
@@ -290,14 +296,13 @@ export default function ApplicationsPage() {
               />
             </div>
             <div className="w-45">
-              <CheckboxInput
+              <TextInput
                 id="playsInstrument"
                 label="Umím hrát na hudební nástroj"
-                register={() =>
-                  register('playsInstrument', {
-                    setValueAs: v => v === true,
-                  })
-                }
+                register={() => register('playsInstrument')}
+                labelClassName="light-placeholder"
+                placeholder="Kytara, housle, klavír..."
+                errors={errors}
               />
             </div>
           </div>

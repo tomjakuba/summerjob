@@ -15,7 +15,7 @@ export const ApplicationCreateSchema = z.object({
   toolsSkills: z.string(),
   toolsBringing: z.string(),
   heardAboutUs: z.string().optional(),
-  playsInstrument: z.boolean(),
+  playsInstrument: z.string().optional(),
   tShirtSize: z.string().optional(),
   additionalInfo: z.string().optional(),
   photo: z.string(),
