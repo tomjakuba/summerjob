@@ -15,10 +15,10 @@ import { CheckboxInput } from 'lib/components/forms/input/CheckboxInput'
 import { TextAreaInput } from 'lib/components/forms/input/TextAreaInput'
 import { ImageUploader } from 'lib/components/forms/ImageUploader'
 import { useAPIApplicationCreate } from 'lib/fetcher/application'
-import { formatNumber } from 'lib/helpers/helpers'
 import { Form } from 'lib/components/forms/Form'
 import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
 import { BulletPointSelect } from 'lib/components/forms/input/BulletPointSelect'
+import { OtherAttributesInput } from 'lib/components/forms/input/OtherAttributesInput'
 
 // TODO: change checkbox component
 // TODO: change datepicker (or create new component?)
@@ -345,23 +345,20 @@ export default function ApplicationsPage() {
               />
             </div>
           </div>
-          <CheckboxInput
-            id="ownsCar"
-            label="Vlastním auto, které mohu použít"
-            register={() =>
-              register('ownsCar', {
-                setValueAs: v => v === true,
-              })
-            }
-          />
-          <CheckboxInput
-            id="canBeMedic"
-            label="Mohu se zúčastnit jako zdravotník"
-            register={() =>
-              register('canBeMedic', {
-                setValueAs: v => v === true,
-              })
-            }
+          <OtherAttributesInput
+            register={register}
+            objects={[
+              {
+                id: 'ownsCar',
+                icon: 'fa fa-car',
+                label: 'Vlastním auto, které mohu použít',
+              },
+              {
+                id: 'canBeMedic',
+                icon: 'fa fa-briefcase-medical',
+                label: 'Mohu se zúčastnit jako zdravotník',
+              },
+            ]}
           />
           <button
             type="submit"
