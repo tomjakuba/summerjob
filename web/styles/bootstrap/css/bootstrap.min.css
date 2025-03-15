@@ -12450,7 +12450,8 @@ select.form-control[multiple] {
 
 form.application .light-placeholder + input::placeholder,
 form.application .light-placeholder + textarea::placeholder,
-form.application .light-placeholder + div > input::placeholder {
+form.application .light-placeholder + div > input::placeholder,
+form.application input.custom-input::placeholder{
   color: var(--bs-gray-400);
   font-size: medium;
 }

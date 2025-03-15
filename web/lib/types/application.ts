@@ -19,7 +19,7 @@ export const ApplicationCreateSchema = z.object({
   tShirtSize: z.string().optional(),
   additionalInfo: z.string().optional(),
   photo: z.string(),
-  accommodationPrice: z.number().min(0, 'Cena musí být kladné číslo'),
+  accommodationPrice: z.string().min(1, 'Cena za ubytování je povinná'),
   ownsCar: z.boolean().default(false),
   canBeMedic: z.boolean().default(false),
 })

@@ -364,7 +364,7 @@ model Application {
   tShirtSize     String?  // Velikost trička
   additionalInfo String?  // Dodatečné informace
   photo          String   // Cesta k uložené fotce
-  accommodationPrice Int
+  accommodationPrice String
   ownsCar        Boolean  @default(false)
   canBeMedic     Boolean  @default(false)
   createdAt      DateTime @default(now())

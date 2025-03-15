@@ -18,6 +18,7 @@ import { useAPIApplicationCreate } from 'lib/fetcher/application'
 import { formatNumber } from 'lib/helpers/helpers'
 import { Form } from 'lib/components/forms/Form'
 import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
+import { BulletPointSelect } from 'lib/components/forms/input/BulletPointSelect'
 
 // TODO: change checkbox component
 // TODO: change datepicker (or create new component?)
@@ -35,6 +36,9 @@ export default function ApplicationsPage() {
     handleSubmit,
     setValue,
     getValues,
+    watch,
+    setError,
+    clearErrors,
     formState: { errors, dirtyFields },
   } = useForm<ApplicationCreateDataInput>({
     resolver: zodResolver(ApplicationCreateSchema),
@@ -42,8 +46,6 @@ export default function ApplicationsPage() {
   const { trigger, isMutating, error, reset } = useAPIApplicationCreate({
     onSuccess: () => setSubmitted(true),
   })
-
-  console.log(errors)
 
   useEffect(() => {
     const now = new Date()
@@ -53,7 +55,8 @@ export default function ApplicationsPage() {
   }, [])
 
   const onSubmit = async (data: ApplicationCreateDataInput) => {
-    console.log('ahooj')
+    console.log(data)
+
     try {
       await trigger(data)
     } catch (err) {
@@ -306,28 +309,37 @@ export default function ApplicationsPage() {
             placeholder="Vaše poznámka"
             errors={errors}
           />
-          <ImageUploader
-            id="photo"
-            label="Fotografie"
-            secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
-            errors={errors}
-            registerPhoto={registerPhoto}
-            removeNewPhoto={removePhoto}
-          />
-          {/* TODO: create new component for accommodationPrice */}
-          <TextInput
-            id="accommodationPrice"
-            label="Cena za ubytování"
-            type="number"
-            register={() =>
-              register('accommodationPrice', {
-                valueAsNumber: true,
-                onChange: e => (e.target.value = formatNumber(e.target.value)),
-              })
-            }
-            errors={errors}
-            mandatory
-          />
+          <div className="d-flex flex-row w-100 justify-content-between">
+            <div className="w-45">
+              <ImageUploader
+                id="photo"
+                label="Fotografie"
+                secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
+                errors={errors}
+                registerPhoto={registerPhoto}
+                removeNewPhoto={removePhoto}
+              />
+            </div>
+            <div className="w-45">
+              <BulletPointSelect
+                id="accommodationPrice"
+                label="Cena za ubytování"
+                labelClassName="light-placeholder"
+                options={[
+                  { value: 1600, label: '1600 Kč' },
+                  { value: 2000, label: '2000 Kč' },
+                ]}
+                setError={setError}
+                clearErrors={clearErrors}
+                register={() => register('accommodationPrice')}
+                setValue={setValue}
+                getValues={getValues}
+                errors={errors}
+                mandatory
+                minCustomValue={1600}
+              />
+            </div>
+          </div>
           <CheckboxInput
             id="ownsCar"
             label="Vlastním auto, které mohu použít"
