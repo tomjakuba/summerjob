@@ -356,7 +356,8 @@ model Application {
   pastParticipation Boolean
   arrivalDate    DateTime
   departureDate  DateTime
-  allergies      String
+  foodAllergies  String?  // Alergie na jídlo
+  workAllergies  String?  // Alergie na práci
   toolsSkills    String   // Nářadí, se kterým umí zacházet
   toolsBringing  String   // Nářadí, které přiveze
   heardAboutUs   String?  // Jak se o nás dozvěděl
