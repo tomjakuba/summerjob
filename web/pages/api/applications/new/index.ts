@@ -1,9 +1,7 @@
-import { APIAccessController } from 'lib/api/APIAccessControler'
 import { APIMethodHandler } from 'lib/api/MethodHandler'
 import { parseFormWithImages } from 'lib/api/parse-form'
 import { validateOrSendError } from 'lib/api/validator'
 import { createApplication } from 'lib/data/applications'
-import { ExtendedSession, Permission } from 'lib/types/auth'
 import logger from 'lib/logger/logger'
 import {
   ApplicationCreateSchema,
@@ -11,19 +9,19 @@ import {
 } from 'lib/types/application'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { APILogEvent } from 'lib/types/logger'
+import { generateFileName } from 'lib/api/fileManager'
+import { getApplicationsUploadDir } from 'lib/api/fileManager'
 
 export type ApplicationAPIPostData = ApplicationCreateDataInput
 
-async function post(
-  req: NextApiRequest,
-  res: NextApiResponse,
-  session: ExtendedSession
-) {
+async function post(req: NextApiRequest, res: NextApiResponse) {
+  const temporaryName = generateFileName(30)
+  const uploadDir = await getApplicationsUploadDir()
   const { files, json } = await parseFormWithImages(
     req,
     res,
-    'app_photo',
-    'uploads/applications',
+    temporaryName,
+    uploadDir,
     1
   )
 
@@ -32,9 +30,15 @@ async function post(
     json,
     res
   )
-  if (!applicationData) return
-
-  const application = await createApplication(applicationData)
+  if (!applicationData) {
+    return
+  }
+  const file = files?.photoFile
+    ? Array.isArray(files.photoFile)
+      ? files.photoFile[0]
+      : files.photoFile
+    : undefined
+  const application = await createApplication(applicationData, file)
 
   await logger.apiRequestWithoutSession(
     APILogEvent.APPLICATION_CREATE,

@@ -9,9 +9,7 @@ import {
   ApplicationCreateDataInput,
 } from 'lib/types/application'
 import { TextInput } from 'lib/components/forms/input/TextInput'
-import { DateSelectionInput } from 'lib/components/forms/input/DateSelectionInput'
 import { FilterSelectInput } from 'lib/components/forms/input/FilterSelectInput'
-import { CheckboxInput } from 'lib/components/forms/input/CheckboxInput'
 import { TextAreaInput } from 'lib/components/forms/input/TextAreaInput'
 import { ImageUploader } from 'lib/components/forms/ImageUploader'
 import { useAPIApplicationCreate } from 'lib/fetcher/application'
@@ -19,26 +17,21 @@ import { Form } from 'lib/components/forms/Form'
 import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
 import { BulletPointSelect } from 'lib/components/forms/input/BulletPointSelect'
 import { OtherAttributesInput } from 'lib/components/forms/input/OtherAttributesInput'
+import { DatePickerInput } from 'lib/components/forms/input/DatePickerInput'
 
-// TODO: change checkbox component
-// TODO: change datepicker (or create new component?)
 export default function ApplicationsPage() {
   const [isApplicationOpen, setIsApplicationOpen] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const router = useRouter()
-
-  const jobStart = new Date('2025-03-01T00:00:00')
-  const jobEnd = new Date('2025-05-01T23:59:59')
-  const allDates = dateSelectionMaker(jobStart.toJSON(), jobEnd.toJSON())
 
   const {
     register,
     handleSubmit,
     setValue,
     getValues,
-    watch,
     setError,
     clearErrors,
+    control,
     formState: { errors, dirtyFields },
   } = useForm<ApplicationCreateDataInput>({
     resolver: zodResolver(ApplicationCreateSchema),
@@ -55,8 +48,6 @@ export default function ApplicationsPage() {
   }, [])
 
   const onSubmit = async (data: ApplicationCreateDataInput) => {
-    console.log(data)
-
     try {
       await trigger(data)
     } catch (err) {
@@ -85,24 +76,19 @@ export default function ApplicationsPage() {
     )
   }
 
-  const registerPhoto = (fileList: FileList) => {
-    if (fileList.length > 0) {
-      const file = fileList[0]
-      const reader = new FileReader()
-      reader.onload = () => {
-        if (typeof reader.result === 'string') {
-          setValue('photo', reader.result, {
-            shouldDirty: true,
-            shouldValidate: true,
-          })
-        }
-      }
-      reader.readAsDataURL(file)
+  const registerPhoto = (file: File | null) => {
+    try {
+      setValue('photoFile', file, { shouldDirty: true, shouldValidate: true })
+    } catch (error) {
+      console.error('Chyba v registerPhoto:', error)
     }
   }
 
-  const removePhoto = () => {
-    setValue('photo', '', { shouldDirty: true, shouldValidate: true })
+  const removeNewPhoto = () => {
+    setValue('photoFile', undefined, {
+      shouldDirty: true,
+      shouldValidate: true,
+    })
   }
 
   return (
@@ -148,11 +134,12 @@ export default function ApplicationsPage() {
           </div>
           <div className="d-flex flex-row w-100 justify-content-between">
             <div className="w-45">
-              <DateSelectionInput
+              <DatePickerInput
                 id="birthDate"
                 label="Datum narození"
-                register={() => register('birthDate')}
-                days={allDates}
+                control={control}
+                errors={errors}
+                mandatory
               />
             </div>
             <div className="w-45">
@@ -227,19 +214,21 @@ export default function ApplicationsPage() {
           </div>
           <div className="d-flex flex-row w-100 justify-content-between">
             <div className="w-45">
-              <DateSelectionInput
+              <DatePickerInput
                 id="arrivalDate"
                 label="Datum příjezdu"
-                register={() => register('arrivalDate')}
-                days={allDates}
+                control={control}
+                errors={errors}
+                mandatory
               />
             </div>
             <div className="w-45">
-              <DateSelectionInput
+              <DatePickerInput
                 id="departureDate"
                 label="Datum odjezdu"
-                register={() => register('departureDate')}
-                days={allDates}
+                control={control}
+                errors={errors}
+                mandatory
               />
             </div>
           </div>
@@ -317,12 +306,14 @@ export default function ApplicationsPage() {
           <div className="d-flex flex-row w-100 justify-content-between">
             <div className="w-45">
               <ImageUploader
-                id="photo"
+                id="photoFile"
                 label="Fotografie"
                 secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
                 errors={errors}
-                registerPhoto={registerPhoto}
-                removeNewPhoto={removePhoto}
+                registerPhoto={fileList => {
+                  registerPhoto(fileList.length > 0 ? fileList[0] : null)
+                }}
+                removeNewPhoto={removeNewPhoto}
               />
             </div>
             <div className="w-45">
