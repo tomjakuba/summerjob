@@ -307,7 +307,7 @@ export default function ApplicationsPage({
             <div className="w-45">
               <TextInput
                 id="workAllergies"
-                label="Alergie na práci"
+                label="Alergie při prácovních podmínkách"
                 register={() => register('workAllergies')}
                 placeholder="Např. prach, pyl, latex..."
                 labelClassName="light-placeholder"
