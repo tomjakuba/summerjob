@@ -25,9 +25,14 @@ export const ApplicationCreateSchema = z
     departureDate: z.coerce
       .date()
       .refine(date => date >= today, 'Datum odjezdu nemůže být v minulosti'),
-    allergies: z.string(),
-    toolsSkills: z.string(),
-    toolsBringing: z.string(),
+    allergies: z
+      .string()
+      .min(
+        1,
+        'Alergie je povinné napsat. Pokud žádné nemáte, přímo to napište.'
+      ),
+    toolsSkills: z.string().min(1, 'Povinné pole'),
+    toolsBringing: z.string().min(1, 'Povinné pole'),
     heardAboutUs: z.string().optional(),
     playsInstrument: z.string().optional(),
     tShirtSize: z.string().optional(),

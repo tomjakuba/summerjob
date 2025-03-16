@@ -14,7 +14,6 @@ import { TextAreaInput } from 'lib/components/forms/input/TextAreaInput'
 import { ImageUploader } from 'lib/components/forms/ImageUploader'
 import { useAPIApplicationCreate } from 'lib/fetcher/application'
 import { Form } from 'lib/components/forms/Form'
-import dateSelectionMaker from 'lib/components/forms/dateSelectionMaker'
 import { BulletPointSelect } from 'lib/components/forms/input/BulletPointSelect'
 import { OtherAttributesInput } from 'lib/components/forms/input/OtherAttributesInput'
 import { DatePickerInput } from 'lib/components/forms/input/DatePickerInput'
@@ -23,6 +22,9 @@ export default function ApplicationsPage() {
   const [isApplicationOpen, setIsApplicationOpen] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const router = useRouter()
+  const applicationStart = new Date('2025-03-01T00:00:00')
+  const applicationEnd = new Date('2025-05-01T23:59:59')
+  const now = new Date()
 
   const {
     register,
@@ -32,7 +34,7 @@ export default function ApplicationsPage() {
     setError,
     clearErrors,
     control,
-    formState: { errors, dirtyFields },
+    formState: { errors },
   } = useForm<ApplicationCreateDataInput>({
     resolver: zodResolver(ApplicationCreateSchema),
   })
@@ -41,9 +43,6 @@ export default function ApplicationsPage() {
   })
 
   useEffect(() => {
-    const now = new Date()
-    const applicationStart = new Date('2025-03-01T00:00:00')
-    const applicationEnd = new Date('2025-05-01T23:59:59')
     setIsApplicationOpen(now >= applicationStart && now <= applicationEnd)
   }, [])
 
@@ -62,15 +61,25 @@ export default function ApplicationsPage() {
 
   if (!isApplicationOpen) {
     return (
-      <p className="text-center text-lg font-semibold">
-        Čas pro podání přihlášky již vypršel.
-      </p>
+      <>
+        {applicationStart >= now && (
+          <p className="text-center text-lg font-weight-bold mt-5">
+            Čas pro podání přihlášky ještě nenastal.
+          </p>
+        )}
+
+        {applicationEnd < now && (
+          <p className="text-center text-lg font-weight-bold mt-5">
+            Čas pro podání přihlášky již vypršel.
+          </p>
+        )}
+      </>
     )
   }
 
   if (submitted) {
     return (
-      <p className="text-center text-lg font-semibold">
+      <p className="text-center text-lg font-weight-bold mt-5">
         Přihláška byla úspěšně odeslána!
       </p>
     )
@@ -310,6 +319,7 @@ export default function ApplicationsPage() {
                 label="Fotografie"
                 secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
                 errors={errors}
+                mandatory={true}
                 registerPhoto={fileList => {
                   registerPhoto(fileList.length > 0 ? fileList[0] : null)
                 }}

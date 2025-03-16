@@ -59,7 +59,7 @@ export function DatePickerInput({
                 setDisplayValue(inputDate) // český formát do UI
                 const isoDate = formatToISO(inputDate)
                 if (isoDate) {
-                  field.onChange(isoDate) // SO formát pro backend
+                  field.onChange(isoDate) // ISO formát pro backend
                 }
               }}
               onBlur={() => {
@@ -71,7 +71,11 @@ export function DatePickerInput({
         />
       </div>
 
-      {errors?.[id] && (
+      {(errors[id]?.message as string) === 'Invalid date' && (
+        <p className="text-danger">Neplatné datum</p>
+      )}
+
+      {errors?.[id] && (errors[id]?.message as string) !== 'Invalid date' && (
         <p className="text-danger text-sm mt-1">{errors[id]?.message}</p>
       )}
     </div>
