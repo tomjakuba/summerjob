@@ -60,7 +60,7 @@ import { z } from 'zod'
 const registry = new OpenAPIRegistry()
 
 const _ApiErrorSchema = registry.register('ApiError', WrappedApiErrorSchema)
-const _Permissions = registry.register('Permissions', z.nativeEnum(Permission))
+// const _Permissions = registry.register('Permissions', z.nativeEnum(Permission))
 
 //#region Cars
 
@@ -220,12 +220,12 @@ registry.registerPath({
 
 //#region Logs
 
-const _LoggingSchema = registry.register('Log', LoggingSchema)
+// const _LoggingSchema = registry.register('Log', LoggingSchema)
 const _LogsResponseSchema = registry.register('LogsSummary', LogsResponseSchema)
-const _LogEventType = registry.register(
-  'LogEventType',
-  z.nativeEnum(APILogEvent)
-)
+// const _LogEventType = registry.register(
+//   'LogEventType',
+//   z.nativeEnum(APILogEvent)
+// )
 
 registry.registerPath({
   path: '/api/logs',
@@ -351,10 +351,10 @@ registry.registerPath({
 
 const _PlanCompleteSchema = registry.register('PlanDetails', PlanCompleteSchema)
 
-const _ActiveJobNoPlanSchema = registry.register(
-  'ActiveJobNoPlan',
-  ActiveJobNoPlanSchema
-)
+// const _ActiveJobNoPlanSchema = registry.register(
+//   'ActiveJobNoPlan',
+//   ActiveJobNoPlanSchema
+// )
 
 registry.registerPath({
   path: '/api/plans',

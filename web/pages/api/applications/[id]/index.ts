@@ -44,7 +44,7 @@ async function patch(
     return
   }
 
-  const { files, json } = await parseFormWithImages(
+  const { json } = await parseFormWithImages(
     req,
     res,
     id,
@@ -58,7 +58,7 @@ async function patch(
   )
   if (!applicationData) return
 
-  const updatedApplication = await updateApplication(id, applicationData)
+  await updateApplication(id, applicationData)
 
   await logger.apiRequest(
     APILogEvent.APPLICATION_MODIFY,

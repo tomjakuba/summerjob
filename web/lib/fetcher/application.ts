@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable-next-line react-hooks/rules-of-hooks */
 
 import type { ApplicationsAPIGetResponse } from 'pages/api/applications'
 import type { ApplicationAPIGetResponse } from 'pages/api/applications/[id]'

@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { DateBool } from 'lib/data/dateSelectionType'
 import { getMonthName, getWeekdayNames } from 'lib/helpers/helpers'
 import React, { useCallback, useEffect, useState } from 'react'

@@ -53,7 +53,7 @@ export default function ApplicationsPage({
 
   useEffect(() => {
     setIsApplicationOpen(now >= applicationStart && now <= applicationEnd)
-  }, [])
+  }, [applicationStart, applicationEnd, now])
 
   const onSubmit = async (data: ApplicationCreateDataInput) => {
     try {
