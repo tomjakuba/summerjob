@@ -6,7 +6,6 @@ import {
   ActiveJobSchema,
   AreaSchema,
   CarSchema,
-  LoggingSchema,
   PlanSchema,
   PostSchema,
   ProposedJobSchema,
@@ -14,10 +13,7 @@ import {
   SummerJobEventSchema,
   WorkerSchema,
 } from 'lib/prisma/zod'
-import {
-  ActiveJobCompleteSchema,
-  ActiveJobNoPlanSchema,
-} from 'lib/types/_schemas'
+import { ActiveJobCompleteSchema } from 'lib/types/_schemas'
 import {
   ActiveJobCreateMultipleSchema,
   ActiveJobCreateSchema,
@@ -25,7 +21,6 @@ import {
 } from 'lib/types/active-job'
 import { WrappedApiErrorSchema } from 'lib/types/api-error'
 import { AreaCreateSchema, AreaUpdateSchema } from 'lib/types/area'
-import { Permission } from 'lib/types/auth'
 import {
   CarCompleteSchema,
   CarCreateSchema,

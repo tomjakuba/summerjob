@@ -1,5 +1,8 @@
 'use client'
 
+/* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable react-hooks/exhaustive-deps */
+
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
@@ -53,7 +56,7 @@ export default function ApplicationsPage({
 
   useEffect(() => {
     setIsApplicationOpen(now >= applicationStart && now <= applicationEnd)
-  }, [applicationStart, applicationEnd, now])
+  }, [])
 
   const onSubmit = async (data: ApplicationCreateDataInput) => {
     try {

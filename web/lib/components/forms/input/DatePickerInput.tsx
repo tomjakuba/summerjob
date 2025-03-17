@@ -111,8 +111,8 @@ export function DatePickerInput({
                 if (!isWithinRange(isoDate) && minDate && maxDate) {
                   setError(id, {
                     message: `Datum musí být mezi ${formatToCzech(
-                      minDate!.split('T')[0]
-                    )} a ${formatToCzech(maxDate!.split('T')[0])}`,
+                      minDate.split('T')[0]
+                    )} a ${formatToCzech(maxDate.split('T')[0])}`,
                   })
                   return
                 }
