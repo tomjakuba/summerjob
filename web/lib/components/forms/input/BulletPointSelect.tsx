@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { useState } from 'react'
 import {
   FieldErrors,
@@ -21,14 +19,19 @@ interface BulletPointSelectProps {
   label: string
   options: Option[]
   register: () => UseFormRegisterReturn
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setValue: UseFormSetValue<any>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   getValues: UseFormGetValues<any>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   errors: FieldErrors<any>
   mandatory?: boolean
   minCustomValue: number
   labelClassName?: string
   margin?: boolean
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setError: UseFormSetError<any>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   clearErrors: UseFormClearErrors<any>
 }
 

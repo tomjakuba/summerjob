@@ -1,6 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react-hooks/rules-of-hooks */
-
 import type { ApplicationsAPIGetResponse } from 'pages/api/applications'
 import type { ApplicationAPIGetResponse } from 'pages/api/applications/[id]'
 import type {
@@ -20,9 +17,14 @@ function convertToFormData(
   const formData = new FormData()
 
   Object.keys(data).forEach(key => {
-    const value = (data as any)[key]
+    const typedKey = key as keyof (
+      | ApplicationCreateDataInput
+      | ApplicationUpdateDataInput
+    )
+    const value = data[typedKey]
+
     if (value !== undefined && key !== 'photoFile') {
-      formData.append(key, value)
+      formData.append(key, String(value))
     }
   })
 
@@ -33,10 +35,14 @@ function convertToFormData(
   return formData
 }
 
-export function useAPIApplicationUpdate(applicationId: string, options?: any) {
+export function useAPIApplicationUpdate(
+  applicationId: string,
+  options?: Record<string, unknown>
+) {
   return async (data: ApplicationUpdateDataInput) => {
     const formData = convertToFormData(data)
 
+    /* eslint-disable-next-line react-hooks/rules-of-hooks */
     return useDataPartialUpdate<FormData>(
       `/api/applications/${applicationId}`,
       {
@@ -48,7 +54,7 @@ export function useAPIApplicationUpdate(applicationId: string, options?: any) {
   }
 }
 
-export function useAPIApplications(options?: any) {
+export function useAPIApplications(options?: Record<string, unknown>) {
   return useData<ApplicationsAPIGetResponse>('/api/applications', options)
 }
 
@@ -56,11 +62,14 @@ export function useAPIApplication(id: string) {
   return useData<ApplicationAPIGetResponse>(`/api/applications/${id}`)
 }
 
-export function useAPIApplicationDelete(id: string, options?: any) {
+export function useAPIApplicationDelete(
+  id: string,
+  options?: Record<string, unknown>
+) {
   return useDataDelete(`/api/applications/${id}`, options)
 }
 
-export function useAPIApplicationCreate(options?: any) {
+export function useAPIApplicationCreate(options?: Record<string, unknown>) {
   return useDataCreate<ApplicationCreateDataInput>(
     '/api/applications/new',
     options

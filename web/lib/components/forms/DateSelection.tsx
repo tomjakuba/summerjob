@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { DateBool } from 'lib/data/dateSelectionType'
 import { getMonthName, getWeekdayNames } from 'lib/helpers/helpers'
 import React, { useCallback, useEffect, useState } from 'react'
@@ -12,6 +10,7 @@ interface DateSelectionProps {
   days: DateBool[][]
   disableAfter?: number
   register: () => UseFormRegisterReturn
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setValue?: UseFormSetValue<any>
   allowSpecialButtons: boolean
 }

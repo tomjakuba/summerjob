@@ -1,10 +1,4 @@
-/*
-  Warnings:
-
-  - You are about to drop the column `allergies` on the `Application` table. All the data in the column will be lost.
-
-*/
 -- AlterTable
-ALTER TABLE "Application" DROP COLUMN "allergies",
-ADD COLUMN     "foodAllergies" TEXT,
-ADD COLUMN     "workAllergies" TEXT;
+ALTER TABLE "Application"
+RENAME COLUMN "allergies" TO "foodAllergies",
+ADD COLUMN "workAllergies" TEXT;

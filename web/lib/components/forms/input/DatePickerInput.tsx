@@ -1,7 +1,5 @@
 'use client'
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import {
   Controller,
   UseFormClearErrors,
@@ -13,12 +11,16 @@ import { Label } from '../Label'
 interface DatePickerInputProps {
   id: string
   label: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   control: any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   errors?: any
   mandatory?: boolean
-  minDate?: string // YYYY-MM-DD
-  maxDate?: string // YYYY-MM-DD
+  minDate?: string
+  maxDate?: string
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   setError: UseFormSetError<any>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   clearErrors: UseFormClearErrors<any>
 }
 
