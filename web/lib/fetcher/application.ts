@@ -1,4 +1,4 @@
-import type { ApplicationsAPIGetResponse } from 'pages/api/applications'
+import type { ApplicationsPaginatedResponse } from 'pages/api/applications'
 import type { ApplicationAPIGetResponse } from 'pages/api/applications/[id]'
 import type {
   ApplicationCreateDataInput,
@@ -55,7 +55,7 @@ export function useAPIApplicationUpdate(
 }
 
 export function useAPIApplications(options?: Record<string, unknown>) {
-  return useData<ApplicationsAPIGetResponse>('/api/applications', options)
+  return useData<ApplicationsPaginatedResponse>('/api/applications', options)
 }
 
 export function useAPIApplication(id: string) {

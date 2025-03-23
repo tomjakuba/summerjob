@@ -781,3 +781,13 @@ form.application input.custom-input::placeholder{
   color: var(--bs-gray-400);
   font-size: medium;
 }
+
+.border-start-success {
+  border-left-color: #4bdf3e !important; 
+}
+.border-start-danger {
+  border-left-color: #e75b69 !important; 
+}
+.border-start-warning {
+  border-left-color: #fdcc37 !important; 
+}

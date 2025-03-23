@@ -12,7 +12,8 @@ CREATE TABLE "Application" (
     "pastParticipation" BOOLEAN NOT NULL,
     "arrivalDate" TIMESTAMP(3) NOT NULL,
     "departureDate" TIMESTAMP(3) NOT NULL,
-    "allergies" TEXT NOT NULL,
+    "foodAllergies" TEXT,
+    "workAllergies" TEXT,
     "toolsSkills" TEXT NOT NULL,
     "toolsBringing" TEXT NOT NULL,
     "heardAboutUs" TEXT,
@@ -27,6 +28,7 @@ CREATE TABLE "Application" (
 
     CONSTRAINT "Application_pkey" PRIMARY KEY ("id")
 );
+
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Application_email_key" ON "Application"("email");

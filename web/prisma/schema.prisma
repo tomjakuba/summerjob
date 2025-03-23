@@ -81,6 +81,12 @@ enum PostTag {
   INFORMATIVE
 }
 
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
 model Tool {
   id                      String       @id @default(uuid())
   tool                    ToolName     
@@ -90,7 +96,6 @@ model Tool {
   proposedJobToTakeWith   ProposedJob? @relation("ToolToTakeWith", fields: [proposedJobToTakeWithId], references: [id])
   proposedJobToTakeWithId String?      
 }
-
 
 model Participant {
   worker   Worker @relation(fields: [workerId], references: [id], onDelete: Cascade)
@@ -369,4 +374,5 @@ model Application {
   ownsCar        Boolean  @default(false)
   canBeMedic     Boolean  @default(false)
   createdAt      DateTime @default(now())
+  status         ApplicationStatus @default(PENDING)
 }

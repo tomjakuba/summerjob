@@ -1,6 +1,6 @@
 import {
   deleteFile,
-  getUploadDirForImagesForCurrentEvent,
+  getUploadDirForImages,
   renameFile,
 } from 'lib/api/fileManager'
 import { PrismaTransactionClient } from 'lib/types/prisma'
@@ -73,7 +73,7 @@ export async function createApplication(
 
       await renameFile(file.filepath, photoPath)
 
-      const relativePath = path.normalize(photoPath.substring(uploadDir.length))
+      const relativePath = path.join('applications', fileName)
 
       const updatedApp = await prismaClient.application.update({
         where: { id: application.id },
@@ -88,6 +88,7 @@ export async function createApplication(
 
   return application
 }
+
 export async function updateApplication(
   id: string,
   data: Partial<ApplicationUpdateDataInput> & { photoFileRemoved?: boolean },
@@ -109,7 +110,7 @@ export async function updateApplication(
       await deleteFile(oldPhotoPath)
     }
 
-    photoPath = path.normalize(photoPath.substring(uploadDir.length))
+    photoPath = path.join('applications', fileName)
   } else if (data.photoFileRemoved) {
     const oldPhotoPath = await getApplicationPhotoPathById(id, prismaClient)
     if (oldPhotoPath) {
@@ -153,6 +154,60 @@ export async function getApplicationPhotoPathById(
     return null
   }
 
-  const uploadDirAbsolutePath = await getUploadDirForImagesForCurrentEvent()
-  return path.join(uploadDirAbsolutePath, application.photo)
+  const uploadDir = await getUploadDirForImages()
+  return path.join(uploadDir, application.photo)
+}
+
+export async function getApplicationsPaginated(
+  page: number,
+  perPage: number,
+  status?: 'PENDING' | 'ACCEPTED' | 'REJECTED'
+) {
+  const skip = (page - 1) * perPage
+
+  const where = status ? { status } : {}
+
+  const [applications, total] = await Promise.all([
+    prisma.application.findMany({
+      skip,
+      take: perPage,
+      orderBy: { createdAt: 'desc' },
+      where,
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phone: true,
+        birthDate: true,
+        gender: true,
+        address: true,
+        pastParticipation: true,
+        arrivalDate: true,
+        departureDate: true,
+        foodAllergies: true,
+        workAllergies: true,
+        toolsSkills: true,
+        toolsBringing: true,
+        heardAboutUs: true,
+        playsInstrument: true,
+        tShirtSize: true,
+        additionalInfo: true,
+        photo: true,
+        accommodationPrice: true,
+        ownsCar: true,
+        canBeMedic: true,
+        createdAt: true,
+        status: true,
+      },
+    }),
+    prisma.application.count({ where }),
+  ])
+
+  return {
+    data: applications,
+    total,
+    page,
+    perPage,
+  }
 }
