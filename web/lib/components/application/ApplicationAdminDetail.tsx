@@ -126,13 +126,13 @@ export default function ApplicationAdminDetailPage() {
           <>
             <button
               className="btn btn-sm btn-success"
-              onClick={() => updateStatus(id, 'accept')}
+              onClick={() => updateStatus(id as string, 'accept')}
             >
               Přijmout
             </button>
             <button
               className="btn btn-sm btn-danger"
-              onClick={() => updateStatus(id, 'reject')}
+              onClick={() => updateStatus(id as string, 'reject')}
             >
               Zamítnout
             </button>
