@@ -1,6 +1,8 @@
 import { cache_getActiveSummerJobEvent } from 'lib/data/cache'
 import ApplicationsPage from 'lib/components/application/ApplicationClientPage'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ApplicationsPageServer() {
   const summerJobEvent = await cache_getActiveSummerJobEvent()
 
