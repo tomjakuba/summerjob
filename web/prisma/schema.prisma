@@ -81,6 +81,12 @@ enum PostTag {
   INFORMATIVE
 }
 
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
 model Tool {
   id                      String       @id @default(uuid())
   tool                    ToolName     
@@ -90,7 +96,6 @@ model Tool {
   proposedJobToTakeWith   ProposedJob? @relation("ToolToTakeWith", fields: [proposedJobToTakeWithId], references: [id])
   proposedJobToTakeWithId String?      
 }
-
 
 model Participant {
   worker   Worker @relation(fields: [workerId], references: [id], onDelete: Cascade)
@@ -342,4 +347,32 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+model Application {
+  id             String   @id @default(uuid())
+  firstName      String
+  lastName       String
+  birthDate      DateTime
+  gender         String
+  phone          String
+  email          String   @unique
+  address        String
+  pastParticipation Boolean
+  arrivalDate    DateTime
+  departureDate  DateTime
+  foodAllergies  String?  // Alergie na jídlo
+  workAllergies  String?  // Alergie na práci
+  toolsSkills    String   // Nářadí, se kterým umí zacházet
+  toolsBringing  String   // Nářadí, které přiveze
+  heardAboutUs   String?  // Jak se o nás dozvěděl
+  playsInstrument String?
+  tShirtSize     String?  // Velikost trička
+  additionalInfo String?  // Dodatečné informace
+  photo          String   // Cesta k uložené fotce
+  accommodationPrice String
+  ownsCar        Boolean  @default(false)
+  canBeMedic     Boolean  @default(false)
+  createdAt      DateTime @default(now())
+  status         ApplicationStatus @default(PENDING)
 }

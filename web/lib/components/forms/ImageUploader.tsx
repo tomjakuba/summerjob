@@ -22,6 +22,7 @@ interface ImageUploaderProps<FormData extends FieldValues> {
   multiple?: boolean
   maxPhotos?: number
   maxFileSize?: number
+  mandatory?: boolean
 }
 
 export const ImageUploader = <FormData extends FieldValues>({
@@ -35,6 +36,7 @@ export const ImageUploader = <FormData extends FieldValues>({
   removeNewPhoto,
   multiple = false,
   maxPhotos = 1,
+  mandatory = false,
   maxFileSize = 1024 * 1024 * 10, // 10 MB
 }: ImageUploaderProps<FormData>) => {
   const error = errors?.[id]?.message as string | undefined
@@ -89,7 +91,7 @@ export const ImageUploader = <FormData extends FieldValues>({
 
   return (
     <>
-      <Label id={id} label={label} />
+      <Label id={id} label={label} mandatory={mandatory} />
       {secondaryLabel && <p className="text-muted">{secondaryLabel}</p>}
       <div className="row mb-2 smj-file-upload">
         <input
