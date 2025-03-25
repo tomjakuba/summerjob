@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { format } from 'date-fns'
+import { format, differenceInCalendarDays } from 'date-fns'
 import Link from 'next/link'
 import { PhotoOnClickModal } from '../photo/PhotoOnClickModal'
 
@@ -95,6 +95,12 @@ export default function ApplicationAdminDetailPage() {
       </div>
     )
   }
+
+  const workingDays =
+    differenceInCalendarDays(
+      new Date(application.departureDate),
+      new Date(application.arrivalDate)
+    ) + 1
 
   return (
     <div className="container mt-4">
@@ -202,6 +208,17 @@ export default function ApplicationAdminDetailPage() {
                 <th scope="row">Datum odjezdu</th>
                 <td>
                   {format(new Date(application.departureDate), 'd. M. yyyy')}
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Doba práce</th>
+                <td>
+                  {workingDays}
+                  {workingDays === 1
+                    ? ' den'
+                    : workingDays < 5
+                    ? ' dny'
+                    : ' dní'}
                 </td>
               </tr>
               <tr>

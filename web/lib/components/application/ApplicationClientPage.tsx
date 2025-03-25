@@ -20,7 +20,6 @@ import { Form } from 'lib/components/forms/Form'
 import { BulletPointSelect } from 'lib/components/forms/input/BulletPointSelect'
 import { OtherAttributesInput } from 'lib/components/forms/input/OtherAttributesInput'
 import { DatePickerInput } from 'lib/components/forms/input/DatePickerInput'
-import { InfoBox } from '../forms/InfoBox'
 
 interface ApplicationsPageProps {
   startDate: string
@@ -130,12 +129,17 @@ export default function ApplicationsPage({
           className="space-y-4 mx-5 application"
         >
           <p>
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Molestias
-            quidem aspernatur ducimus eaque, facere reprehenderit impedit iusto
-            distinctio pariatur optio earum perferendis sunt doloremque. Culpa
-            doloribus maiores nihil maxime id deleniti officia tenetur quibusdam
-            ut repellendus ducimus, animi dolore inventore asperiores? Maxime
-            tenetur architecto eius amet aliquam! Fugit, quo laborum!
+            Milý SummerJobáku,
+            <br />
+            vítej u přihlašování na SummerJob 2025. Letos budeme v termínu 29.
+            6. - 6. 7. znovu pomáhat v Šluknovském výběžku. Jsme rádi, že se
+            nebojíš přiložit ruku k dílu! Aby ses mohl zařadit mezi letošní
+            pracanty, musíš nejdřív úspěšně vyplnit všechny potřebné údaje a
+            zaplatit účastnický poplatek. Může se stát, že počet přihlášených
+            dobrovolníků stejně jako v předešlých letech překročí kapacitu celé
+            akce. V takovém případě budou mít přednost zájemci, kteří chtějí
+            přijet makat na celý týden, splňují věkový limit a přihlásili se
+            nejrychleji. Tak hodně štěstí, těšíme se! 🙂
           </p>
           <div className="d-flex flex-row w-100 justify-content-between">
             <div className="w-45">
@@ -243,7 +247,6 @@ export default function ApplicationsPage({
               />
             </div>
           </div>
-          <InfoBox message="Toto je informační box, klikni na křížek pro zavření!" />
           <div className="d-flex flex-row w-100 justify-content-between">
             <div className="w-45">
               <DatePickerInput
