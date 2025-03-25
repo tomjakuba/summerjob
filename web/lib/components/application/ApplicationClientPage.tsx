@@ -325,7 +325,7 @@ export default function ApplicationsPage({
             <div className="w-45">
               <TextInput
                 id="tShirtSize"
-                label="Máte zájemo tričko (500 Kč)? Vyplňte velikost"
+                label="Máte zájemo tričko (350 Kč)? Vyplňte velikost"
                 register={() => register('tShirtSize')}
                 labelClassName="light-placeholder"
                 placeholder="S, M, L, XL, XXL"
