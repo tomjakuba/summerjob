@@ -284,7 +284,6 @@ export default function ApplicationsPage({
                 placeholder="Nářadí - motorovka, křovinořez, cirkulárka..."
                 labelClassName="light-placeholder"
                 errors={errors}
-                mandatory
               />
             </div>
             <div className="w-45">
@@ -295,7 +294,6 @@ export default function ApplicationsPage({
                 placeholder="Nářadí - motorovka, křovinořez, kladivo..."
                 labelClassName="light-placeholder"
                 errors={errors}
-                mandatory
               />
             </div>
           </div>
