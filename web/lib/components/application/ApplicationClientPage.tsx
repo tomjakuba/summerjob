@@ -141,8 +141,8 @@ export default function ApplicationsPage({
             přijet makat na celý týden, splňují věkový limit a přihlásili se
             nejrychleji. Tak hodně štěstí, těšíme se! 🙂
           </p>
-          <div className="d-flex flex-row w-100 justify-content-between">
-            <div className="w-45">
+          <div className="d-flex flex-column flex-md-row w-100 justify-content-between gap-3">
+            <div className="w-100 w-md-45">
               <TextInput
                 id="firstName"
                 label="Jméno"
@@ -153,7 +153,7 @@ export default function ApplicationsPage({
                 mandatory
               />
             </div>
-            <div className="w-45">
+            <div className="w-100 w-md-45">
               <TextInput
                 id="lastName"
                 label="Příjmení"
@@ -165,8 +165,8 @@ export default function ApplicationsPage({
               />
             </div>
           </div>
-          <div className="d-flex flex-row w-100 justify-content-between">
-            <div className="w-45">
+          <div className="d-flex flex-column flex-md-row w-100 justify-content-between gap-3">
+            <div className="w-100 w-md-45">
               <DatePickerInput
                 id="birthDate"
                 label="Datum narození"
@@ -177,7 +177,7 @@ export default function ApplicationsPage({
                 clearErrors={clearErrors}
               />
             </div>
-            <div className="w-45">
+            <div className="w-100 w-md-45">
               <FilterSelectInput
                 id="gender"
                 label="Pohlaví"
@@ -193,8 +193,8 @@ export default function ApplicationsPage({
               />
             </div>
           </div>
-          <div className="d-flex flex-row w-100 justify-content-between">
-            <div className="w-45">
+          <div className="d-flex flex-column flex-md-row w-100 justify-content-between gap-3">
+            <div className="w-100 w-md-45">
               <TextInput
                 id="phone"
                 label="Telefon"
@@ -205,7 +205,7 @@ export default function ApplicationsPage({
                 mandatory
               />
             </div>
-            <div className="w-45">
+            <div className="w-100 w-md-45">
               <TextInput
                 id="email"
                 label="Email"
@@ -217,8 +217,8 @@ export default function ApplicationsPage({
               />
             </div>
           </div>
-          <div className="d-flex flex-row w-100 justify-content-between">
-            <div className="w-45">
+          <div className="d-flex flex-column flex-md-row w-100 justify-content-between gap-3">
+            <div className="w-100 w-md-45">
               <TextInput
                 id="address"
                 label="Plná adresa"
@@ -229,7 +229,7 @@ export default function ApplicationsPage({
                 mandatory
               />
             </div>
-            <div className="w-45">
+            <div className="w-100 w-md-45">
               <FilterSelectInput
                 id="pastParticipation"
                 label="Už jsem se v minulosti zúčastnil/a?"
@@ -247,8 +247,8 @@ export default function ApplicationsPage({
               />
             </div>
           </div>
-          <div className="d-flex flex-row w-100 justify-content-between">
-            <div className="w-45">
+          <div className="d-flex flex-column flex-md-row w-100 justify-content-between gap-3">
+            <div className="w-100 w-md-45">
               <DatePickerInput
                 id="arrivalDate"
                 label="Datum příjezdu"
@@ -261,7 +261,7 @@ export default function ApplicationsPage({
                 clearErrors={clearErrors}
               />
             </div>
-            <div className="w-45">
+            <div className="w-100 w-md-45">
               <DatePickerInput
                 id="departureDate"
                 label="Datum odjezdu"
@@ -275,8 +275,8 @@ export default function ApplicationsPage({
               />
             </div>
           </div>
-          <div className="d-flex flex-row w-100 justify-content-between">
-            <div className="w-45">
+          <div className="d-flex flex-column flex-md-row w-100 justify-content-between gap-3">
+            <div className="w-100 w-md-45">
               <TextInput
                 id="toolsSkills"
                 label="Nářadí, se kterým umím zacházet"
@@ -286,7 +286,7 @@ export default function ApplicationsPage({
                 errors={errors}
               />
             </div>
-            <div className="w-45">
+            <div className="w-100 w-md-45">
               <TextInput
                 id="toolsBringing"
                 label="Nářadí, které přivezu"
@@ -297,8 +297,8 @@ export default function ApplicationsPage({
               />
             </div>
           </div>
-          <div className="d-flex flex-row w-100 justify-content-between">
-            <div className="w-45">
+          <div className="d-flex flex-column flex-md-row w-100 justify-content-between gap-3">
+            <div className="w-100 w-md-45">
               <TextInput
                 id="foodAllergies"
                 label="Alergie na jídlo"
@@ -308,7 +308,7 @@ export default function ApplicationsPage({
                 errors={errors}
               />
             </div>
-            <div className="w-45">
+            <div className="w-100 w-md-45">
               <TextInput
                 id="workAllergies"
                 label="Alergie při prácovních podmínkách"
@@ -319,8 +319,8 @@ export default function ApplicationsPage({
               />
             </div>
           </div>
-          <div className="d-flex flex-row w-100 justify-content-between">
-            <div className="w-45">
+          <div className="d-flex flex-column flex-md-row w-100 justify-content-between gap-3">
+            <div className="w-100 w-md-45">
               <TextInput
                 id="tShirtSize"
                 label="Máte zájemo tričko (350 Kč)? Vyplňte velikost"
@@ -330,7 +330,7 @@ export default function ApplicationsPage({
                 errors={errors}
               />
             </div>
-            <div className="w-45">
+            <div className="w-100 w-md-45">
               <TextInput
                 id="playsInstrument"
                 label="Umím hrát na hudební nástroj"
@@ -357,13 +357,14 @@ export default function ApplicationsPage({
             placeholder="Vaše poznámka"
             errors={errors}
           />
-          <div className="d-flex flex-row w-100 justify-content-between">
-            <div className="w-45">
+          <div className="d-flex flex-column flex-md-row w-100 justify-content-between gap-3">
+            <div className="w-100 w-md-45">
               <ImageUploader
                 id="photoFile"
                 label="Fotografie"
                 secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
                 errors={errors}
+                setError={setError}
                 mandatory={true}
                 registerPhoto={fileList => {
                   registerPhoto(fileList.length > 0 ? fileList[0] : null)
@@ -371,7 +372,7 @@ export default function ApplicationsPage({
                 removeNewPhoto={removeNewPhoto}
               />
             </div>
-            <div className="w-45">
+            <div className="w-100 w-md-45">
               <BulletPointSelect
                 id="accommodationPrice"
                 label="Cena za ubytování"
