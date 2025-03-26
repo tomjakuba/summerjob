@@ -311,7 +311,7 @@ export default function ApplicationsPage({
             <div className="w-45">
               <TextInput
                 id="workAllergies"
-                label="Alergie při prácovních podmínkách"
+                label="Alergie při pracovních podmínkách"
                 register={() => register('workAllergies')}
                 placeholder="Např. prach, pyl, latex..."
                 labelClassName="light-placeholder"
@@ -323,10 +323,10 @@ export default function ApplicationsPage({
             <div className="w-45">
               <TextInput
                 id="tShirtSize"
-                label="Máte zájemo tričko (350 Kč)? Vyplňte velikost"
+                label="Máš zájem o tričko (350 Kč)? Vyplňte velikost"
                 register={() => register('tShirtSize')}
                 labelClassName="light-placeholder"
-                placeholder="S, M, L, XL, XXL"
+                placeholder="XS, S, M, L, XL, XXL"
                 errors={errors}
               />
             </div>
@@ -343,7 +343,7 @@ export default function ApplicationsPage({
           </div>
           <TextInput
             id="heardAboutUs"
-            label="Jak jste se o nás dozvěděl/a?"
+            label="Jak jsi se o nás dozvěděl/a?"
             register={() => register('heardAboutUs')}
             placeholder="Řekl mi o vás kamarád..."
             labelClassName="light-placeholder"
@@ -374,7 +374,7 @@ export default function ApplicationsPage({
             <div className="w-45">
               <BulletPointSelect
                 id="accommodationPrice"
-                label="Cena za ubytování"
+                label="Účastnický příspěvek"
                 labelClassName="light-placeholder"
                 options={[
                   { value: 1600, label: '1600 Kč' },
