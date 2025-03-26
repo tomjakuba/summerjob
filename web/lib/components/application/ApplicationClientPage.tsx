@@ -232,7 +232,7 @@ export default function ApplicationsPage({
             <div className="w-45">
               <FilterSelectInput
                 id="pastParticipation"
-                label="Už jsem se v minulosti zúčastnil/a?"
+                label="Už jsi se v minulosti zúčastnil/a?"
                 placeholder="Vyberte odpověď"
                 labelClassName="light-placeholder"
                 items={[
