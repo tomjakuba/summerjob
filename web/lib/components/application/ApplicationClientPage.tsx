@@ -279,7 +279,7 @@ export default function ApplicationsPage({
             <div className="w-45">
               <TextInput
                 id="toolsSkills"
-                label="Nářadí, se kterým umím zacházet"
+                label="Nářadí, se kterým umíš zacházet"
                 register={() => register('toolsSkills')}
                 placeholder="Nářadí - motorovka, křovinořez, cirkulárka..."
                 labelClassName="light-placeholder"
@@ -289,7 +289,7 @@ export default function ApplicationsPage({
             <div className="w-45">
               <TextInput
                 id="toolsBringing"
-                label="Nářadí, které přivezu"
+                label="Nářadí, které přivezeš"
                 register={() => register('toolsBringing')}
                 placeholder="Nářadí - motorovka, křovinořez, kladivo..."
                 labelClassName="light-placeholder"
@@ -323,7 +323,7 @@ export default function ApplicationsPage({
             <div className="w-45">
               <TextInput
                 id="tShirtSize"
-                label="Máš zájem o tričko (350 Kč)? Vyplňte velikost"
+                label="Máš zájem o tričko (350 Kč)? Vyplň velikost."
                 register={() => register('tShirtSize')}
                 labelClassName="light-placeholder"
                 placeholder="XS, S, M, L, XL, XXL"
@@ -333,7 +333,7 @@ export default function ApplicationsPage({
             <div className="w-45">
               <TextInput
                 id="playsInstrument"
-                label="Umím hrát na hudební nástroj"
+                label="Umíš hrát na hudební nástroj?"
                 register={() => register('playsInstrument')}
                 labelClassName="light-placeholder"
                 placeholder="Kytara, housle, klavír..."
