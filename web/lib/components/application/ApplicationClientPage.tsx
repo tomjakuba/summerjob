@@ -20,6 +20,7 @@ import { Form } from 'lib/components/forms/Form'
 import { BulletPointSelect } from 'lib/components/forms/input/BulletPointSelect'
 import { OtherAttributesInput } from 'lib/components/forms/input/OtherAttributesInput'
 import { DatePickerInput } from 'lib/components/forms/input/DatePickerInput'
+import 'react-datepicker/dist/react-datepicker.css'
 
 interface ApplicationsPageProps {
   startDate: string
