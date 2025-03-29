@@ -25,18 +25,16 @@ import 'react-datepicker/dist/react-datepicker.css'
 interface ApplicationsPageProps {
   startDate: string
   endDate: string
+  isApplicationOpen: boolean
 }
 
 export default function ApplicationsPage({
   startDate,
   endDate,
+  isApplicationOpen,
 }: ApplicationsPageProps) {
-  const [isApplicationOpen, setIsApplicationOpen] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const router = useRouter()
-  const applicationStart = new Date('2025-03-01T00:00:00')
-  const applicationEnd = new Date('2025-05-01T23:59:59')
-  const now = new Date()
 
   const {
     register,
@@ -54,9 +52,7 @@ export default function ApplicationsPage({
     onSuccess: () => setSubmitted(true),
   })
 
-  useEffect(() => {
-    setIsApplicationOpen(now >= applicationStart && now <= applicationEnd)
-  }, [])
+  console.log(isApplicationOpen)
 
   const onSubmit = async (data: ApplicationCreateDataInput) => {
     try {
@@ -73,19 +69,9 @@ export default function ApplicationsPage({
 
   if (!isApplicationOpen) {
     return (
-      <>
-        {applicationStart >= now && (
-          <p className="text-center text-lg font-weight-bold mt-5">
-            Čas pro podání přihlášky ještě nenastal.
-          </p>
-        )}
-
-        {applicationEnd < now && (
-          <p className="text-center text-lg font-weight-bold mt-5">
-            Čas pro podání přihlášky již vypršel.
-          </p>
-        )}
-      </>
+      <p className="text-center text-lg font-weight-bold mt-5">
+        Přihlašování není aktuálně otevřené.
+      </p>
     )
   }
 
