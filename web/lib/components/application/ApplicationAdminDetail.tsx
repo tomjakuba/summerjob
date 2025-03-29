@@ -108,7 +108,7 @@ export default function ApplicationAdminDetailPage() {
         ← Zpět na seznam
       </Link>
 
-      <div className="my-4 d-flex align-items-center gap-3">
+      {/* <div className="my-4 d-flex align-items-center gap-3">
         <span>
           <strong>Status:</strong>{' '}
           <span
@@ -144,9 +144,9 @@ export default function ApplicationAdminDetailPage() {
             </button>
           </>
         )}
-      </div>
+      </div> */}
 
-      <div className="card mb-4">
+      <div className="card my-4">
         <div className="card-body">
           <table className="table table-sm table-borderless table-hover mb-0">
             <tbody>

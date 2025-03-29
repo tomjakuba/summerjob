@@ -283,6 +283,8 @@ model SummerJobEvent {
   id                 String               @id @default(uuid())
   name               String               @db.VarChar(64)
   isApplicationOpen  Boolean              @default(false)
+  isPasswordProtected     Boolean         @default(false)
+  applicationPasswordHash String?  
   startDate          DateTime             @db.Date
   endDate            DateTime             @db.Date
   isActive           Boolean              @default(false)

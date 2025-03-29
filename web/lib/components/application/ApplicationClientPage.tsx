@@ -21,19 +21,26 @@ import { BulletPointSelect } from 'lib/components/forms/input/BulletPointSelect'
 import { OtherAttributesInput } from 'lib/components/forms/input/OtherAttributesInput'
 import { DatePickerInput } from 'lib/components/forms/input/DatePickerInput'
 import 'react-datepicker/dist/react-datepicker.css'
+import ApplicationPasswordForm from './ApplicationPasswordForm'
 
 interface ApplicationsPageProps {
   startDate: string
   endDate: string
   isApplicationOpen: boolean
+  isPasswordProtected: boolean
+  eventId: string
 }
 
 export default function ApplicationsPage({
   startDate,
   endDate,
   isApplicationOpen,
+  isPasswordProtected,
+  eventId,
 }: ApplicationsPageProps) {
   const [submitted, setSubmitted] = useState(false)
+  const [hasAccess, setHasAccess] = useState(!isPasswordProtected)
+
   const router = useRouter()
 
   const {
@@ -51,8 +58,6 @@ export default function ApplicationsPage({
   const { trigger, isMutating, error, reset } = useAPIApplicationCreate({
     onSuccess: () => setSubmitted(true),
   })
-
-  console.log(isApplicationOpen)
 
   const onSubmit = async (data: ApplicationCreateDataInput) => {
     try {
@@ -72,6 +77,17 @@ export default function ApplicationsPage({
       <p className="text-center text-lg font-weight-bold mt-5">
         Přihlašování není aktuálně otevřené.
       </p>
+    )
+  }
+
+  if (isPasswordProtected && !hasAccess) {
+    return (
+      <div className="max-w-md mx-auto mt-10 p-4">
+        <ApplicationPasswordForm
+          eventId={eventId}
+          onSuccess={() => setHasAccess(true)}
+        />
+      </div>
     )
   }
 

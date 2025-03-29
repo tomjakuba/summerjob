@@ -19,6 +19,8 @@ export default async function ApplicationsPageServer() {
       startDate={summerJobEvent.startDate.toJSON()}
       endDate={summerJobEvent.endDate.toJSON()}
       isApplicationOpen={summerJobEvent.isApplicationOpen}
+      isPasswordProtected={summerJobEvent.isPasswordProtected}
+      eventId={summerJobEvent.id}
     />
   )
 }

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import ApplicationToggleButton from './ApplicationToggleButton'
 
 interface ApplicationListItem {
   id: string
@@ -217,10 +216,6 @@ export default function ApplicationAdminPage({
 
   return (
     <div className="container mt-2">
-      <ApplicationToggleButton
-        eventId={eventId}
-        initialValue={isApplicationOpen}
-      />
       <div className="d-flex justify-content-between align-items-center mb-3">
         <select
           className="form-select form-select-sm"
