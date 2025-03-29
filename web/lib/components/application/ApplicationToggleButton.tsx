@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 interface ApplicationToggleButtonProps {
   eventId: string
@@ -36,8 +36,8 @@ export default function ApplicationToggleButton({
       const data = await res.json()
       setIsOpen(data.isApplicationOpen)
       setSuccess(true)
-    } catch (err: any) {
-      setError(err.message || 'Neznámá chyba')
+    } catch (err) {
+      console.error('Chyba: ', err)
     } finally {
       setLoading(false)
       setTimeout(() => setSuccess(false), 2000)
