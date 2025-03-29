@@ -31,13 +31,15 @@ async function post(
     )
 
     res.status(200).json({ isPasswordProtected: result })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err)
-    res
-      .status(400)
-      .json({
-        message: err.message || 'Chyba při nastavování ochrany přihlášky',
-      })
+
+    const message =
+      err instanceof Error
+        ? err.message
+        : 'Chyba při nastavování ochrany přihlášky'
+
+    res.status(400).json({ message })
   }
 }
 

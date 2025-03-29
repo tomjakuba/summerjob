@@ -142,8 +142,6 @@ export async function toggleApplicationOpen(id: string) {
     where: { id },
   })
 
-  console.log(event)
-
   if (!event) {
     throw new InvalidDataError('Event not found')
   }
@@ -175,19 +173,18 @@ export async function setApplicationPasswordProtection(
     throw new InvalidDataError('Password is required to enable protection')
   }
 
-  const updateData = enable
-    ? {
-        isPasswordProtected: true,
-        applicationPasswordHash: await hash(password!, 10),
-      }
-    : {
-        isPasswordProtected: false,
-        applicationPasswordHash: null,
-      }
+  let applicationPasswordHash: string | null = null
+
+  if (enable && password) {
+    applicationPasswordHash = await hash(password, 10)
+  }
 
   const updated = await prisma.summerJobEvent.update({
     where: { id },
-    data: updateData,
+    data: {
+      isPasswordProtected: enable,
+      applicationPasswordHash,
+    },
   })
 
   return updated.isPasswordProtected

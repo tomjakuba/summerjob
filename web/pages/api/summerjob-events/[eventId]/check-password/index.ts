@@ -8,13 +8,17 @@ async function post(req: NextApiRequest, res: NextApiResponse) {
 
   try {
     const isValid = await checkApplicationPassword(eventId, password)
-
     res.status(200).json({ valid: isValid })
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err)
-    res
-      .status(400)
-      .json({ message: err.message || 'Chyba při ověřování hesla' })
+
+    let message = 'Chyba při ověřování hesla'
+
+    if (err instanceof Error) {
+      message = err.message
+    }
+
+    res.status(400).json({ message })
   }
 }
 

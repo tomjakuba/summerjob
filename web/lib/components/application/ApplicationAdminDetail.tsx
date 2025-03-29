@@ -41,24 +41,6 @@ export default function ApplicationAdminDetailPage() {
   const [application, setApplication] = useState<Application | null>(null)
   const [loading, setLoading] = useState(true)
 
-  async function updateStatus(id: string, newStatus: 'accept' | 'reject') {
-    try {
-      const res = await fetch(`/api/applications/${id}/${newStatus}`, {
-        method: 'PATCH',
-      })
-
-      if (!res.ok) throw new Error('Nepodařilo se aktualizovat stav')
-
-      const updated = await res.json()
-      setApplication(prev =>
-        prev ? { ...prev, status: updated.status } : null
-      )
-    } catch (err) {
-      console.error(err)
-      alert('Chyba při změně stavu přihlášky.')
-    }
-  }
-
   useEffect(() => {
     if (!id) return
 
