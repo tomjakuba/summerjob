@@ -61,6 +61,28 @@ export default function ApplicationsPage({
 
   const onSubmit = async (data: ApplicationCreateDataInput) => {
     try {
+      if (isPasswordProtected) {
+        const password = localStorage.getItem(`application-password-${eventId}`)
+        if (!password) {
+          console.error('Heslo nebylo zadáno. Odemkněte nejprve přihlášku.')
+          return
+        }
+
+        const res = await fetch(
+          `/api/summerjob-events/${eventId}/check-password`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password }),
+          }
+        )
+
+        if (!res.ok) {
+          console.error('Neplatné heslo. Přihlášku nelze odeslat.')
+          return
+        }
+      }
+
       await trigger(data)
     } catch (err) {
       console.error('Chyba při odesílání přihlášky:', err)

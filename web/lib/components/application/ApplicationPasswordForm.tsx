@@ -30,6 +30,7 @@ export default function ApplicationPasswordForm({
       const data: { valid: boolean } = await res.json()
 
       if (res.ok && data.valid) {
+        localStorage.setItem(`application-password-${eventId}`, password)
         onSuccess()
       } else {
         setError('Nesprávné heslo, zkuste to znovu.')
