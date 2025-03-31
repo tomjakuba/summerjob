@@ -218,3 +218,18 @@ export async function checkApplicationPassword(
 
   return isMatch
 }
+
+export async function isApplicationPasswordProtected(
+  eventId: string
+): Promise<boolean> {
+  const event = await prisma.summerJobEvent.findUnique({
+    where: { id: eventId },
+    select: { isPasswordProtected: true },
+  })
+
+  if (!event) {
+    throw new InvalidDataError('Ročník nenalezen')
+  }
+
+  return event.isPasswordProtected
+}

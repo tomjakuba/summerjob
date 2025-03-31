@@ -55,35 +55,44 @@ export default function ApplicationsPage({
   } = useForm<ApplicationCreateDataInput>({
     resolver: zodResolver(ApplicationCreateSchema),
   })
-  const { trigger, isMutating, error, reset } = useAPIApplicationCreate({
+  const { isMutating, error, reset } = useAPIApplicationCreate({
     onSuccess: () => setSubmitted(true),
   })
 
   const onSubmit = async (data: ApplicationCreateDataInput) => {
     try {
-      if (isPasswordProtected) {
-        const password = localStorage.getItem(`application-password-${eventId}`)
-        if (!password) {
-          console.error('Heslo nebylo zadáno. Odemkněte nejprve přihlášku.')
-          return
-        }
+      const formData = new FormData()
 
-        const res = await fetch(
-          `/api/summerjob-events/${eventId}/check-password`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ password }),
-          }
-        )
+      const password = isPasswordProtected
+        ? localStorage.getItem(`application-password-${eventId}`)
+        : null
 
-        if (!res.ok) {
-          console.error('Neplatné heslo. Přihlášku nelze odeslat.')
-          return
-        }
+      const { photoFile, ...rest } = data
+
+      if (photoFile) {
+        formData.append('photoFile', photoFile)
       }
 
-      await trigger(data)
+      const jsonData = {
+        ...rest,
+        applicationPassword: password,
+        eventId,
+      }
+
+      formData.append('jsonData', JSON.stringify(jsonData))
+
+      const response = await fetch('/api/applications/new', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        console.error('Odpověď serveru:', error)
+        throw new Error('Odeslání přihlášky selhalo')
+      }
+
+      setSubmitted(true)
     } catch (err) {
       console.error('Chyba při odesílání přihlášky:', err)
     }
