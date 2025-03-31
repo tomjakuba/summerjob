@@ -40,6 +40,7 @@ export default function ApplicationsPage({
 }: ApplicationsPageProps) {
   const [submitted, setSubmitted] = useState(false)
   const [hasAccess, setHasAccess] = useState(!isPasswordProtected)
+  const [isLoading, setIsLoading] = useState(false)
 
   const router = useRouter()
 
@@ -61,6 +62,8 @@ export default function ApplicationsPage({
 
   const onSubmit = async (data: ApplicationCreateDataInput) => {
     try {
+      setIsLoading(true)
+
       const formData = new FormData()
 
       const password = isPasswordProtected
@@ -95,6 +98,8 @@ export default function ApplicationsPage({
       setSubmitted(true)
     } catch (err) {
       console.error('Chyba při odesílání přihlášky:', err)
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -445,9 +450,9 @@ export default function ApplicationsPage({
             type="submit"
             className="w-full btn btn-primary d-block m-auto
             my-5"
-            disabled={isMutating}
+            disabled={isLoading}
           >
-            {isMutating ? 'Odesílání...' : 'Odeslat přihlášku'}
+            {isLoading ? 'Odesílání...' : 'Odeslat přihlášku'}
           </button>
         </form>
       </Form>
