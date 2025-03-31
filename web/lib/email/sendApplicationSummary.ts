@@ -1,6 +1,5 @@
 import { createTransport } from 'nodemailer'
 import { ApplicationCreateDataInput } from 'lib/types/application'
-import { format } from 'date-fns'
 
 const transport = createTransport(process.env.EMAIL_SERVER || '')
 
