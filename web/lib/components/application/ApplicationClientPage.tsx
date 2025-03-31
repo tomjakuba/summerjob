@@ -282,7 +282,7 @@ export default function ApplicationsPage({
             <div className="w-100 w-md-45">
               <FilterSelectInput
                 id="pastParticipation"
-                label="Už jsem se v minulosti zúčastnil/a?"
+                label="Už jsi se v minulosti zúčastnil/a?"
                 placeholder="Vyberte odpověď"
                 labelClassName="light-placeholder"
                 items={[
@@ -329,7 +329,7 @@ export default function ApplicationsPage({
             <div className="w-100 w-md-45">
               <TextInput
                 id="toolsSkills"
-                label="Nářadí, se kterým umím zacházet"
+                label="Nářadí, se kterým umíš zacházet"
                 register={() => register('toolsSkills')}
                 placeholder="Nářadí - motorovka, křovinořez, cirkulárka..."
                 labelClassName="light-placeholder"
@@ -339,7 +339,7 @@ export default function ApplicationsPage({
             <div className="w-100 w-md-45">
               <TextInput
                 id="toolsBringing"
-                label="Nářadí, které přivezu"
+                label="Nářadí, které přivezeš"
                 register={() => register('toolsBringing')}
                 placeholder="Nářadí - motorovka, křovinořez, kladivo..."
                 labelClassName="light-placeholder"
@@ -361,7 +361,7 @@ export default function ApplicationsPage({
             <div className="w-100 w-md-45">
               <TextInput
                 id="workAllergies"
-                label="Alergie při prácovních podmínkách"
+                label="Alergie při pracovních podmínkách"
                 register={() => register('workAllergies')}
                 placeholder="Např. prach, pyl, latex..."
                 labelClassName="light-placeholder"
@@ -373,10 +373,10 @@ export default function ApplicationsPage({
             <div className="w-100 w-md-45">
               <TextInput
                 id="tShirtSize"
-                label="Máte zájemo tričko (350 Kč)? Vyplňte velikost a barvu (modrá/černá). Objednávka je závazná."
+                label="Máš zájem o tričko (350 Kč)? Vyplň velikost a barvu (modrá/černá). Objednávka je závazná."
                 register={() => register('tShirtSize')}
                 labelClassName="light-placeholder"
-                placeholder="S/M/L/XL/XXL a modrá/černá"
+                placeholder="XS, S, M, L, XL, XXL"
                 errors={errors}
               />
             </div>
@@ -393,7 +393,7 @@ export default function ApplicationsPage({
           </div>
           <TextInput
             id="heardAboutUs"
-            label="Jak jste se o nás dozvěděl/a?"
+            label="Jak jsi se o nás dozvěděl/a?"
             register={() => register('heardAboutUs')}
             placeholder="Řekl mi o vás kamarád..."
             labelClassName="light-placeholder"
@@ -425,7 +425,7 @@ export default function ApplicationsPage({
             <div className="w-100 w-md-45">
               <BulletPointSelect
                 id="accommodationPrice"
-                label="Cena za ubytování"
+                label="Účastnický příspěvek"
                 labelClassName="light-placeholder"
                 options={[
                   { value: 1600, label: '1600 Kč (základní)' },
