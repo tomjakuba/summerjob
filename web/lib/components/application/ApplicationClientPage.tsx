@@ -129,9 +129,20 @@ export default function ApplicationsPage({
 
   if (submitted) {
     return (
-      <p className="text-center text-lg font-weight-bold mt-5">
-        Přihláška byla úspěšně odeslána!
-      </p>
+      <div className="bg-white rounded shadow p-4 p-md-5 mx-auto w-75 mt-5">
+        <p className="mt-1 display-6 mb-3">Přihláška byla úspěšně odeslána!</p>
+        <p className="text-muted text-base font-normal">
+          O přijetí tě budeme informovat během následujících dvou týdnů.{' '}
+          <strong>
+            Samotné odeslání přihlášky ještě neznamená, že máš účast jistou.
+          </strong>{' '}
+          Díky za pochopení!
+        </p>
+        <p className="text-muted text-base font-normal">
+          Na tvůj e-mail jsme právě odeslali tebou vyplňené informace z
+          formuláře.
+        </p>
+      </div>
     )
   }
 
