@@ -132,7 +132,7 @@ export default function ApplicationsPage({
       <div className="bg-white rounded shadow p-4 p-md-5 mx-auto w-75 mt-5">
         <p className="mt-1 display-6 mb-3">Přihláška byla úspěšně odeslána!</p>
         <p className="text-muted text-base font-normal">
-          O přijetí tě budeme informovat během následujících dvou týdnů.{' '}
+          O přijetí tě budeme informovat během následujících tří týdnů.{' '}
           <strong>
             Samotné odeslání přihlášky ještě neznamená, že máš účast jistou.
           </strong>{' '}

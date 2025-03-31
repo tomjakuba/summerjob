@@ -51,7 +51,7 @@ export async function sendApplicationSummaryEmail(
 
   const subject = 'Souhrn přihlášky na SummerJob'
   const intro = `Ahoj ${firstName},<br/><br/>děkujeme za odeslání přihlášky na SummerJob! Níže najdeš souhrn údajů, které jsi ${pronounText}.<br/><br/>`
-  const outro = `<br/><br/><strong>Do dvou týdnů ti potvrdíme účast.</strong><br/><br/>Tým SummerJob ❤️`
+  const outro = `<br/><br/><strong>Do tří týdnů ti potvrdíme účast.</strong><br/><br/>Tým SummerJob ❤️`
 
   const details = Object.entries(rest)
     .map(([key, value]) => {
