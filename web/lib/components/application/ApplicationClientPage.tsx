@@ -373,20 +373,20 @@ export default function ApplicationsPage({
             <div className="w-100 w-md-45">
               <TextInput
                 id="tShirtSize"
-                label="Máte zájemo tričko (350 Kč)? Vyplňte velikost"
+                label="Máte zájemo tričko (350 Kč)? Vyplňte velikost a barvu (modrá/černá). Objednávka je závazná."
                 register={() => register('tShirtSize')}
                 labelClassName="light-placeholder"
-                placeholder="S, M, L, XL, XXL"
+                placeholder="S/M/L/XL/XXL a modrá/černá"
                 errors={errors}
               />
             </div>
             <div className="w-100 w-md-45">
               <TextInput
                 id="playsInstrument"
-                label="Umím hrát na hudební nástroj"
+                label="Chceš zpívat nebo hrát na hudební nástroj ve schole?"
                 register={() => register('playsInstrument')}
                 labelClassName="light-placeholder"
-                placeholder="Kytara, housle, klavír..."
+                placeholder="Ano, umím hrát na housle,.."
                 errors={errors}
               />
             </div>
@@ -412,7 +412,7 @@ export default function ApplicationsPage({
               <ImageUploader
                 id="photoFile"
                 label="Fotografie"
-                secondaryLabel="Maximálně 1 soubor o maximální velikosti 10 MB."
+                secondaryLabel="Fotka nám ulehčí rozdělování práce. Maximálně 1 soubor o maximální velikosti 10 MB."
                 errors={errors}
                 setError={setError}
                 mandatory={true}
@@ -428,8 +428,8 @@ export default function ApplicationsPage({
                 label="Cena za ubytování"
                 labelClassName="light-placeholder"
                 options={[
-                  { value: 1600, label: '1600 Kč' },
-                  { value: 2000, label: '2000 Kč' },
+                  { value: 1600, label: '1600 Kč (základní)' },
+                  { value: 2000, label: '2000 Kč (sponzorský)' },
                 ]}
                 setError={setError}
                 clearErrors={clearErrors}
@@ -440,6 +440,10 @@ export default function ApplicationsPage({
                 mandatory
                 minCustomValue={1600}
               />
+              <p className="mt-3 text-muted fs-6 fw-lighter">
+                Pokud se kvůli výši příspěvku nemůžeš z finančních důvodů
+                zúčastnit, ozvi se nám na email: summerjob@summerjob.eu
+              </p>
             </div>
           </div>
           <OtherAttributesInput
@@ -448,12 +452,13 @@ export default function ApplicationsPage({
               {
                 id: 'ownsCar',
                 icon: 'fa fa-car',
-                label: 'Vlastním auto, které mohu použít',
+                label: 'Přijedu autem a jsem ochotný/á vozit pracanty na joby.',
               },
               {
                 id: 'canBeMedic',
                 icon: 'fa fa-briefcase-medical',
-                label: 'Mohu se zúčastnit jako zdravotník',
+                label:
+                  'Jsem zdravotník (lékař, sestra, záchranář, nebo absolvent kurzu ZZA s platným certifikátem) a jsem ochotný/á se spoluúčastnit na péči o summerjobáky.',
               },
             ]}
           />
