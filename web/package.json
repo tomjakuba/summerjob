@@ -16,7 +16,8 @@
     "test": "ts-mocha -p 'test/tsconfig.json' 'test/**/*.spec.ts'",
     "prettier": "prettier --ignore-path .gitignore --check '**/*.{ts,tsx,js,json,md}'",
     "prettier:fix": "prettier --write --ignore-path .gitignore --check '**/*.{ts,tsx,js,json,md}'",
-    "prepare": "npx prisma generate && cd .. && husky install web/.husky"
+    "prepare": "npx prisma generate && cd .. && husky install web/.husky",
+    "maildev": "maildev"
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "^4.5.3",
@@ -70,6 +71,7 @@
     "chai-exclude": "^2.1.0",
     "encoding": "^0.1.13",
     "lint-staged": "^13.2.2",
+    "maildev": "^2.2.1",
     "mocha": "^10.4.0",
     "prettier": "^2.8.8",
     "prisma": "^5.10.2",

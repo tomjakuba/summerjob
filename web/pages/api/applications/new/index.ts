@@ -15,6 +15,7 @@ import {
   checkApplicationPassword,
   isApplicationPasswordProtected,
 } from 'lib/data/summerjob-event'
+import { sendApplicationSummaryEmail } from 'lib/email/sendApplicationSummary'
 
 export type ApplicationAPIPostData = ApplicationCreateDataInput
 
@@ -65,6 +66,12 @@ async function post(req: NextApiRequest, res: NextApiResponse) {
       : files.photoFile
     : undefined
   const application = await createApplication(applicationData, file)
+
+  try {
+    await sendApplicationSummaryEmail(applicationData.email, applicationData)
+  } catch (err) {
+    console.error('Nepodařilo se odeslat rekapitulační email:', err)
+  }
 
   await logger.apiRequestWithoutSession(
     APILogEvent.APPLICATION_CREATE,
