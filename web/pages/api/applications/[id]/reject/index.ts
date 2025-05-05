@@ -7,7 +7,6 @@ import { ApplicationStatus } from 'lib/prisma/client'
 import { ExtendedSession } from 'lib/types/auth'
 import logger from 'lib/logger/logger'
 import { APILogEvent } from 'lib/types/logger'
-import applications from '../..'
 
 async function patch(
   req: NextApiRequest,

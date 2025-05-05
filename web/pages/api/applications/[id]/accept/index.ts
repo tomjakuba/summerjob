@@ -7,6 +7,7 @@ import { ApplicationStatus } from 'lib/prisma/client'
 import logger from 'lib/logger/logger'
 import { APILogEvent } from 'lib/types/logger'
 import { ExtendedSession } from 'lib/types/auth'
+import { createWorkerFromApplication } from 'lib/data/worker-from-application'
 
 async function patch(
   req: NextApiRequest,
@@ -15,10 +16,12 @@ async function patch(
 ) {
   const id = req.query.id as string
 
-  const updated = await prisma.application.update({
+  const application = await prisma.application.update({
     where: { id },
     data: { status: ApplicationStatus.ACCEPTED },
   })
+
+  await createWorkerFromApplication(application)
 
   await logger.apiRequest(
     APILogEvent.APPLICATION_ACCEPTED,
@@ -30,7 +33,7 @@ async function patch(
     session
   )
 
-  res.status(200).json(updated)
+  res.status(200).json(application)
 }
 
 export default APIAccessController(
