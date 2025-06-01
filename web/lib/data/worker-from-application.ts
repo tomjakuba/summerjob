@@ -129,10 +129,22 @@ export async function createWorkerFromApplication(application: Application) {
     end: new Date(application.departureDate),
   })
 
-  const fa = extractMapped(application.foodAllergies, foodAllergyMapping)
-  const wa = extractMapped(application.workAllergies, workAllergyMapping)
-  const sh = extractMapped(application.toolsSkills, skillHasMapping)
-  const sb = extractMapped(application.toolsBringing, skillBringsMapping)
+  const ApplicationFoodAllergies = extractMapped(
+    application.foodAllergies,
+    foodAllergyMapping
+  )
+  const ApplicationWorkAllergies = extractMapped(
+    application.workAllergies,
+    workAllergyMapping
+  )
+  const ApplicationSkillHas = extractMapped(
+    application.toolsSkills,
+    skillHasMapping
+  )
+  const ApplicationToolsBrings = extractMapped(
+    application.toolsBringing,
+    skillBringsMapping
+  )
 
   const note = buildWorkerNote(application)
 
@@ -146,10 +158,10 @@ export async function createWorkerFromApplication(application: Application) {
       isTeam: false,
       ownsCar: application.ownsCar,
       canBeMedic: application.canBeMedic,
-      foodAllergies: { set: fa.matched },
-      workAllergies: { set: wa.matched },
-      skills: { set: sh.matched },
-      tools: { set: sb.matched },
+      foodAllergies: { set: ApplicationFoodAllergies.matched },
+      workAllergies: { set: ApplicationWorkAllergies.matched },
+      skills: { set: ApplicationSkillHas.matched },
+      tools: { set: ApplicationToolsBrings.matched },
       photoPath: application.photo || undefined,
       age: calculateAge(application.birthDate),
       note,
