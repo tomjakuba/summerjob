@@ -262,19 +262,19 @@ function getWorkerInfo(
     return { success: false, error: 'Missing data' }
   }
   const formatedPhone = formatPhoneNumber(phone)
-  const allergyItems = allergiesStr
+  const parsedAllergies = allergiesStr
     .split(',')
     .map(a => a.trim())
     .filter(a => a !== '')
 
-  const foodAllergies = allergyItems.filter(a =>
+  const foodAllergies = parsedAllergies.filter(a =>
     Object.keys(FoodAllergy).includes(a)
   ) as FoodAllergy[]
-  const workAllergies = allergyItems.filter(a =>
+  const workAllergies = parsedAllergies.filter(a =>
     Object.keys(WorkAllergy).includes(a)
   ) as WorkAllergy[]
 
-  const unknownAllergies = allergyItems.filter(
+  const unknownAllergies = parsedAllergies.filter(
     a =>
       !Object.keys(FoodAllergy).includes(a) &&
       !Object.keys(WorkAllergy).includes(a)
