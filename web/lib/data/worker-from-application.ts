@@ -148,6 +148,53 @@ export async function createWorkerFromApplication(application: Application) {
 
   const note = buildWorkerNote(application)
 
+  const existingWorker = await prisma.worker.findUnique({
+    where: { email: application.email.toLowerCase() },
+  })
+
+  if (existingWorker) {
+    const updatedWorker = await prisma.worker.update({
+      where: { email: application.email.toLowerCase() },
+      data: {
+        blocked: false,
+        firstName: application.firstName,
+        lastName: application.lastName,
+        phone: application.phone,
+        ownsCar: application.ownsCar,
+        canBeMedic: application.canBeMedic,
+        foodAllergies: { set: ApplicationFoodAllergies.matched },
+        workAllergies: { set: ApplicationWorkAllergies.matched },
+        skills: { set: ApplicationSkillHas.matched },
+        tools: { set: ApplicationToolsBrings.matched },
+        photoPath: application.photo || undefined,
+        age: calculateAge(application.birthDate),
+        note,
+        application: { connect: { id: application.id } },
+      },
+    })
+
+    await prisma.workerAvailability.upsert({
+      where: {
+        workerId_eventId: {
+          workerId: existingWorker.id,
+          eventId: activeEventId,
+        },
+      },
+      update: {
+        workDays,
+        adorationDays: [],
+      },
+      create: {
+        worker: { connect: { id: existingWorker.id } },
+        event: { connect: { id: activeEventId } },
+        workDays,
+        adorationDays: [],
+      },
+    })
+
+    return updatedWorker
+  }
+
   const worker = await prisma.worker.create({
     data: {
       firstName: application.firstName,
