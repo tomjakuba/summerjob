@@ -153,6 +153,10 @@ export async function createWorkerFromApplication(application: Application) {
   })
 
   if (existingWorker) {
+    const combinedNote = [note, existingWorker.note]
+      .filter(Boolean)
+      .join('\n\n---\n')
+
     const updatedWorker = await prisma.worker.update({
       where: { email: application.email.toLowerCase() },
       data: {
@@ -168,7 +172,7 @@ export async function createWorkerFromApplication(application: Application) {
         tools: { set: ApplicationToolsBrings.matched },
         photoPath: application.photo || undefined,
         age: calculateAge(application.birthDate),
-        note,
+        note: combinedNote,
         application: { connect: { id: application.id } },
       },
     })
