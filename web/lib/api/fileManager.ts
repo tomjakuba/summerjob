@@ -41,14 +41,26 @@ export const generateFileName = (length: number): string => {
 }
 
 export const deleteFile = async (oldPhotoPath: string) => {
-  await promises.unlink(oldPhotoPath) // delete replaced/original file
+  const safeBaseDir = path.resolve(getUploadDirForImages());
+  const resolvedPath = path.resolve(oldPhotoPath);
+  const relative = path.relative(safeBaseDir, resolvedPath);
+  if (relative.startsWith('..') || path.isAbsolute(relative)) {
+    throw new Error('Attempt to delete a file outside the allowed directory');
+  }
+  await promises.unlink(resolvedPath); // delete replaced/original file
 }
 
 export const renameFile = async (
   oldPhotoPath: string,
   newPhotoPath: string
 ) => {
-  await promises.rename(oldPhotoPath, newPhotoPath)
+  const uploadRoot = path.resolve(getUploadDirForImages()) // Safe root directory
+  const resolvedNewPath = path.resolve(newPhotoPath) // Normalize the new path
+  const relativePath = path.relative(uploadRoot, resolvedNewPath)
+  if (relativePath.startsWith('..') || path.isAbsolute(relativePath)) {
+    throw new Error('Invalid file path: Path is outside the allowed directory.')
+  }
+  await promises.rename(oldPhotoPath, resolvedNewPath)
 }
 
 export const updatePhotoPathByNewFilename = (
@@ -64,7 +76,7 @@ export const updatePhotoPathByNewFilename = (
 export const createDirectory = async (dirName: string) => {
   try {
     await promises.access(dirName)
-  } catch (error) {
+  } catch {
     await promises.mkdir(dirName, { recursive: true })
   }
 }
@@ -73,5 +85,5 @@ export const deleteDirectory = async (dirName: string) => {
   try {
     await promises.access(dirName)
     await promises.rmdir(dirName)
-  } catch (error) {}
+  } catch {}
 }

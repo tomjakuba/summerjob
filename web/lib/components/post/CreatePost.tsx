@@ -4,21 +4,21 @@ import { DateBool } from 'lib/data/dateSelectionType'
 import { LabelWithIcon } from 'lib/data/enumMapping/enumMapping'
 import { postTagMappingWithIcon } from 'lib/data/enumMapping/postTagMapping'
 import { useAPIPostCreate } from 'lib/fetcher/post'
-import { removeRedundantSpace } from 'lib/helpers/helpers'
+import { removeRedundantSpace, formatNumber } from 'lib/helpers/helpers'
 import { PostTag } from 'lib/prisma/client'
 import { PostCreateData, PostCreateSchema } from 'lib/types/post'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useState, useEffect } from 'react'
+import { useForm, FieldErrors } from 'react-hook-form'
 import { z } from 'zod'
 import { PillSelectItem } from '../filter-select/PillSelect'
 import { Form } from '../forms/Form'
 import { ImageUploader } from '../forms/ImageUploader'
 import { DateSelectionInput } from '../forms/input/DateSelectionInput'
 import { MapInput } from '../forms/input/MapInput'
+import { MarkdownEditor } from '../forms/input/MarkdownEditor'
 import { OtherAttributesInput } from '../forms/input/OtherAttributesInput'
 import { PillSelectInput } from '../forms/input/PillSelectInput'
-import { TextAreaInput } from '../forms/input/TextAreaInput'
 import { TextInput } from '../forms/input/TextInput'
 import { TimeInput } from '../forms/input/TimeInput'
 
@@ -33,7 +33,8 @@ export default function CreatePost({ allDates }: CreatePostProps) {
     register,
     handleSubmit,
     setValue,
-    formState: { errors },
+    watch,
+    formState: { errors, dirtyFields },
   } = useForm<PostForm>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -45,9 +46,24 @@ export default function CreatePost({ allDates }: CreatePostProps) {
 
   const [saved, setSaved] = useState(false)
 
+  // Watch fields to conditionally show/disable maxParticipants
+  const isMandatory = watch('isMandatory')
+  const isOpenForParticipants = watch('isOpenForParticipants')
+
+  // Clear maxParticipants when it shouldn't be available
+  useEffect(() => {
+    if (isMandatory || !isOpenForParticipants) {
+      setValue('maxParticipants', null, {
+        shouldDirty: true,
+        shouldValidate: true,
+      })
+    }
+  }, [isMandatory, isOpenForParticipants, setValue])
+
   const { trigger, isMutating, reset, error } = useAPIPostCreate({
     onSuccess: () => {
       setSaved(true)
+      reset()
       router.refresh()
     },
   })
@@ -120,6 +136,7 @@ export default function CreatePost({ allDates }: CreatePostProps) {
         saved={saved}
         error={error}
         formId="create-post"
+        isDirty={!saved && Object.keys(dirtyFields).length > 0}
       >
         <form id="create-post" onSubmit={handleSubmit(onSubmit)}>
           <TextInput
@@ -136,22 +153,22 @@ export default function CreatePost({ allDates }: CreatePostProps) {
             mandatory
             margin={false}
           />
-          <TextAreaInput
+          <MarkdownEditor
             id="shortDescription"
             label="Krátký popis"
             placeholder="Popis"
             rows={2}
             register={() => register('shortDescription')}
-            errors={errors}
+            errors={errors as FieldErrors<Record<string, unknown>>}
             mandatory
           />
-          <TextAreaInput
+          <MarkdownEditor
             id="longDescription"
             label="Dlouhý popis"
             placeholder="Popis"
             rows={4}
             register={() => register('longDescription')}
-            errors={errors}
+            errors={errors as FieldErrors<Record<string, unknown>>}
           />
           <div className="d-flex flex-row">
             <DateSelectionInput
@@ -200,6 +217,23 @@ export default function CreatePost({ allDates }: CreatePostProps) {
             register={selectTags}
             errors={errors}
           />
+          {isOpenForParticipants && !isMandatory && (
+            <TextInput
+              id="maxParticipants"
+              type="number"
+              label="Maximální počet účastníků"
+              placeholder="Maximální počet účastníků"
+              min={1}
+              register={() =>
+                register('maxParticipants', {
+                  valueAsNumber: true,
+                  onChange: e =>
+                    (e.target.value = formatNumber(e.target.value)),
+                })
+              }
+              errors={errors}
+            />
+          )}
           <OtherAttributesInput
             label="Další vlastnosti"
             register={register}

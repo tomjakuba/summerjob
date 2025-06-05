@@ -91,6 +91,7 @@ export default function EditWorker({
   const { trigger, isMutating, reset, error } = useAPIWorkerUpdate(worker.id, {
     onSuccess: () => {
       setSaved(true)
+      reset()
       router.refresh()
     },
   })
@@ -154,6 +155,7 @@ export default function EditWorker({
         error={error}
         formId="edit-worker"
         shouldShowBackButton={!isProfilePage}
+        isDirty={!saved && Object.keys(dirtyFields).length > 0}
       >
         <form id="edit-worker" onSubmit={handleSubmit(onSubmit)}>
           <TextInput

@@ -6,6 +6,8 @@ import { PostBubbleActions } from './PostBubbleActions'
 import { PostModal } from './PostModal'
 import { IconAndLabel } from '../forms/IconAndLabel'
 import { Participate } from './Participate'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 interface PostBubbleProps {
   item: PostComplete
@@ -54,7 +56,11 @@ export const PostBubble = ({
             showTime={showTime}
             fontSize="fs-7"
           />
-          <span className="fs-6">{item.shortDescription}</span>
+          <div className="fs-6 markdown-content">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {item.shortDescription}
+            </ReactMarkdown>
+          </div>
           <div className="d-flex justify-content-between align-items-center">
             <div className="d-flex flex-wrap fs-7 text-muted">
               {item.tags.map(tag => (
@@ -66,6 +72,14 @@ export const PostBubble = ({
                 </span>
               ))}
             </div>
+            {item.maxParticipants && (
+              <div className="fs-7 text-muted">
+                Účastníků: {item.participants.length} / {item.maxParticipants}
+                {item.participants.length >= item.maxParticipants && (
+                  <span className="text-warning ms-1">• Plná</span>
+                )}
+              </div>
+            )}
           </div>
           {onUpdated && (
             <div

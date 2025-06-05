@@ -18,6 +18,7 @@ export const PostCompleteSchema = PostSchema.extend({
       worker: z.object({ firstName: z.string(), lastName: z.string() }),
     })
   ),
+  maxParticipants: z.number().nullable(),
 })
 
 export type PostComplete = z.infer<typeof PostCompleteSchema>
@@ -91,6 +92,7 @@ const PostBasicSchema = z
     tags: z.array(z.nativeEnum(PostTag)).optional(),
     isMandatory: z.boolean().optional(),
     isOpenForParticipants: z.boolean().optional(),
+    maxParticipants: z.number().positive().nullable(),
   })
   .strict()
 
@@ -132,6 +134,12 @@ export const PostUpdateSchema = PostBasicSchema.merge(
       workerId: z.string(),
       isEnrolled: z.boolean(),
     }),
+    participantManagement: z
+      .object({
+        addParticipantIds: z.array(z.string()).optional(),
+        removeParticipantIds: z.array(z.string()).optional(),
+      })
+      .optional(),
   })
 )
   .strict()

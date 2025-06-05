@@ -1,7 +1,7 @@
 'use client'
 
-/* eslint-disable react-hooks/rules-of-hooks */
-/* eslint-disable react-hooks/exhaustive-deps */
+ 
+ 
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -372,7 +372,7 @@ export default function ApplicationsPage({
             </div>
           </div>
           <div className="d-flex flex-column flex-md-row w-100 justify-content-between gap-3">
-            <div className="w-100 w-md-45">
+            {/* <div className="w-100 w-md-45">
               <TextInput
                 id="tShirtSize"
                 label={
@@ -393,7 +393,7 @@ export default function ApplicationsPage({
                 placeholder="XS, S, M, L, XL, XXL"
                 errors={errors}
               />
-            </div>
+            </div> */}
             <div className="w-100 w-md-45">
               <TextInput
                 id="playsInstrument"
