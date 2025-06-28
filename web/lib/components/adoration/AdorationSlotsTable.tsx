@@ -2,7 +2,7 @@
 
 import { format } from 'date-fns'
 import {
-  useAPIAdorationSlotsUser,
+  apiAdorationSlotsUser,
   apiAdorationSignup,
 } from 'lib/fetcher/adoration'
 import { useEffect, useState } from 'react'
@@ -38,7 +38,7 @@ export default function AdorationSlotsTable({
     data: allSlots = [],
     isLoading,
     mutate,
-  } = useAPIAdorationSlotsUser(selectedDate, eventId)
+  } = apiAdorationSlotsUser(selectedDate, eventId)
   
   // Filter out full slots, but keep those where the user is signed up
   const slots = allSlots.filter(slot => slot.workerCount < slot.capacity || slot.isUserSignedUp)
