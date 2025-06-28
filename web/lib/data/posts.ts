@@ -262,3 +262,31 @@ export async function deletePost(id: string) {
     })
   })
 }
+
+export async function maybeCreateDefaultAdorationPost() {
+  const existing = await prisma.post.findFirst({
+    where: {
+      name: 'Adorace',
+    },
+  })
+
+  if (!existing) {
+    await prisma.post.create({
+      data: {
+        name: 'Adorace',
+        shortDescription: 'Příspěvek vytvořen kvůli adoracím. [Přihlásit se](/adoration)',
+        longDescription: '',
+        availability: [],
+        isMandatory: true,
+        isOpenForParticipants: false,
+        maxParticipants: null,
+        coordinates: undefined,
+        address: '',
+        tags: [],
+        timeFrom: null,
+        timeTo: null,
+        forEvent: { connect: { id: await cache_getActiveSummerJobEventId() } },
+      },
+    })
+  }
+}

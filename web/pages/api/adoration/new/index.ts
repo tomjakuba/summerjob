@@ -3,6 +3,8 @@ import { Permission } from 'lib/types/auth'
 import { NextApiRequest, NextApiResponse } from 'next'
 import { createAdorationSlotsBulk } from 'lib/data/adoration'
 
+import { maybeCreateDefaultAdorationPost } from 'lib/data/posts'
+
 export const config = {
   api: {
     bodyParser: false,
@@ -72,6 +74,8 @@ export default APIAccessController(
           fromMinute,
           toMinute
         )
+
+        maybeCreateDefaultAdorationPost() 
 
         res.status(200).json(result)
       } catch (e) {
