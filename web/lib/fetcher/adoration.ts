@@ -68,7 +68,7 @@ export async function apiAdorationUpdateLocationBulk(
   return await res.json()
 }
 
-export function apiAdorationSlotsAdmin(date: string, eventId: string): {
+export function useAPIAdorationSlotsAdmin(date: string, eventId: string): {
   data: FrontendAdorationSlot[]
   isLoading: boolean
   error?: unknown
@@ -100,7 +100,7 @@ export function apiAdorationSlotsAdmin(date: string, eventId: string): {
   return { ...res, data: [] }
 }
 
-  export function apiAdorationSlotsUser(date: string, eventId: string): {
+  export function useAPIAdorationSlotsUser(date: string, eventId: string): {
     data: FrontendAdorationSlot[]
     isLoading: boolean
     error?: unknown

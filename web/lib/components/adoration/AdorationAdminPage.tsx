@@ -6,7 +6,7 @@ import { format, parseISO } from 'date-fns'
 import {
   apiAdorationDeleteBulk,
   apiAdorationUpdateLocationBulk,
-  apiAdorationSlotsAdmin
+  useAPIAdorationSlotsAdmin
 } from 'lib/fetcher/adoration'
 import AdminCreateAdorationModal from './AdorationAdminCreateModal'
 import AdorationWorkerAssignModal from './AdorationWorkerAssignModal'
@@ -48,7 +48,7 @@ export default function AdminAdorationManager({ event }: Props) {
     data: slots = [],
     isLoading,
     mutate,
-  } = apiAdorationSlotsAdmin(date, event.id)
+  } = useAPIAdorationSlotsAdmin(date, event.id)
 
   const isAllSelected =
     slots.length > 0 && slots.every(slot => selectedIds.includes(slot.id))
