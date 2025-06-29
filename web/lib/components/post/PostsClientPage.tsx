@@ -472,9 +472,16 @@ export default function PostsClientPage({
                           <div>
                             {formatDateToDayShort(item.availability[0])}
                           </div>
-                          <div>{formateTime(item.timeFrom)}</div>
-                          {' - '}
-                          <div>{formateTime(item.timeTo)}</div>
+                          {/* Mobile: single line */}
+                          <div className="d-block d-sm-none">
+                            {formateTime(item.timeFrom)} - {formateTime(item.timeTo)}
+                          </div>
+                          {/* Desktop: multi-line */}
+                          <div className="d-none d-sm-block">
+                            <div>{formateTime(item.timeFrom)}</div>
+                            {' - '}
+                            <div>{formateTime(item.timeTo)}</div>
+                          </div>
                         </div>
                       )}
                     </div>
