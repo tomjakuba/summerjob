@@ -13,7 +13,7 @@ export const metadata = {
 export const dynamic = 'force-dynamic'
 
 export default async function PostsPage() {
-  const { posts } = await getPostsWithAdorationFlag()
+  const { posts, hasAdoration } = await getPostsWithAdorationFlag()
   const sPosts = serializePosts(posts)
 
   const isAdvancedAccessAllowed = await withPermissions([Permission.POSTS])
