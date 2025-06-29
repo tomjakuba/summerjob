@@ -71,7 +71,6 @@ export default function AdminAdorationManager({ event }: Props) {
   const deleteSelectedSlots = async () => {
     try {
       await apiAdorationDeleteBulk(selectedIds)
-      await apiAdorationDeleteBulk(selectedIds)
       await mutate()
       setSelectedIds([])
     } catch (e) {
