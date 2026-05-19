@@ -16,6 +16,7 @@ export default async function AdminLayout({
     Permission.APPLICATIONS,
     Permission.ADORATION,
     Permission.NOTIFICATIONS,
+    Permission.WORKERS,
     Permission.RECEPTION,
   ])
   if (!isAllowed.success) {
