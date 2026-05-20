@@ -1,9 +1,21 @@
-import { createTransport } from 'nodemailer'
+import { createTransport, Transporter } from 'nodemailer'
 import { ApplicationCreateDataInput } from 'lib/types/application'
 import { getTShirtSizeById } from 'lib/data/t-shirt-sizes'
 import { getTShirtColorById } from 'lib/data/t-shirt-colors'
 
-const transport = createTransport(process.env.EMAIL_SERVER || '')
+// Lazily created so that an unset/empty EMAIL_SERVER does not throw while this module is being evaluated
+let transport: Transporter | null = null
+
+function getTransport(): Transporter {
+  if (!transport) {
+    const server = process.env.EMAIL_SERVER
+    if (!server) {
+      throw new Error('EMAIL_SERVER není nastaven.')
+    }
+    transport = createTransport(server)
+  }
+  return transport
+}
 
 const fieldLabels: Partial<Record<keyof ApplicationCreateDataInput, string>> = {
   firstName: 'Jméno',
@@ -95,7 +107,7 @@ export async function sendApplicationSummaryEmail(
 
   const html = `${intro}${details}${outro}`
 
-  const result = await transport.sendMail({
+  const result = await getTransport().sendMail({
     to: email,
     from: process.env.EMAIL_FROM,
     subject,

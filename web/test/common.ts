@@ -346,24 +346,27 @@ class Common {
     // Add another job to the plan with two different workers
     const jobType = await this.createJobType()
     const otherJob = await this.createProposedJob(area.id, jobType.id)
-    await this.post(`/api/plans/${plan.id}/active-jobs`, Id.PLANS, {
-      proposedJobId: otherJob.id,
-      privateDescription: faker.lorem.paragraph(),
-      publicDescription: '',
-    })
+    const otherActiveJob = await this.post(
+      `/api/plans/${plan.id}/active-jobs`,
+      Id.PLANS,
+      {
+        proposedJobId: otherJob.id,
+      }
+    )
+    const otherActiveJobId = otherActiveJob.body.id
     const workers = await Promise.all([
       this.createWorker(),
       this.createWorker(),
     ])
     await this.post(
-      `/api/plans/${plan.id}/active-jobs/${otherJob.id}`,
+      `/api/plans/${plan.id}/active-jobs/${otherActiveJobId}`,
       Id.PLANS,
       {
         workerIds: workers.map(w => w.id),
       }
     )
     await this.post(
-      `/api/plans/${plan.id}/active-jobs/${otherJob.id}`,
+      `/api/plans/${plan.id}/active-jobs/${otherActiveJobId}`,
       Id.PLANS,
       {
         responsibleWorkerId: [workers[0].id],
@@ -375,7 +378,7 @@ class Common {
       area,
       jobs: [
         { id: job.id, ride: ride.body, workerIds: [driver.id, passenger.id] },
-        { id: otherJob.id, workerIds: workers.map(w => w.id) },
+        { id: otherActiveJobId, workerIds: workers.map(w => w.id) },
       ],
     }
   }

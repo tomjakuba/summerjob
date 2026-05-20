@@ -1,4 +1,4 @@
-import { afterAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { api, Id, isEmpty } from './common'
 import { randomUUID } from 'crypto'
 
@@ -32,6 +32,8 @@ function createAdorationBulkData(eventId: string, eventStart: Date) {
 }
 
 describe('Adoration', function () {
+  beforeAll(api.beforeTestBlock)
+
   //#region Access
   describe('#access', function () {
     it('should not be able to bulk create slots without ADMIN permission', async function () {

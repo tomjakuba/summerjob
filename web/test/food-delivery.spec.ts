@@ -1,4 +1,4 @@
-import { afterAll, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import { api, Id, isEmpty } from './common'
 import { randomUUID } from 'crypto'
 
@@ -15,6 +15,15 @@ type FoodDelivery = {
 }
 
 describe('Food delivery', function () {
+  beforeAll(api.beforeTestBlock)
+
+  afterEach(async function () {
+    const plans = await api.get('/api/plans', Id.PLANS)
+    for (const plan of plans.body) {
+      await api.deletePlan(plan.id)
+    }
+  })
+
   //#region Access
   describe('#access', function () {
     it('should not be able to list deliveries without PLANS permission', async function () {
