@@ -1,4 +1,4 @@
-import { afterAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { api, Id, isEmpty } from './common'
 import { randomUUID } from 'crypto'
 
@@ -11,6 +11,8 @@ function createTShirtSizeData() {
 }
 
 describe('T-shirt sizes', function () {
+  beforeAll(api.beforeTestBlock)
+
   //#region Access
   describe('#access', function () {
     it('should be accessible without permission (read)', async function () {

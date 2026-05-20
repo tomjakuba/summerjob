@@ -1,4 +1,4 @@
-import { afterAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { api, Id, isEmpty } from './common'
 import { randomUUID } from 'crypto'
 
@@ -49,6 +49,8 @@ function createApplicationData(eventId: string) {
 }
 
 describe('Applications', function () {
+  beforeAll(api.beforeTestBlock)
+
   //#region Access
   describe('#access', function () {
     it('should accept a public submission (no permission)', async function () {

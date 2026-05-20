@@ -1,4 +1,4 @@
-import { afterAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { api, Id, isEmpty } from './common'
 import { randomUUID } from 'crypto'
 
@@ -16,6 +16,8 @@ type ArrivalWorker = {
 }
 
 describe('Arrivals', function () {
+  beforeAll(api.beforeTestBlock)
+
   //#region Access
   describe('#access', function () {
     it('should not be able to list arrivals without WORKERS/ADMIN permission', async function () {
